@@ -17,7 +17,7 @@ elif is_py3:
     unicode = str
 
 
-def get_fields(Model, 
+def get_fields(Model,
                parent_field="",
                model_stack=[],
                stack_limit=2,
@@ -58,7 +58,7 @@ def get_fields(Model,
             stop_recursion = True
 
     if stop_recursion:
-        return [] # give empty list for "extend"
+        return []  # give empty list for "extend"
 
     for field in fields:
         field_name = field.name
@@ -78,8 +78,8 @@ def get_fields(Model,
         out_fields.append([full_field, field_name, Model, field.__class__])
 
         if not stop_recursion and \
-                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
+                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or
+                 isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
 
             if isinstance(field, RelatedObject):
                 RelModel = field.model
@@ -87,9 +87,11 @@ def get_fields(Model,
             else:
                 RelModel = field.related_model
 
-            out_fields.extend(get_fields(RelModel, full_field, list(model_stack)))
+            out_fields.extend(get_fields(
+                RelModel, full_field, list(model_stack)))
 
     return out_fields
+
 
 def give_model_field(full_field, Model):
     """
@@ -105,10 +107,13 @@ def give_model_field(full_field, Model):
         if full_key == full_field:
             return full_key, name, _Model, _ModelField
 
-    raise Exception('Field key `{0}` not found on `{1}`.'.format(full_field, Model.__name__))
+    raise Exception('Field key `{0}` not found on `{1}`.'.format(
+        full_field, Model.__name__))
+
 
 def get_simple_fields(Model, **kwargs):
     return [[f[0], f[3].__name__] for f in get_fields(Model, **kwargs)]
+
 
 def get_user_model():
     # handle 1.7 and back

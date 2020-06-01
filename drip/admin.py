@@ -15,8 +15,10 @@ class QuerySetRuleInline(admin.TabularInline):
 
 class DripForm(forms.ModelForm):
     message_class = forms.ChoiceField(
-        choices=((k, '%s (%s)' % (k, v)) for k, v in configured_message_classes().items())
+        choices=((k, '%s (%s)' % (k, v))
+                 for k, v in configured_message_classes().items())
     )
+
     class Meta:
         model = Drip
         exclude = []
@@ -29,7 +31,8 @@ class DripAdmin(admin.ModelAdmin):
     ]
     form = DripForm
 
-    av = lambda self, view: self.admin_site.admin_view(view)
+    def av(self, view): return self.admin_site.admin_view(view)
+
     def timeline(self, request, drip_id, into_past, into_future):
         """
         Return a list of people who should get emails.
@@ -46,7 +49,8 @@ class DripAdmin(admin.ModelAdmin):
                 'drip': shifted_drip,
                 'qs': shifted_drip.get_queryset().exclude(id__in=seen_users)
             })
-            seen_users.update(shifted_drip.get_queryset().values_list('id', flat=True))
+            seen_users.update(
+                shifted_drip.get_queryset().values_list('id', flat=True))
 
         return render(request, 'drip/timeline.html', locals())
 
@@ -102,10 +106,14 @@ class DripAdmin(admin.ModelAdmin):
             )
         ]
         return my_urls + urls
+
+
 admin.site.register(Drip, DripAdmin)
 
 
 class SentDripAdmin(admin.ModelAdmin):
     list_display = [f.name for f in SentDrip._meta.fields]
     ordering = ['-id']
+
+
 admin.site.register(SentDrip, SentDripAdmin)
