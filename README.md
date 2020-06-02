@@ -1,4 +1,4 @@
-Django Drip
+Django Drip Campaigns
 ====================
 
 [![Build Status](https://secure.travis-ci.org/zapier/django-drip.png)](http://travis-ci.org/zapier/django-drip)
