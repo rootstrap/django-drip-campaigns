@@ -6,7 +6,7 @@ DEBUG = True
 
 SECRET_KEY = 'whatever/you/want-goes-here'
 
-SECRET_KEY="whatever"
+SECRET_KEY = "whatever"
 
 DATABASES = {
     'default': {
@@ -16,12 +16,13 @@ DATABASES = {
 }
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
     'django.contrib.admin',
-    'django.contrib.sessions',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.staticfiles',
+    'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     'drip',
 
@@ -30,12 +31,14 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 )
 
 TEMPLATES = [
@@ -70,3 +73,11 @@ ROOT_URLCONF = 'test_urls'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ()
+
+#prueba
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+#prueba
+AUTH_USER_MODEL = 'auth.User'

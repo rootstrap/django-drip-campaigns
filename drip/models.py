@@ -4,11 +4,14 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
 
-from drip.utils import get_user_model
+#from drip.utils import get_user_model
+from django.contrib.auth import get_user_model #prueba
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
 from drip.helpers import parse
+
+USER = get_user_model() #prueba
 
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -59,7 +62,7 @@ class SentDrip(models.Model):
         on_delete=models.CASCADE,
     )
     user = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+        USER, #prueba
         related_name='sent_drips',
         on_delete=models.CASCADE,
     )

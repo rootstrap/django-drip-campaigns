@@ -10,10 +10,12 @@ from django.utils import timezone
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
-from drip.utils import get_user_model, unicode
+from drip.utils import unicode#get_user_model, unicode
+from django.contrib.auth import get_user_model
 
 from credits.models import Profile
 
+USER = get_user_model()
 
 class RulesTestCase(TestCase):
     def setUp(self):
@@ -43,7 +45,7 @@ class DripsTestCase(TestCase):
         Creates 20 users, half of which buy 25 credits a day,
         and the other half that does none.
         """
-        self.User = get_user_model()
+        self.User =  USER #prueba
 
         start = timezone.now() - timedelta(hours=2)
         num_string = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth']
@@ -420,7 +422,7 @@ class PlainDripEmail(DripMessage):
 
 class CustomMessagesTest(TestCase):
     def setUp(self):
-        self.User = get_user_model()
+        self.User = USER #prueba
 
         self.old_msg_classes = getattr(settings, 'DRIP_MESSAGE_CLASSES', None)
         self.user = self.User.objects.create(username='customuser', email='custom@example.com')

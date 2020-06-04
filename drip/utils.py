@@ -116,5 +116,6 @@ def get_user_model():
         from django.contrib.auth import get_user_model as django_get_user_model
         User = django_get_user_model()
     except ImportError:
+        print('-------------------- error --------------------------------------')
         from django.contrib.auth.models import User
     return User

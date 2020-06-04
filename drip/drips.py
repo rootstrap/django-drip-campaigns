@@ -9,7 +9,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
 from drip.models import SentDrip
-from drip.utils import get_user_model
+#from drip.utils import get_user_model
+from django.contrib.auth import get_user_model #prueba
 
 try:
     from django.utils.timezone import now as conditional_now

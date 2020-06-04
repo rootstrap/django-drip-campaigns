@@ -1,5 +1,5 @@
 # production
-Django>=1.4
+Django>=2.2
 
 # development
 Sphinx==1.1.3
