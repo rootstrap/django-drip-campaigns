@@ -1,24 +1,30 @@
 language: python
+
 dist: xenial
+
 python:
   - "3.5"
   - "3.6"
   - "3.7"
-  #- "pypy"
+  - "3.8"
+
 env:
   - DJANGO_VERSION="2.2"
   - DJANGO_VERSION="3.0.7"
 
 install:
-  #- pip install "Django>=${DJANGO_VERSION},<${DJANGO_VERSION}.99"
-  
-  #- pip install -r requirements.txt
   - pip3 install "Django==${DJANGO_VERSION}"
   - pip3 install Sphinx
-#script: python manage.py test drip
+
 script:
+  # makemigrations of each app is needed 
   - python manage.py makemigrations drip
   - python manage.py makemigrations credits
   - python manage.py makemigrations auth
   - python manage.py migrate
   - python manage.py test
+
+matrix:
+  exclude:
+    - python: "3.5"
+      env: DJANGO_VERSION="3.0.7" #To use this version of django, a python version > 3.5 is needed
