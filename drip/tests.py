@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -54,7 +54,9 @@ class DripsTestCase(TestCase):
 
         for i, name in enumerate(num_string):
             user = self.User.objects.create(
-                username='%s_25_credits_a_day' % name, email='%s@test.com' % name)
+                username='%s_25_credits_a_day' % name,
+                email='%s@test.com' % name
+            )
             self.User.objects.filter(id=user.id).update(
                 date_joined=start - timedelta(days=i))
 
@@ -80,41 +82,65 @@ class DripsTestCase(TestCase):
     def test_day_two_users_active(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                     profile__credits__gt=0).count())
+        self.assertEqual(
+            1, self.User.objects.filter(
+                date_joined__range=(start, end),
+                profile__credits__gt=0
+            ).count()
+        )
 
     def test_day_two_users_inactive(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                     profile__credits=0).count())
+        self.assertEqual(
+            1, self.User.objects.filter(
+                date_joined__range=(start, end),
+                profile__credits=0
+            ).count()
+        )
 
     def test_day_seven_users_active(self):
         start = timezone.now() - timedelta(days=8)
         end = timezone.now() - timedelta(days=7)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                     profile__credits__gt=0).count())
+        self.assertEqual(
+            1, self.User.objects.filter(
+                date_joined__range=(start, end),
+                profile__credits__gt=0
+            ).count()
+        )
 
     def test_day_seven_users_inactive(self):
         start = timezone.now() - timedelta(days=8)
         end = timezone.now() - timedelta(days=7)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                     profile__credits=0).count())
+        self.assertEqual(
+            1, self.User.objects.filter(
+                date_joined__range=(start, end),
+                profile__credits=0
+            ).count()
+        )
 
     def test_day_fourteen_users_active(self):
         start = timezone.now() - timedelta(days=15)
         end = timezone.now() - timedelta(days=14)
-        self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end),
-                                                     profile__credits__gt=0).count())
+        self.assertEqual(
+            0, self.User.objects.filter(
+                date_joined__range=(start, end),
+                profile__credits__gt=0
+            ).count()
+        )
 
     def test_day_fourteen_users_inactive(self):
         start = timezone.now() - timedelta(days=15)
         end = timezone.now() - timedelta(days=14)
-        self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end),
-                                                     profile__credits=0).count())
+        self.assertEqual(
+            0, self.User.objects.filter(
+                date_joined__range=(start, end),
+                profile__credits=0
+            ).count()
+        )
 
     ########################
-    ### RELATION SNAGGER ###
+    #   RELATION SNAGGER   #
     ########################
 
     def test_get_simple_fields(self):
@@ -125,7 +151,7 @@ class DripsTestCase(TestCase):
             bool([sf for sf in simple_fields if 'profile' in sf[0]]))
 
     ##################
-    ### TEST DRIPS ###
+    #   TEST DRIPS   #
     ##################
 
     def test_backwards_drip_class(self):
@@ -195,16 +221,24 @@ class DripsTestCase(TestCase):
         model_drip = self.build_joined_date_drip()
         drip = model_drip.drip
 
-        # vanilla (now-8, now-7), past (now-8-3, now-7-3), future (now-8+1, now-7+1)
-        for count, shifted_drip in zip([0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+        # vanilla (now-8, now-7), past (now-8-3, now-7-3),
+        # future (now-8+1, now-7+1)
+        for count, shifted_drip in zip(
+            [0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)
+        ):
+            self.assertEqual(
+                count, shifted_drip.get_queryset().count()
+            )
 
         # no reason to change after a send...
         drip.send()
         drip = Drip.objects.get(id=model_drip.id).drip
 
-        # vanilla (now-8, now-7), past (now-8-3, now-7-3), future (now-8+1, now-7+1)
-        for count, shifted_drip in zip([0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)):
+        # vanilla (now-8, now-7), past (now-8-3, now-7-3),
+        # future (now-8+1, now-7+1)
+        for count, shifted_drip in zip(
+            [0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)
+        ):
             self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_custom_drip_with_count(self):
@@ -220,7 +254,9 @@ class DripsTestCase(TestCase):
         # 1 person meet the criteria
         self.assertEqual(1, drip.get_queryset().count())
 
-        for count, shifted_drip in zip([0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)):
+        for count, shifted_drip in zip(
+            [0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)
+        ):
             self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_exclude_and_include(self):
@@ -229,7 +265,6 @@ class DripsTestCase(TestCase):
             subject_template='HELLO {{ user.username }}',
             body_html_template='KETTEHS ROCK!'
         )
-
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__credits',
@@ -264,7 +299,9 @@ class DripsTestCase(TestCase):
         )
         drip = model_drip.drip
 
-        for count, shifted_drip in zip([0, 2, 2, 0, 0], drip.walk(into_past=3, into_future=2)):
+        for count, shifted_drip in zip(
+            [0, 2, 2, 0, 0], drip.walk(into_past=3, into_future=2)
+        ):
             self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_custom_drip_static_now_datetime(self):
@@ -283,7 +320,9 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         # catches "today and yesterday" users
-        for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
+        for count, shifted_drip in zip(
+            [4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)
+        ):
             self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_admin_timeline_prunes_user_output(self):
@@ -326,7 +365,7 @@ class DripsTestCase(TestCase):
         self.assertEqual(unicode(response.content).count(admin.email), 1)
 
     ##################
-    ### TEST M2M   ###
+    #   TEST M2M     #
     ##################
 
     def test_annotated_field_name_property_no_count(self):
@@ -451,7 +490,8 @@ class CustomMessagesTest(TestCase):
         self.model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='<h2>This</h2> is an <b>example</b> html <strong>body</strong>.'
+            body_html_template='<h2>This</h2> is an <b>example</b>'
+            ' html <strong>body</strong>.'
         )
         QuerySetRule.objects.create(
             drip=self.model_drip,
@@ -491,7 +531,8 @@ class CustomMessagesTest(TestCase):
         self.assertEqual(1, result)
         self.assertEqual(1, len(mail.outbox))
         email = mail.outbox.pop()
-        # In this case we did specify the custom key, so message should be of custom type.
+        # In this case we did specify the custom key,
+        # so message should be of custom type.
         self.assertIsInstance(email, mail.EmailMessage)
 
     def test_override_default(self):

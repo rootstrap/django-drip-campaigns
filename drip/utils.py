@@ -8,6 +8,8 @@ from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 _ver = sys.version_info
 is_py2 = (_ver[0] == 2)
 is_py3 = (_ver[0] == 3)
+basestring = None
+unicode = None
 
 if is_py2:
     basestring = basestring
@@ -38,7 +40,9 @@ def get_fields(Model,
         app_label, model_name = Model.split('.')
         Model = models.get_model(app_label, model_name)
 
-    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()
+    fields = Model._meta.fields + \
+        Model._meta.many_to_many + \
+        Model._meta.get_fields()
     model_stack.append(Model)
 
     # do a variety of checks to ensure recursion isnt being redundant
@@ -78,12 +82,14 @@ def get_fields(Model,
         out_fields.append([full_field, field_name, Model, field.__class__])
 
         if not stop_recursion and \
-                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or
-                 isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
+                (isinstance(field, ForeignKey) or
+                 isinstance(field, OneToOneField) or
+                 isinstance(field, RelatedObject) or
+                 isinstance(field, ManyToManyField)):
 
             if isinstance(field, RelatedObject):
                 RelModel = field.model
-                #field_names.extend(get_fields(RelModel, full_field, True))
+                # field_names.extend(get_fields(RelModel, full_field, True))
             else:
                 RelModel = field.related_model
 

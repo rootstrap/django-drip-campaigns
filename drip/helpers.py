@@ -1,9 +1,11 @@
 import re
 import datetime
-from decimal import Decimal
 
 STRFDATETIME = re.compile('([dgGhHis])')
-def STRFDATETIME_REPL(x): return '%%(%s)s' % x.group()
+
+
+def STRFDATETIME_REPL(x):
+    return '%%(%s)s' % x.group()
 
 
 def parse(string):
@@ -121,9 +123,11 @@ def parse(string):
         raise TypeError("'%s' is not a valid time interval" % string)
     # This is the format we get from sometimes Postgres, sqlite,
     # and from serialization
-    d = re.match(r'^((?P<days>[-+]?\d+) days?,? )?(?P<sign>[-+]?)(?P<hours>\d+):'
-                 r'(?P<minutes>\d+)(:(?P<seconds>\d+(\.\d+)?))?$',
-                 str(string))
+    d = re.match(
+        r'^((?P<days>[-+]?\d+) days?,? )?(?P<sign>[-+]?)(?P<hours>\d+):'
+        r'(?P<minutes>\d+)(:(?P<seconds>\d+(\.\d+)?))?$',
+        str(string)
+    )
     if d:
         d = d.groupdict(0)
         if d['sign'] == '-':

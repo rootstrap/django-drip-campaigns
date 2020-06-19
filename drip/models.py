@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -14,35 +14,54 @@ from drip.helpers import parse
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
-
     name = models.CharField(
         max_length=255,
         unique=True,
         verbose_name='Drip Name',
-        help_text='A unique name for this drip.')
-
+        help_text='A unique name for this drip.'
+    )
     enabled = models.BooleanField(default=False)
 
-    from_email = models.EmailField(null=True, blank=True,
-                                   help_text='Set a custom from email.')
-    from_email_name = models.CharField(max_length=150, null=True, blank=True,
-                                       help_text="Set a name for a custom from email.")
+    from_email = models.EmailField(
+        null=True, blank=True, help_text='Set a custom from email.'
+    )
+    from_email_name = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True,
+        help_text='Set a name for a custom from email.'
+    )
     subject_template = models.TextField(null=True, blank=True)
-    body_html_template = models.TextField(null=True, blank=True,
-                                          help_text='You will have settings and user in the context.')
+    body_html_template = models.TextField(
+        null=True,
+        blank=True,
+        help_text='You will have settings and user in the context.'
+    )
     message_class = models.CharField(
-        max_length=120, blank=True, default='default')
+        max_length=120, blank=True, default='default'
+    )
 
     @property
     def drip(self):
         from drip.drips import DripBase
 
-        drip = DripBase(drip_model=self,
-                        name=self.name,
-                        from_email=self.from_email if self.from_email else None,
-                        from_email_name=self.from_email_name if self.from_email_name else None,
-                        subject_template=self.subject_template if self.subject_template else None,
-                        body_template=self.body_html_template if self.body_html_template else None)
+        drip = DripBase(
+            drip_model=self,
+            name=self.name,
+            from_email=self.from_email if self.from_email else None,
+            from_email_name=self.from_email_name if (
+                self.from_email_name
+            )
+            else None,
+            subject_template=self.subject_template if (
+                self.subject_template
+            )
+            else None,
+            body_template=self.body_html_template if (
+                self.body_html_template
+            )
+            else None
+        )
         return drip
 
     def __unicode__(self):
@@ -54,7 +73,6 @@ class SentDrip(models.Model):
     Keeps a record of all sent drips.
     """
     date = models.DateTimeField(auto_now_add=True)
-
     drip = models.ForeignKey(
         'drip.Drip',
         related_name='sent_drips',
@@ -65,17 +83,18 @@ class SentDrip(models.Model):
         related_name='sent_drips',
         on_delete=models.CASCADE,
     )
-
     subject = models.TextField()
     body = models.TextField()
     from_email = models.EmailField(
         # For south so that it can migrate existing rows.
         null=True, default=None
     )
-    from_email_name = models.CharField(max_length=150,
-                                       # For south so that it can migrate existing rows.
-                                       null=True, default=None
-                                       )
+    from_email_name = models.CharField(
+        max_length=150,
+        # For south so that it can migrate existing rows.
+        null=True,
+        default=None
+    )
 
 
 METHOD_TYPES = (
@@ -118,9 +137,13 @@ class QuerySetRule(models.Model):
     lookup_type = models.CharField(
         max_length=12, default='exact', choices=LOOKUP_TYPES)
 
-    field_value = models.CharField(max_length=255,
-                                   help_text=('Can be anything from a number, to a string. Or, do ' +
-                                              '`now-7 days` or `today+3 days` for fancy timedelta.'))
+    field_value = models.CharField(
+        max_length=255,
+        help_text=(
+            'Can be anything from a number, to a string. Or, do ' +
+            '`now-7 days` or `today+3 days` for fancy timedelta.'
+        )
+    )
 
     def clean(self):
         User = get_user_model()

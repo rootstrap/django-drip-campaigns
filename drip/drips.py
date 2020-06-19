@@ -130,7 +130,7 @@ class DripBase(object):
         self.now_shift_kwargs = kwargs.get('now_shift_kwargs', {})
 
     #########################
-    ### DATE MANIPULATION ###
+    #   DATE MANIPULATION   #
     #########################
 
     def now(self):
@@ -142,14 +142,16 @@ class DripBase(object):
 
     def timedelta(self, *a, **kw):
         """
-        If needed, this allows us the ability to manipulate the slicing of time.
+        If needed, this allows us the ability
+        to manipulate the slicing of time.
         """
         from datetime import timedelta
         return timedelta(*a, **kw)
 
     def walk(self, into_past=0, into_future=0):
         """
-        Walk over a date range and create new instances of self with new ranges.
+        Walk over a date range and create
+        new instances of self with new ranges.
         """
         walked_range = []
         for shift in range(-into_past, into_future):
@@ -184,7 +186,7 @@ class DripBase(object):
         return qs
 
     ##################
-    ### MANAGEMENT ###
+    #   MANAGEMENT   #
     ##################
 
     def get_queryset(self):
@@ -211,10 +213,11 @@ class DripBase(object):
         Do an exclude for all Users who have a SentDrip already.
         """
         target_user_ids = self.get_queryset().values_list('id', flat=True)
-        exclude_user_ids = SentDrip.objects.filter(date__lt=conditional_now(),
-                                                   drip=self.drip_model,
-                                                   user__id__in=target_user_ids)\
-            .values_list('user_id', flat=True)
+        exclude_user_ids = SentDrip.objects.filter(
+            date__lt=conditional_now(),
+            drip=self.drip_model,
+            user__id__in=target_user_ids
+        ).values_list('user_id', flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
     def send(self):
@@ -253,7 +256,7 @@ class DripBase(object):
         return count
 
     ####################
-    ### USER DEFINED ###
+    #   USER DEFINED   #
     ####################
 
     def queryset(self):

@@ -11,3 +11,5 @@ sqlite.db
 settings.py
 
 env*
+
+__pycache__
