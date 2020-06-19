@@ -9,3 +9,5 @@ docs/_build/
 
 sqlite.db
 settings.py
+
+env*
