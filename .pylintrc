@@ -3,3 +3,16 @@ disable=
         C0114,
         C0115,
         C0116,
+
+# this is a workaround because pylint has a bug that can't ignore folders.
+init-hook=
+    sys.path.append(os.getcwd());
+    from pylint_ignore import PylintIgnorePaths;
+    PylintIgnorePaths(
+        'env-django-drip/',
+        'drip/migrations/',
+        'docs/',
+        '__pycache__'
+    )
+
+generated-members=objects
