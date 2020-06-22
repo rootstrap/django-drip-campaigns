@@ -1,9 +1,12 @@
 import re
 import datetime
-from decimal import Decimal
 
 STRFDATETIME = re.compile('([dgGhHis])')
-STRFDATETIME_REPL = lambda x: '%%(%s)s' % x.group()
+
+
+def STRFDATETIME_REPL(x):
+    return '%%(%s)s' % x.group()
+
 
 def parse(string):
     """
@@ -120,9 +123,11 @@ def parse(string):
         raise TypeError("'%s' is not a valid time interval" % string)
     # This is the format we get from sometimes Postgres, sqlite,
     # and from serialization
-    d = re.match(r'^((?P<days>[-+]?\d+) days?,? )?(?P<sign>[-+]?)(?P<hours>\d+):'
-                 r'(?P<minutes>\d+)(:(?P<seconds>\d+(\.\d+)?))?$',
-                 str(string))
+    d = re.match(
+        r'^((?P<days>[-+]?\d+) days?,? )?(?P<sign>[-+]?)(?P<hours>\d+):'
+        r'(?P<minutes>\d+)(:(?P<seconds>\d+(\.\d+)?))?$',
+        str(string)
+    )
     if d:
         d = d.groupdict(0)
         if d['sign'] == '-':
@@ -132,14 +137,14 @@ def parse(string):
     else:
         # This is the more flexible format
         d = re.match(
-                     r'^((?P<weeks>-?((\d*\.\d+)|\d+))\W*w((ee)?(k(s)?)?)(,)?\W*)?'
-                     r'((?P<days>-?((\d*\.\d+)|\d+))\W*d(ay(s)?)?(,)?\W*)?'
-                     r'((?P<hours>-?((\d*\.\d+)|\d+))\W*h(ou)?(r(s)?)?(,)?\W*)?'
-                     r'((?P<minutes>-?((\d*\.\d+)|\d+))\W*m(in(ute)?(s)?)?(,)?\W*)?'
-                     r'((?P<seconds>-?((\d*\.\d+)|\d+))\W*s(ec(ond)?(s)?)?)?\W*$',
-                     string)
+            r'^((?P<weeks>-?((\d*\.\d+)|\d+))\W*w((ee)?(k(s)?)?)(,)?\W*)?'
+            r'((?P<days>-?((\d*\.\d+)|\d+))\W*d(ay(s)?)?(,)?\W*)?'
+            r'((?P<hours>-?((\d*\.\d+)|\d+))\W*h(ou)?(r(s)?)?(,)?\W*)?'
+            r'((?P<minutes>-?((\d*\.\d+)|\d+))\W*m(in(ute)?(s)?)?(,)?\W*)?'
+            r'((?P<seconds>-?((\d*\.\d+)|\d+))\W*s(ec(ond)?(s)?)?)?\W*$',
+            string)
         if not d:
             raise TypeError("'%s' is not a valid time interval" % string)
         d = d.groupdict(0)
 
-    return datetime.timedelta(**dict(( (k, float(v)) for k,v in d.items())))
+    return datetime.timedelta(**dict(((k, float(v)) for k, v in d.items())))

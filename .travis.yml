@@ -16,6 +16,7 @@ env:
 install:
   - pip3 install "Django==${DJANGO_VERSION}"
   - pip3 install Sphinx
+  - pip3 install flake8
 
 script:
   # makemigrations of each app is needed 
@@ -24,6 +25,7 @@ script:
   - python manage.py makemigrations auth
   - python manage.py migrate
   - python manage.py test
+  - flake8 .
 
 matrix:
   exclude:
