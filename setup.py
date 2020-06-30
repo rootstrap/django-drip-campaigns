@@ -7,14 +7,15 @@ import os
 import sys
 
 
-name = 'django-drip'
+name = 'django-drip-campaigns'
 package = 'drip'
-description = 'Simple drip campaigns for Django.'
-url = 'https://github.com/zapier/django-drip'
-author = 'Bryan Helmig'
-author_email = 'bryan@zapier.com'
+description = 'Drip campaigns for Django.'
+url = 'https://github.com/rootstrap/django-drip-campaigns'
+author = 'Kalil de Lima'
+author_email = 'kalil@rootstrap.com'
 license = 'MIT'
-install_requires = ['Django', 'django-timedeltafield']
+install_requires = ['Django>=2.2', 'django-timedeltafield']
+keywords = 'django drip email user query'
 
 
 def get_version(package):
@@ -69,6 +70,7 @@ setup(
     description=description,
     author=author,
     author_email=author_email,
+    keywords=keywords,
     packages=get_packages(package),
     package_data=get_package_data(package),
     install_requires=install_requires,
@@ -80,11 +82,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
