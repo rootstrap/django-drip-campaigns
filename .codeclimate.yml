@@ -1,0 +1,28 @@
+version: "2"
+
+checks:
+  argument-count:
+    config:
+      threshold: 5 #Allow at most 5 arguments in a function
+  method-count:
+    config:
+      threshold: 25 #Allow at most 25 functions in a class
+
+exclude_patterns:
+  - "**/*_settings.py"
+  - "**/migrations/**"
+  - "**/settings/**"
+  - "docs/"
+  - "env**"
+  - "build/"
+  - "dist/"
+  - "django_drip_campaigns.egg-info/"
+  - "**__pycache__**"
+
+plugins:
+  pep8:
+    enabled: true
+  duplication:
+    enabled: true
+    exclude_patterns:
+      - "drip/tests/**" #Don't check duplication on tests

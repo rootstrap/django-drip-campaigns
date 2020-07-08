@@ -81,14 +81,18 @@ class DripMessage(object):
             self._plain = strip_tags(self.body)
         return self._plain
 
+    def get_from_(self):
+        if self.drip_base.from_email_name:
+            from_ = "%s <%s>" % (
+                self.drip_base.from_email_name, self.drip_base.from_email)
+        else:
+            from_ = self.drip_base.from_email
+        return from_
+
     @property
     def message(self):
         if not self._message:
-            if self.drip_base.from_email_name:
-                from_ = "%s <%s>" % (
-                    self.drip_base.from_email_name, self.drip_base.from_email)
-            else:
-                from_ = self.drip_base.from_email
+            from_ = self.get_from_()
 
             self._message = EmailMultiAlternatives(
                 self.subject, self.plain, from_, [self.user.email])
@@ -220,20 +224,7 @@ class DripBase(object):
         ).values_list('user_id', flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
-    def send(self):
-        """
-        Send the message to each user on the queryset.
-
-        Create SentDrip for each user that gets a message.
-
-        Returns count of created SentDrips.
-        """
-
-        if not self.from_email:
-            self.from_email = getattr(
-                settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
-        MessageClass = message_class_for(self.drip_model.message_class)
-
+    def get_count_from_queryset(self, MessageClass):
         count = 0
         for user in self.get_queryset():
             message_instance = MessageClass(self, user)
@@ -252,8 +243,23 @@ class DripBase(object):
             except Exception as e:
                 logging.error("Failed to send drip %s to user %s: %s" %
                               (self.drip_model.id, user, e))
-
         return count
+
+    def send(self):
+        """
+        Send the message to each user on the queryset.
+
+        Create SentDrip for each user that gets a message.
+
+        Returns count of created SentDrips.
+        """
+
+        if not self.from_email:
+            self.from_email = getattr(
+                settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
+        MessageClass = message_class_for(self.drip_model.message_class)
+
+        return self.get_count_from_queryset(MessageClass)
 
     ####################
     #   USER DEFINED   #

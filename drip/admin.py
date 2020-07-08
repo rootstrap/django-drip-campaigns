@@ -55,26 +55,37 @@ class DripAdmin(admin.ModelAdmin):
 
         return render(request, 'drip/timeline.html', locals())
 
+    def get_mime_html_from_alternatives(self, alternatives):
+        html = ''
+        mime = ''
+        for body, mime in alternatives:
+            if mime == 'text/html':
+                html = body
+                mime = 'text/html'
+        return html, mime
+
+    def get_mime_html(self, drip, user):
+        drip_message = message_class_for(
+            drip.message_class)(drip.drip, user)
+        if drip_message.message.alternatives:
+            return self.get_mime_html_from_alternatives(
+                drip_message.message.alternatives
+            )
+        html = drip_message.message.body
+        mime = 'text/plain'
+        return html, mime
+
     def view_drip_email(
         self, request, drip_id, into_past, into_future, user_id
     ):
+
         from django.shortcuts import get_object_or_404
         from django.http import HttpResponse
         drip = get_object_or_404(Drip, id=drip_id)
         User = get_user_model()
         user = get_object_or_404(User, id=user_id)
 
-        drip_message = message_class_for(drip.message_class)(drip.drip, user)
-        html = ''
-        mime = ''
-        if drip_message.message.alternatives:
-            for body, mime in drip_message.message.alternatives:
-                if mime == 'text/html':
-                    html = body
-                    mime = 'text/html'
-        else:
-            html = drip_message.message.body
-            mime = 'text/plain'
+        html, mime = self.get_mime_html(drip, user)
 
         return HttpResponse(html, content_type=mime)
 

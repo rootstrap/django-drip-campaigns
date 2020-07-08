@@ -169,12 +169,7 @@ class QuerySetRule(models.Model):
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def filter_kwargs(self, qs, now=datetime.now):
-        # Support Count() as m2m__count
-        field_name = self.annotated_field_name
-        field_name = '__'.join([field_name, self.lookup_type])
-        field_value = self.field_value
-
+    def set_time_deltas_and_dates(self, now, field_value):
         # set time deltas and dates
         if self.field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
@@ -188,17 +183,34 @@ class QuerySetRule(models.Model):
         elif self.field_value.startswith('today+'):
             field_value = self.field_value.replace('today+', '')
             field_value = now().date() + parse(field_value)
+        return field_value
 
+    def set_f_expressions(self, field_value):
         # F expressions
         if self.field_value.startswith('F_'):
             field_value = self.field_value.replace('F_', '')
             field_value = models.F(field_value)
+        return field_value
 
+    def set_booleans(self, field_value):
         # set booleans
         if self.field_value == 'True':
             field_value = True
         if self.field_value == 'False':
             field_value = False
+        return field_value
+
+    def filter_kwargs(self, qs, now=datetime.now):
+        # Support Count() as m2m__count
+        field_name = self.annotated_field_name
+        field_name = '__'.join([field_name, self.lookup_type])
+        field_value = self.field_value
+
+        field_value = self.set_time_deltas_and_dates(now, field_value)
+
+        field_value = self.set_f_expressions(field_value)
+
+        field_value = self.set_booleans(field_value)
 
         kwargs = {field_name: field_value}
 
