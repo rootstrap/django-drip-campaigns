@@ -1,5 +1,7 @@
-Django Drip Campaigns
-====================
+[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/codeclimate/codeclimate/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage)](https://codeclimate.com/github/codeclimate/codeclimate/test_coverage)
+
+# Django Drip Campaigns
 
 [![Build Status](https://secure.travis-ci.org/zapier/django-drip.png)](http://travis-ci.org/zapier/django-drip)
 
@@ -11,7 +13,7 @@ This project is a fork of the one written by [Zapier](https://zapier.com/z/qO/) 
 
 ### Installing:
 
-We highly recommend using pip to install *django-drip*, the packages are regularly updated 
+We highly recommend using pip to install _django-drip_, the packages are regularly updated
 with stable releases:
 
 ```
@@ -44,7 +46,8 @@ python manage.py syncdb
 # or...
 python manage.py migrate drip
 ```
--------------------
+
+---
 
 ![what the admin looks like](https://raw.github.com/zapier/django-drip/master/docs/images/drip-example.png)
 ![what the admin looks like for the timeline](https://raw.github.com/zapier/django-drip/master/docs/images/view-timeline.png)
