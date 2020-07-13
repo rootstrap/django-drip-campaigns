@@ -19,6 +19,75 @@ elif is_py3:
     unicode = str
 
 
+def check_redundant(model_stack, stack_limit):
+    stop_recursion = False
+    if len(model_stack) > stack_limit:
+        # rudimentary CustomUser->User->CustomUser->User detection, or
+        # stack depth shouldn't exceed x, or
+        # we've hit a point where we are repeating models
+        if ((model_stack[-3] == model_stack[-1]) or
+            (len(model_stack) > 5) or
+                (len(set(model_stack)) != len(model_stack))):
+            stop_recursion = True
+    return stop_recursion
+
+
+def get_field_name(field, RelatedObject):
+    field_name = field.name
+
+    if isinstance(field, RelatedObject):
+        field_name = field.field.related_query_name()
+    return field_name
+
+
+def get_full_field(parent_field, field_name):
+    if parent_field:
+        full_field = "__".join([parent_field, field_name])
+    else:
+        full_field = field_name
+    return full_field
+
+
+def get_rel_model(field, RelatedObject):
+    if isinstance(field, RelatedObject):
+        RelModel = field.model
+        # field_names.extend(get_fields(RelModel, full_field, True))
+    else:
+        RelModel = field.related_model
+    return RelModel
+
+
+def is_valid_instance(field):
+    return (isinstance(field, ForeignKey) or
+            isinstance(field, OneToOneField) or
+            isinstance(field, RelatedObject) or
+            isinstance(field, ManyToManyField))
+
+
+def get_out_fields(Model, parent_field, model_stack, excludes, fields):
+    out_fields = []
+    for field in fields:
+
+        field_name = get_field_name(field, RelatedObject)
+
+        full_field = get_full_field(parent_field, field_name)
+
+        if len([True for exclude in excludes if (exclude in full_field)]):
+            continue
+
+        # add to the list
+        out_fields.append([full_field, field_name, Model, field.__class__])
+
+        if is_valid_instance(field):
+
+            RelModel = get_rel_model(field, RelatedObject)
+
+            out_fields.extend(get_fields(
+                RelModel, full_field, list(model_stack)))
+
+    return out_fields
+
+
 def get_fields(Model,
                parent_field="",
                model_stack=[],
@@ -33,7 +102,6 @@ def get_fields(Model,
     ...
 
      """
-    out_fields = []
 
     # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
     if isinstance(Model, basestring):
@@ -47,56 +115,12 @@ def get_fields(Model,
 
     # do a variety of checks to ensure recursion isnt being redundant
 
-    stop_recursion = False
-    if len(model_stack) > stack_limit:
-        # rudimentary CustomUser->User->CustomUser->User detection
-        if model_stack[-3] == model_stack[-1]:
-            stop_recursion = True
-
-        # stack depth shouldn't exceed x
-        if len(model_stack) > 5:
-            stop_recursion = True
-
-        # we've hit a point where we are repeating models
-        if len(set(model_stack)) != len(model_stack):
-            stop_recursion = True
+    stop_recursion = check_redundant(model_stack, stack_limit)
 
     if stop_recursion:
         return []  # give empty list for "extend"
 
-    for field in fields:
-        field_name = field.name
-
-        if isinstance(field, RelatedObject):
-            field_name = field.field.related_query_name()
-
-        if parent_field:
-            full_field = "__".join([parent_field, field_name])
-        else:
-            full_field = field_name
-
-        if len([True for exclude in excludes if (exclude in full_field)]):
-            continue
-
-        # add to the list
-        out_fields.append([full_field, field_name, Model, field.__class__])
-
-        if not stop_recursion and \
-                (isinstance(field, ForeignKey) or
-                 isinstance(field, OneToOneField) or
-                 isinstance(field, RelatedObject) or
-                 isinstance(field, ManyToManyField)):
-
-            if isinstance(field, RelatedObject):
-                RelModel = field.model
-                # field_names.extend(get_fields(RelModel, full_field, True))
-            else:
-                RelModel = field.related_model
-
-            out_fields.extend(get_fields(
-                RelModel, full_field, list(model_stack)))
-
-    return out_fields
+    return get_out_fields(Model, parent_field, model_stack, excludes, fields)
 
 
 def give_model_field(full_field, Model):
