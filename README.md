@@ -1,5 +1,5 @@
-[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/codeclimate/codeclimate/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage)](https://codeclimate.com/github/codeclimate/codeclimate/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/5240f5a755d873846f8f/maintainability)](https://codeclimate.com/repos/5f0c9d52db4bad011400189e/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/5240f5a755d873846f8f/test_coverage)](https://codeclimate.com/repos/5f0c9d52db4bad011400189e/test_coverage)
 
 # Django Drip Campaigns
 

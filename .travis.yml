@@ -4,7 +4,7 @@ dist: xenial
 
 env:
   global:
-    - CC_TEST_REPORTER_ID=9799dd1344e6aa73b585d4cd5bd2d6890fd5724260056adfb99fb11eeee91c2a
+    - CC_TEST_REPORTER_ID="9799dd1344e6aa73b585d4cd5bd2d6890fd5724260056adfb99fb11eeee91c2a"
 
 python:
   - "3.5"
@@ -28,7 +28,7 @@ before_script:
   - ./cc-test-reporter before-build
 
 script:
-  # makemigrations of each app is needed 
+  # makemigrations of each app is needed
   - python manage.py makemigrations drip
   - python manage.py makemigrations credits
   - python manage.py makemigrations auth
