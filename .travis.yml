@@ -2,6 +2,10 @@ language: python
 
 dist: xenial
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=9799dd1344e6aa73b585d4cd5bd2d6890fd5724260056adfb99fb11eeee91c2a
+
 python:
   - "3.5"
   - "3.6"
@@ -18,6 +22,11 @@ install:
   - pip3 install Sphinx
   - pip3 install flake8
 
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
 script:
   # makemigrations of each app is needed 
   - python manage.py makemigrations drip
@@ -26,6 +35,9 @@ script:
   - python manage.py migrate
   - python manage.py test
   - flake8 .
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 matrix:
   exclude:
