@@ -135,4 +135,5 @@ class SentDripAdmin(admin.ModelAdmin):
     ordering = ['-id']
 
 
+# coment
 admin.site.register(SentDrip, SentDripAdmin)
