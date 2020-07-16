@@ -2,10 +2,6 @@ language: python
 
 dist: xenial
 
-env:
-  global:
-    - CC_TEST_REPORTER_ID="9799dd1344e6aa73b585d4cd5bd2d6890fd5724260056adfb99fb11eeee91c2a"
-
 python:
   - "3.5"
   - "3.6"
@@ -14,6 +10,8 @@ python:
   - "pypy3"
 
 env:
+  global:
+    - CC_TEST_REPORTER_ID=022c7b78c0d0c1af735f968d236d9a0691025b2c7746b5030522e07405084c9c
   - DJANGO_VERSION="2.2"
   - DJANGO_VERSION="3.0.7"
 
@@ -21,6 +19,7 @@ install:
   - pip3 install "Django==${DJANGO_VERSION}"
   - pip3 install Sphinx
   - pip3 install flake8
+  - pip install coverage
 
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -33,11 +32,12 @@ script:
   - python manage.py makemigrations credits
   - python manage.py makemigrations auth
   - python manage.py migrate
-  - python manage.py test
   - flake8 .
+  - coverage run ./manage.py test -v 2
 
 after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - coverage xml
+  - if [[ "$DJANGO_VERSION" == "3.0.7" && "$TRAVIS_PYTHON_VERSION" == "pypy3" ]]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
 
 matrix:
   exclude:
