@@ -2,10 +2,6 @@ language: python
 
 dist: xenial
 
-env:
-  global:
-    - CC_TEST_REPORTER_ID=9799dd1344e6aa73b585d4cd5bd2d6890fd5724260056adfb99fb11eeee91c2a
-
 python:
   - "3.5"
   - "3.6"
@@ -34,12 +30,12 @@ script:
   - python manage.py makemigrations credits
   - python manage.py makemigrations auth
   - python manage.py migrate
-  - coverage run manage.py test
   - flake8 .
+  - coverage run manage.py test -v 2
 
 after_script:
   - coverage xml
-  - if [[ "$DJANGO_VERSION" == "3.0.7" && "$TRAVIS_PYTHON_VERSION" == "3.8" ]]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
+  - if [[ "$DJANGO_VERSION" == "3.0.7" && "$TRAVIS_PYTHON_VERSION" == "3.8" ]]; then ./cc-test-reporter after-build -r 9799dd1344e6aa73b585d4cd5bd2d6890fd5724260056adfb99fb11eeee91c2a --exit-code $TRAVIS_TEST_RESULT; fi
 
 matrix:
   exclude:
