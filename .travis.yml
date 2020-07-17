@@ -42,4 +42,4 @@ after_script:
 matrix:
   exclude:
     - python: "3.5"
-      env: DJANGO_VERSION="3.0.7" #To use this version of django, a python version > 3.5 is needed
+      env: DJANGO_VERSION="3.0.7" #To use this version of django, a python version >  3.5 is needed
