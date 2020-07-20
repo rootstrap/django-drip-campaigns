@@ -10,8 +10,6 @@ python:
   - "pypy3"
 
 env:
-  global:
-    - CC_TEST_REPORTER_ID: 022c7b78c0d0c1af735f968d236d9a0691025b2c7746b5030522e07405084c9c
   - DJANGO_VERSION="2.2"
   - DJANGO_VERSION="3.0.7"
 
