@@ -4,42 +4,29 @@ dist: xenial
 
 python:
   - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "pypy3"
+  #- "3.6"
+  #- "3.7"
+  #- "pypy"
 
 env:
-  global:
-    - CC_TEST_REPORTER_ID=022c7b78c0d0c1af735f968d236d9a0691025b2c7746b5030522e07405084c9c
   - DJANGO_VERSION="2.2"
-  - DJANGO_VERSION="3.0.7"
+  #- DJANGO_VERSION="3.0.7"
+  #- DJANGO_VERSION="1.6"
+  #- DJANGO_VERSION="1.7"
 
 install:
+  #- pip install "Django>=${DJANGO_VERSION},<${DJANGO_VERSION}.99"
+
+  #- pip install -r requirements.txt
+
   - pip3 install "Django==${DJANGO_VERSION}"
   - pip3 install Sphinx
-  - pip3 install flake8
-  - pip install coverage
 
-before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
 
+#script: python manage.py test drip
 script:
-  # makemigrations of each app is needed
   - python manage.py makemigrations drip
   - python manage.py makemigrations credits
   - python manage.py makemigrations auth
   - python manage.py migrate
-  - flake8 .
-  - coverage run ./manage.py test -v 2
-
-after_script:
-  - coverage xml
-  - if [[ "$DJANGO_VERSION" == "3.0.7" && "$TRAVIS_PYTHON_VERSION" == "pypy3" ]]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
-
-matrix:
-  exclude:
-    - python: "3.5"
-      env: DJANGO_VERSION="3.0.7" #To use this version of django, a python version > 3.5 is needed
+  - python manage.py test
