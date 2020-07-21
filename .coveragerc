@@ -1,0 +1,14 @@
+[run]
+omit =
+    */lib/*
+    build/*
+    dist/*
+    __pycache__/*
+    django_drip_campaigns.egg-info/*
+    env-*
+    env-django-drip/*
+    *__pycache__*
+    */migrations/*
+    *__init__.py
+    */virtualenv/*
+
