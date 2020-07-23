@@ -108,18 +108,17 @@ class DripAdmin(admin.ModelAdmin):
         )
 
     def get_urls(self):
-        from django.conf.urls import url
+        from django.urls import path
         urls = super(DripAdmin, self).get_urls()
         my_urls = [
-            url(
-                r'^(?P<drip_id>[\d]+)/timeline/'
-                r'(?P<into_past>[\d]+)/(?P<into_future>[\d]+)/$',
+            path(
+                '<int:drip_id>/timeline/<int:into_past>/<int:into_future>/',
                 self.av(self.timeline),
                 name='drip_timeline'
             ),
-            url(
-                r'^(?P<drip_id>[\d]+)/timeline/(?P<into_past>[\d]+)/'
-                r'(?P<into_future>[\d]+)/(?P<user_id>[\d]+)/$',
+            path(
+                '<int:drip_id>/timeline/<int:into_past>/'
+                '<int:into_future>/<int:user_id>/',
                 self.av(self.view_drip_email),
                 name='view_drip_email'
             )
