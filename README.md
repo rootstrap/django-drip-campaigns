@@ -17,7 +17,7 @@ We highly recommend using pip to install _django-drip_, the packages are regular
 with stable releases:
 
 ```
-pip install django-drip
+pip install django-drip-campaigns
 ```
 
 Next, you'll want to add `drip` to your `INSTALLED_APPS` in settings.py.
