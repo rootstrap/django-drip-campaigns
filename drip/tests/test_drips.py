@@ -440,3 +440,33 @@ class DripsTestCase(TestCase):
             model_drip.drip.get_queryset())
 
         self.assertEqual(qs.count(), 4)
+
+
+class UrlsTestCase(TestCase):
+    def test_drip_timeline_url(self):
+        timeline_url = reverse(
+            'admin:drip_timeline',
+            kwargs={
+                'drip_id': 1,
+                'into_past': 2,
+                'into_future': 3
+            }
+        )
+
+        self.assertEqual(timeline_url, '/admin/drip/drip/1/timeline/2/3/')
+
+    def test_view_drip_email_url_url(self):
+        view_drip_email_url = reverse(
+            'admin:view_drip_email',
+            kwargs={
+                'drip_id': 1,
+                'into_past': 2,
+                'into_future': 3,
+                'user_id': 4
+            }
+        )
+
+        self.assertEqual(
+            view_drip_email_url,
+            '/admin/drip/drip/1/timeline/2/3/4/'
+        )
