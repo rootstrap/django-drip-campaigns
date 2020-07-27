@@ -66,3 +66,5 @@ ROOT_URLCONF = 'test_urls'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ()
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
