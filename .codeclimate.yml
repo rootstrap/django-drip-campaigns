@@ -13,6 +13,7 @@ exclude_patterns:
   - "**/migrations/**"
   - "**/settings/**"
   - "docs/"
+  - "legacy_docs/"
   - "env**"
   - "build/"
   - "dist/"
