@@ -22,8 +22,18 @@ class DripsTestCase(TestCase):
         self.User = get_user_model()
 
         start = timezone.now() - timedelta(hours=2)
-        num_string = ['first', 'second', 'third', 'fourth',
-                      'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
+        num_string = [
+            'first',
+            'second',
+            'third',
+            'fourth',
+            'fifth',
+            'sixth',
+            'seventh',
+            'eighth',
+            'ninth',
+            'tenth'
+        ]
 
         for i, name in enumerate(num_string):
             user = self.User.objects.create(
@@ -31,7 +41,8 @@ class DripsTestCase(TestCase):
                 email='%s@test.com' % name
             )
             self.User.objects.filter(id=user.id).update(
-                date_joined=start - timedelta(days=i))
+                date_joined=start - timedelta(days=i)
+            )
 
             profile = Profile.objects.get(user=user)
             profile.credits = i * 25
@@ -39,9 +50,11 @@ class DripsTestCase(TestCase):
 
         for i, name in enumerate(num_string):
             user = self.User.objects.create(
-                username='%s_no_credits' % name, email='%s@test.com' % name)
+                username='%s_no_credits' % name, email='%s@test.com' % name
+            )
             self.User.objects.filter(id=user.id).update(
-                date_joined=start - timedelta(days=i))
+                date_joined=start - timedelta(days=i)
+            )
 
     def test_users_exists(self):
         self.assertEqual(20, self.User.objects.all().count())
@@ -49,14 +62,19 @@ class DripsTestCase(TestCase):
     def test_day_zero_users(self):
         start = timezone.now() - timedelta(days=1)
         end = timezone.now()
-        self.assertEqual(2, self.User.objects.filter(
-            date_joined__range=(start, end)).count())
+        self.assertEqual(
+            2,
+            self.User.objects.filter(
+                date_joined__range=(start, end)
+            ).count()
+        )
 
     def test_day_two_users_active(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
         self.assertEqual(
-            1, self.User.objects.filter(
+            1,
+            self.User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits__gt=0
             ).count()
@@ -66,7 +84,8 @@ class DripsTestCase(TestCase):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
         self.assertEqual(
-            1, self.User.objects.filter(
+            1,
+            self.User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits=0
             ).count()
@@ -267,8 +286,9 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='lte',
-            field_value=(timezone.now() - timedelta(days=8)
-                         ).strftime('%Y-%m-%d %H:%M:%S')
+            field_value=(
+                timezone.now() - timedelta(days=8)
+            ).strftime('%Y-%m-%d %H:%M:%S')
         )
         drip = model_drip.drip
 
@@ -287,8 +307,9 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)
-                         ).strftime('%Y-%m-%d 00:00:00')
+            field_value=(
+                timezone.now() - timedelta(days=1)
+            ).strftime('%Y-%m-%d 00:00:00')
         )
         drip = model_drip.drip
 
@@ -299,7 +320,9 @@ class DripsTestCase(TestCase):
             self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_admin_timeline_prunes_user_output(self):
-        """multiple users in timeline is confusing."""
+        """
+        multiple users in timeline is confusing.
+        """
         admin = self.User.objects.create(
             username='admin', email='admin@example.com')
         admin.is_staff = True
@@ -316,16 +339,21 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)
-                         ).strftime('%Y-%m-%d 00:00:00')
+            field_value=(
+                timezone.now() - timedelta(days=1)
+            ).strftime('%Y-%m-%d 00:00:00')
         )
 
         # then get it's admin view.
         rf = RequestFactory()
-        timeline_url = reverse('admin:drip_timeline', kwargs={
-            'drip_id': model_drip.id,
-            'into_past': 3,
-            'into_future': 3})
+        timeline_url = reverse(
+            'admin:drip_timeline',
+            kwargs={
+                'drip_id': model_drip.id,
+                'into_past': 3,
+                'into_future': 3
+            }
+        )
 
         request = rf.get(timeline_url)
         request.user = admin
@@ -371,8 +399,10 @@ class DripsTestCase(TestCase):
             field_value=2
         )
 
-        self.assertEqual(qsr.annotated_field_name,
-                         'num_userprofile_user_groups')
+        self.assertEqual(
+            qsr.annotated_field_name,
+            'num_userprofile_user_groups'
+        )
 
     def test_apply_annotations_no_count(self):
 
@@ -409,8 +439,10 @@ class DripsTestCase(TestCase):
         )
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
-        self.assertEqual(list(qs.query.annotation_select.keys()), [
-                         'num_profile_user_groups'])
+        self.assertEqual(
+            list(qs.query.annotation_select.keys()),
+            ['num_profile_user_groups']
+        )
 
     def test_apply_multiple_rules_with_aggregation(self):
 
@@ -431,13 +463,15 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)
-                         ).strftime('%Y-%m-%d 00:00:00')
+            field_value=(
+                timezone.now() - timedelta(days=1)
+            ).strftime('%Y-%m-%d 00:00:00')
         )
 
         qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(
-            model_drip.drip.get_queryset())
+            model_drip.drip.get_queryset()
+        )
 
         self.assertEqual(qs.count(), 4)
 

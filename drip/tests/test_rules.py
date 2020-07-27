@@ -13,16 +13,28 @@ class RulesTestCase(TestCase):
         )
 
     def test_valid_rule(self):
-        rule = QuerySetRule(drip=self.drip, field_name='date_joined',
-                            lookup_type='lte', field_value='now-60 days')
+        rule = QuerySetRule(
+            drip=self.drip,
+            field_name='date_joined',
+            lookup_type='lte',
+            field_value='now-60 days'
+        )
         rule.clean()
 
     def test_bad_field_name(self):
-        rule = QuerySetRule(drip=self.drip, field_name='date__joined',
-                            lookup_type='lte', field_value='now-60 days')
+        rule = QuerySetRule(
+            drip=self.drip,
+            field_name='date__joined',
+            lookup_type='lte',
+            field_value='now-60 days'
+        )
         self.assertRaises(ValidationError, rule.clean)
 
     def test_bad_field_value(self):
-        rule = QuerySetRule(drip=self.drip, field_name='date_joined',
-                            lookup_type='lte', field_value='now-2 months')
+        rule = QuerySetRule(
+            drip=self.drip,
+            field_name='date_joined',
+            lookup_type='lte',
+            field_value='now-2 months'
+        )
         self.assertRaises(ValidationError, rule.clean)

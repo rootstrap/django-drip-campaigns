@@ -131,11 +131,14 @@ class QuerySetRule(models.Model):
     )
 
     method_type = models.CharField(
-        max_length=12, default='filter', choices=METHOD_TYPES)
+        max_length=12, default='filter', choices=METHOD_TYPES
+    )
     field_name = models.CharField(
-        max_length=128, verbose_name='Field name of User')
+        max_length=128, verbose_name='Field name of User'
+    )
     lookup_type = models.CharField(
-        max_length=12, default='exact', choices=LOOKUP_TYPES)
+        max_length=12, default='exact', choices=LOOKUP_TYPES
+    )
 
     field_value = models.CharField(
         max_length=255,
@@ -151,7 +154,8 @@ class QuerySetRule(models.Model):
             self.apply(User.objects.all())
         except Exception as e:
             raise ValidationError(
-                '%s raised trying to apply rule: %s' % (type(e).__name__, e))
+                '%s raised trying to apply rule: %s' % (type(e).__name__, e)
+            )
 
     @property
     def annotated_field_name(self):
