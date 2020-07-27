@@ -4,7 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
 
-from drip.utils import get_user_model
+from drip.utils import get_user_model, get_user_model_fields_as_choices
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
@@ -136,7 +136,9 @@ class QuerySetRule(models.Model):
         choices=METHOD_TYPES,
     )
     field_name = models.CharField(
-        max_length=128, verbose_name='Field name of User'
+        max_length=128,
+        verbose_name='Field name of User',
+        choices=get_user_model_fields_as_choices()
     )
     lookup_type = models.CharField(
         max_length=12, default='exact', choices=LOOKUP_TYPES
