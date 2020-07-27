@@ -22,7 +22,7 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = 'Django-drip-campaign'
-copyright = '2020, Kalil de Lima'
+copyright = '2020, Rootstrap Inc.'
 author = 'Kalil de Lima'
 
 # The full version, including alpha/beta/rc tags
