@@ -1,3 +1,3 @@
 [flake8]
 
-exclude = *migrations/*.py, env*, __pycache__, docs
+exclude = *migrations/*.py, env*, __pycache__, docs, legacy_docs
