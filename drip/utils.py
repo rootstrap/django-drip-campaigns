@@ -87,7 +87,7 @@ def get_out_fields(Model, parent_field, model_stack, excludes, fields):
             RelModel = get_rel_model(field, RelatedObject)
 
             out_fields.extend(
-                get_fields(RelModel, full_field, list(model_stack))
+                get_fields(RelModel, full_field, list(model_stack)),
             )
 
     return out_fields
@@ -145,7 +145,7 @@ def give_model_field(full_field, Model):
             return full_key, name, _Model, _ModelField
 
     raise Exception('Field key `{0}` not found on `{1}`.'.format(
-        full_field, Model.__name__)
+        full_field, Model.__name__),
     )
 
 

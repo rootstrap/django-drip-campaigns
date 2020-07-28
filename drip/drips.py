@@ -180,7 +180,7 @@ class DripBase(object):
         """
         clauses = {
             'filter': [],
-            'exclude': []
+            'exclude': [],
         }
 
         for rule in self.drip_model.queryset_rules.all():
@@ -206,7 +206,7 @@ class DripBase(object):
         queryset = getattr(self, '_queryset', None)
         if queryset is None:
             self._queryset = self.apply_queryset_rules(
-                self.queryset()
+                self.queryset(),
             ).distinct()
         return self._queryset
 
@@ -268,7 +268,9 @@ class DripBase(object):
 
         if not self.from_email:
             self.from_email = getattr(
-                settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL
+                settings,
+                'DRIP_FROM_EMAIL',
+                settings.DEFAULT_FROM_EMAIL,
             )
         MessageClass = message_class_for(self.drip_model.message_class)
 

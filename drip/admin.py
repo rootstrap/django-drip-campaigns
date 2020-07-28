@@ -17,7 +17,7 @@ class DripForm(forms.ModelForm):
         choices=(
             (k, '%s (%s)' % (k, v))
             for k, v in configured_message_classes().items()
-        )
+        ),
     )
 
     class Meta:
@@ -53,9 +53,9 @@ class DripAdmin(admin.ModelAdmin):
                 {
                     'drip': shifted_drip,
                     'qs': shifted_drip.get_queryset().exclude(
-                        id__in=seen_users
-                    )
-                }
+                        id__in=seen_users,
+                    ),
+                },
             )
             seen_users.update(
                 shifted_drip.get_queryset().values_list('id', flat=True)
@@ -74,7 +74,7 @@ class DripAdmin(admin.ModelAdmin):
 
     def get_mime_html(self, drip, user):
         drip_message = message_class_for(
-            drip.message_class
+            drip.message_class,
         )(drip.drip, user)
         if drip_message.message.alternatives:
             return self.get_mime_html_from_alternatives(

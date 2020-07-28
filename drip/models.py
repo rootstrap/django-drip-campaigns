@@ -131,7 +131,9 @@ class QuerySetRule(models.Model):
     )
 
     method_type = models.CharField(
-        max_length=12, default='filter', choices=METHOD_TYPES
+        max_length=12,
+        default='filter',
+        choices=METHOD_TYPES,
     )
     field_name = models.CharField(
         max_length=128, verbose_name='Field name of User'

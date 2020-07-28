@@ -9,7 +9,7 @@ class RulesTestCase(TestCase):
         self.drip = Drip.objects.create(
             name='A Drip just for Rules',
             subject_template='Hello',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
     def test_valid_rule(self):
@@ -17,7 +17,7 @@ class RulesTestCase(TestCase):
             drip=self.drip,
             field_name='date_joined',
             lookup_type='lte',
-            field_value='now-60 days'
+            field_value='now-60 days',
         )
         rule.clean()
 
@@ -26,7 +26,7 @@ class RulesTestCase(TestCase):
             drip=self.drip,
             field_name='date__joined',
             lookup_type='lte',
-            field_value='now-60 days'
+            field_value='now-60 days',
         )
         self.assertRaises(ValidationError, rule.clean)
 
@@ -35,6 +35,6 @@ class RulesTestCase(TestCase):
             drip=self.drip,
             field_name='date_joined',
             lookup_type='lte',
-            field_value='now-2 months'
+            field_value='now-2 months',
         )
         self.assertRaises(ValidationError, rule.clean)
