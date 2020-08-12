@@ -41,13 +41,13 @@ INSTALLED_APPS = [
 
 If you haven't, create a superuser with the [django createsuperuser command](https://docs.djangoproject.com/en/3.0/intro/tutorial02/#creating-an-admin-user). Enter with the admin user, and select `Drips` to manage them. You will be able to:
 
-- View the drips.
+- View created drips.
 - Create a new drip.
 - Select and delete drips.
 
 ### Create Drip
 
-In the django admin, after select `Drips`, you can click on `ADD DRIP +` button to create a new drip. You will see the `add drip` page:
+In the django admin, after select `Drips`, you can click on `ADD DRIP +` button to create a new one. You will see the `add drip` page:
 
 <img src="docs/images/add_drip_page.png" alt="Add Drip" width="700" />
 
@@ -60,7 +60,41 @@ Please take a look a this example:
 
 <img src="docs/images/users_lookup_fields.png" alt="User's fields" width="700" />
 
-Whit this, you can select one or more fields to create useful drips.
+Whit this, you can select one or more fields to create useful drips.  
+Additionally if you select a field name of user that has a date type, you can enter in the `FIELD VALUE` input, a date value written in natural language that combines operations on the current datetime.  
+For example, if you have selected the field `last_login` that has a date type, and you want to create a drip to send emails to the users who logged in exactly one week ago; you can enter:
+
+```
+now-1 week
+```
+
+or
+
+```
+now- 1 w
+```
+
+Possible operations and values:
+
+- Add (`+`) or subtract (`-`) dates.
+- On the left side of the operation, write the current datetime value: `now`.
+- On the right side of the operation:
+  - `seconds` or `s`.
+  - `minutes` or `m`.
+  - `hours` or `h`.
+  - `days` or `d`.
+  - `weeks` or `w`.
+  - If you enter the number `1`, you can write `second`, `minute`, etc.
+  - Don't enter a space between `now` and the operation symbol. Optionally you can add (or not) a space around the number value.
+
+Let's see some examples of the date values that you can enter:
+
+- `now-1 day`
+- `now+ 8days`
+- `now+ 1 h`
+- `now-4hours`
+- `now- 3 weeks`
+- `now-1 weeks`
 
 ### View Timeline
 
