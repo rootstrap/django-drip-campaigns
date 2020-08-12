@@ -4,8 +4,6 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-
-[packages]
 appnope = "==0.1.0"
 asgiref = "==3.2.7"
 astroid = "==2.4.1"
@@ -39,12 +37,14 @@ typed-ast = "==1.4.1"
 wcwidth = "==0.1.9"
 wrapt = "==1.12.1"
 zipp = "==3.1.0"
-Django = "==3.0.7"
 ipython_genutils = "==0.2.0"
 Jinja2 = "==2.11.2"
 MarkupSafe = "==1.1.1"
 Pygments = "==2.6.1"
 Sphinx = "==1.1.3"
+
+[packages]
+Django = "==3.0.7"
 
 [requires]
 python_version = "3.8"
