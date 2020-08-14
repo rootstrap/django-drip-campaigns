@@ -31,6 +31,7 @@ class DripAdmin(admin.ModelAdmin):
         QuerySetRuleInline,
     ]
     form = DripForm
+    users_fields = []
 
     def av(self, view):
         return self.admin_site.admin_view(view)
@@ -102,7 +103,9 @@ class DripAdmin(admin.ModelAdmin):
         from drip.utils import get_simple_fields
         extra_context = extra_context or {}
         User = get_user_model()
-        extra_context['field_data'] = json.dumps(get_simple_fields(User))
+        if not self.users_fields:
+            self.users_fields = json.dumps(get_simple_fields(User))
+        extra_context['field_data'] = self.users_fields
         return extra_context
 
     def add_view(self, request, extra_context=None):
