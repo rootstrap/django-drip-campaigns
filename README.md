@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 
 ## Usage
 
-If you haven't, create a superuser with the [django createsuperuser command](https://docs.djangoproject.com/en/3.0/intro/tutorial02/#creating-an-admin-user). Enter with the admin user, and select `Drips` to manage them. You will be able to:
+If you haven't, create a superuser with the [Django createsuperuser command](https://docs.djangoproject.com/en/3.0/intro/tutorial02/#creating-an-admin-user). Login with the admin user, and select `Drips` to manage them. You will be able to:
 
 - View created drips.
 - Create a new drip.
@@ -47,7 +47,7 @@ If you haven't, create a superuser with the [django createsuperuser command](htt
 
 ### Create Drip
 
-In the django admin, after select `Drips`, you can click on `ADD DRIP +` button to create a new one. You will see the `add drip` page:
+In the Django admin, after select `Drips`, you can click on `ADD DRIP +` button to create a new one. You will see the `add drip` page:
 
 <img src="docs/images/add_drip_page.png" alt="Add Drip" width="700" />
 
@@ -60,7 +60,7 @@ Please take a look a this example:
 
 <img src="docs/images/users_lookup_fields.png" alt="User's fields" width="700" />
 
-Whit this, you can select one or more fields to create useful drips.  
+With this, you can select one or more fields to create useful drips.  
 Additionally if you select a field name of user that has a date type, you can enter in the `FIELD VALUE` input, a date value written in natural language that combines operations on the current datetime.  
 For example, if you have selected the field `last_login` that has a date type, and you want to create a drip to send emails to the users who logged in exactly one week ago; you can enter:
 
@@ -98,7 +98,7 @@ Let's see some examples of the date values that you can enter:
 
 ### View Timeline
 
-In the django admin, you can select a drip and then click on the `VIEW TIMELINE` button to view the mails expected to be sent with the corresponding receivers:
+In the Django admin, you can select a drip and then click on the `VIEW TIMELINE` button to view the mails expected to be sent with the corresponding receivers:
 
 <img src="docs/images/view_timeline.png" alt="View Timeline" width="350" />
 
