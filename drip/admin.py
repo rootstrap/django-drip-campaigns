@@ -14,8 +14,10 @@ class QuerySetRuleInline(admin.TabularInline):
 
 class DripForm(forms.ModelForm):
     message_class = forms.ChoiceField(
-        choices=((k, '%s (%s)' % (k, v))
-                 for k, v in configured_message_classes().items())
+        choices=(
+            (k, '%s (%s)' % (k, v))
+            for k, v in configured_message_classes().items()
+        ),
     )
 
     class Meta:
@@ -30,7 +32,8 @@ class DripAdmin(admin.ModelAdmin):
     ]
     form = DripForm
 
-    def av(self, view): return self.admin_site.admin_view(view)
+    def av(self, view):
+        return self.admin_site.admin_view(view)
 
     def timeline(self, request, drip_id, into_past, into_future):
         """
@@ -46,12 +49,17 @@ class DripAdmin(admin.ModelAdmin):
             into_past=int(into_past), into_future=int(into_future)+1
         ):
             shifted_drip.prune()
-            shifted_drips.append({
-                'drip': shifted_drip,
-                'qs': shifted_drip.get_queryset().exclude(id__in=seen_users)
-            })
+            shifted_drips.append(
+                {
+                    'drip': shifted_drip,
+                    'qs': shifted_drip.get_queryset().exclude(
+                        id__in=seen_users,
+                    ),
+                },
+            )
             seen_users.update(
-                shifted_drip.get_queryset().values_list('id', flat=True))
+                shifted_drip.get_queryset().values_list('id', flat=True)
+            )
 
         return render(request, 'drip/timeline.html', locals())
 
@@ -66,7 +74,8 @@ class DripAdmin(admin.ModelAdmin):
 
     def get_mime_html(self, drip, user):
         drip_message = message_class_for(
-            drip.message_class)(drip.drip, user)
+            drip.message_class,
+        )(drip.drip, user)
         if drip_message.message.alternatives:
             return self.get_mime_html_from_alternatives(
                 drip_message.message.alternatives
@@ -98,7 +107,8 @@ class DripAdmin(admin.ModelAdmin):
 
     def add_view(self, request, extra_context=None):
         return super(DripAdmin, self).add_view(
-            request, extra_context=self.build_extra_context(extra_context))
+            request, extra_context=self.build_extra_context(extra_context),
+        )
 
     def change_view(self, request, object_id, extra_context=None):
         return super(DripAdmin, self).change_view(

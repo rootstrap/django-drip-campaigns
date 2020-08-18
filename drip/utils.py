@@ -25,9 +25,11 @@ def check_redundant(model_stack, stack_limit):
         # rudimentary CustomUser->User->CustomUser->User detection, or
         # stack depth shouldn't exceed x, or
         # we've hit a point where we are repeating models
-        if ((model_stack[-3] == model_stack[-1]) or
+        if (
+            (model_stack[-3] == model_stack[-1]) or
             (len(model_stack) > 5) or
-                (len(set(model_stack)) != len(model_stack))):
+            (len(set(model_stack)) != len(model_stack))
+        ):
             stop_recursion = True
     return stop_recursion
 
@@ -58,10 +60,12 @@ def get_rel_model(field, RelatedObject):
 
 
 def is_valid_instance(field):
-    return (isinstance(field, ForeignKey) or
-            isinstance(field, OneToOneField) or
-            isinstance(field, RelatedObject) or
-            isinstance(field, ManyToManyField))
+    return (
+        isinstance(field, ForeignKey) or
+        isinstance(field, OneToOneField) or
+        isinstance(field, RelatedObject) or
+        isinstance(field, ManyToManyField)
+    )
 
 
 def get_out_fields(Model, parent_field, model_stack, excludes, fields):
@@ -82,17 +86,20 @@ def get_out_fields(Model, parent_field, model_stack, excludes, fields):
 
             RelModel = get_rel_model(field, RelatedObject)
 
-            out_fields.extend(get_fields(
-                RelModel, full_field, list(model_stack)))
+            out_fields.extend(
+                get_fields(RelModel, full_field, list(model_stack)),
+            )
 
     return out_fields
 
 
-def get_fields(Model,
-               parent_field="",
-               model_stack=[],
-               stack_limit=2,
-               excludes=['permissions', 'comment', 'content_type']):
+def get_fields(
+    Model,
+    parent_field="",
+    model_stack=[],
+    stack_limit=2,
+    excludes=['permissions', 'comment', 'content_type']
+):
     """
     Given a Model, return a list of lists of strings with important stuff:
     ...
@@ -138,7 +145,8 @@ def give_model_field(full_field, Model):
             return full_key, name, _Model, _ModelField
 
     raise Exception('Field key `{0}` not found on `{1}`.'.format(
-        full_field, Model.__name__))
+        full_field, Model.__name__),
+    )
 
 
 def get_simple_fields(Model, **kwargs):
