@@ -65,7 +65,7 @@ class DripMessage(object):
     def subject(self):
         if not self._subject:
             self._subject = Template(
-                self.drip_base.subject_template
+                self.drip_base.subject_template,
             ).render(self.context)
         return self._subject
 
@@ -73,7 +73,7 @@ class DripMessage(object):
     def body(self):
         if not self._body:
             self._body = Template(
-                self.drip_base.body_template
+                self.drip_base.body_template,
             ).render(self.context)
         return self._body
 
@@ -86,7 +86,8 @@ class DripMessage(object):
     def get_from_(self):
         if self.drip_base.from_email_name:
             from_ = "%s <%s>" % (
-                self.drip_base.from_email_name, self.drip_base.from_email
+                self.drip_base.from_email_name,
+                self.drip_base.from_email,
             )
         else:
             from_ = self.drip_base.from_email
@@ -98,7 +99,9 @@ class DripMessage(object):
             from_ = self.get_from_()
 
             self._message = EmailMultiAlternatives(
-                self.subject, self.plain, from_, [self.user.email]
+                self.subject,
+                self.plain, from_,
+                [self.user.email],
             )
 
             # check if there are html tags in the rendered template
@@ -127,10 +130,12 @@ class DripBase(object):
         self.name = kwargs.pop('name', self.name)
         self.from_email = kwargs.pop('from_email', self.from_email)
         self.from_email_name = kwargs.pop(
-            'from_email_name', self.from_email_name
+            'from_email_name',
+            self.from_email_name,
         )
         self.subject_template = kwargs.pop(
-            'subject_template', self.subject_template
+            'subject_template',
+            self.subject_template,
         )
         self.body_template = kwargs.pop('body_template', self.body_template)
 
@@ -168,7 +173,7 @@ class DripBase(object):
             kwargs = dict(
                 drip_model=self.drip_model,
                 name=self.name,
-                now_shift_kwargs={'days': shift}
+                now_shift_kwargs={'days': shift},
             )
             walked_range.append(self.__class__(**kwargs))
         return walked_range

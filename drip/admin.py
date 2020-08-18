@@ -107,7 +107,7 @@ class DripAdmin(admin.ModelAdmin):
 
     def add_view(self, request, extra_context=None):
         return super(DripAdmin, self).add_view(
-            request, extra_context=self.build_extra_context(extra_context)
+            request, extra_context=self.build_extra_context(extra_context),
         )
 
     def change_view(self, request, object_id, extra_context=None):
