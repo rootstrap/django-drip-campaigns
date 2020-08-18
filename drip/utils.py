@@ -150,7 +150,16 @@ def give_model_field(full_field, Model):
 
 
 def get_simple_fields(Model, **kwargs):
-    return [[f[0], f[3].__name__] for f in get_fields(Model, **kwargs)]
+    ret_list = []
+    for f in get_fields(Model, **kwargs):
+        if '__' in f[0]:
+            # Add __user__ to the fields in related models
+            parts = f[0].split('__')
+            f[0] = parts[0] + '__user__' + parts[1]
+        if f[0] not in [x[0] for x in ret_list]:
+            # Add field if not already in list
+            ret_list.append([f[0], f[3].__name__])
+    return ret_list
 
 
 def get_user_model():

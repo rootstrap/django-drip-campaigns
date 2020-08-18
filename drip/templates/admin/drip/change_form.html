@@ -52,14 +52,8 @@ admin_urls %} {% block object-tools-items %}
         for (var i=0; i < data.length; i++) {
           var item = data[i];
           if (item[0].indexOf(val) != -1) {
-            if (item[0].includes('__')){
-              let parts = item[0].split('__');
-              let value = `${parts[0]}__user__${parts[1]}`;
-              $(ul).append(`<li data-field=${value}>${value} (${item[1]})</li>`);
-            } else {
-                $(ul).append(`<li data-field=${item[0]}>${item[0]} (${item[1]})</li>`);
-              };
-            };
+            $(ul).append(`<li data-field=${item[0]}>${item[0]} (${item[1]})</li>`);
+          };
         };
       }
 
