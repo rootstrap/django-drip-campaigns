@@ -3,18 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Django-drip-campaign's documentation!
+Welcome to Django Drip Campaigns documentation!
 ================================================
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    Introduction <content/introduction>
+    Installation and configuration <content/installation.configuration>
+    Features <content/features>
