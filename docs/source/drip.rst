@@ -1,3 +1,7 @@
+.. _drip-spec:
+
+:orphan:
+
 drip package
 ============
 

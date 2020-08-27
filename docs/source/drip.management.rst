@@ -1,3 +1,5 @@
+.. _drip-management:
+
 drip.management package
 =======================
 

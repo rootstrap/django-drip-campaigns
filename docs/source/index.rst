@@ -13,3 +13,4 @@ Welcome to Django Drip Campaigns documentation!
     Introduction <content/introduction>
     Installation and configuration <content/installation.configuration>
     Features <content/features>
+    Class specification <content/classes>
