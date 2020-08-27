@@ -41,7 +41,8 @@ ipython_genutils = "==0.2.0"
 Jinja2 = "==2.11.2"
 MarkupSafe = "==1.1.1"
 Pygments = "==2.6.1"
-Sphinx = "==1.1.3"
+sphinx = "*"
+sphinxcontrib-django = "*"
 
 [packages]
 Django = "==3.0.7"
