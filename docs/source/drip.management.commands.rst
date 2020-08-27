@@ -1,3 +1,5 @@
+.. _drip-commands:
+
 drip.management.commands package
 ================================
 
