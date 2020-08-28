@@ -8,11 +8,9 @@ import os
 import sys
 
 
-with open(
-        f"{path.abspath(path.dirname('__file__'))}/README.md",
-        encoding='utf-8',
-        ) as f:
-    long_description = f.read()
+current_dir = path.abspath(path.dirname('__file__'))
+with open(path.join(current_dir, 'README.md'), encoding='utf-8') as file:
+    long_description = file.read()
 
 
 name = 'django-drip-campaigns'
