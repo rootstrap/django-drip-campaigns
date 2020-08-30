@@ -64,7 +64,7 @@ class Drip(models.Model):
         )
         return drip
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
