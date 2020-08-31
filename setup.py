@@ -2,9 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
+from os import path
 import re
 import os
 import sys
+
+
+current_dir = path.abspath(path.dirname('__file__'))
+with open(path.join(current_dir, 'README.md'), encoding='utf-8') as file:
+    long_description = file.read()
 
 
 name = 'django-drip-campaigns'
@@ -74,6 +80,8 @@ setup(
     packages=get_packages(package),
     package_data=get_package_data(package),
     install_requires=install_requires,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
