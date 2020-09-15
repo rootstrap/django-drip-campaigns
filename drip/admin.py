@@ -2,6 +2,9 @@ import json
 
 from django import forms
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.db.models import UUIDField
+
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import configured_message_classes, message_class_for
@@ -129,13 +132,28 @@ class DripAdmin(admin.ModelAdmin):
                 self.av(self.timeline),
                 name='drip_timeline'
             ),
-            path(
-                '<int:drip_id>/timeline/<int:into_past>/'
-                '<int:into_future>/<int:user_id>/',
-                self.av(self.view_drip_email),
-                name='view_drip_email'
-            )
         ]
+
+        User = get_user_model()
+        if User._meta.get_field('id').get_internal_type() == "UUIDField":
+            my_urls += [
+                path(
+                    '<int:drip_id>/timeline/<int:into_past>/'
+                    '<int:into_future>/<uuid:user_id>/',
+                    self.av(self.view_drip_email),
+                    name='view_drip_email'
+                ),
+            ]
+        else:
+            my_urls += [
+                path(
+                    '<int:drip_id>/timeline/<int:into_past>/'
+                    '<int:into_future>/<int:user_id>/',
+                    self.av(self.view_drip_email),
+                    name='view_drip_email'
+                ),
+            ]
+
         return my_urls + urls
 
 
@@ -148,3 +166,4 @@ class SentDripAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SentDrip, SentDripAdmin)
+
