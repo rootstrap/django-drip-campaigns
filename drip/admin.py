@@ -2,8 +2,6 @@ import json
 
 from django import forms
 from django.contrib import admin
-from django.db.models import UUIDField
-
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import configured_message_classes, message_class_for
@@ -165,4 +163,3 @@ class SentDripAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SentDrip, SentDripAdmin)
-
