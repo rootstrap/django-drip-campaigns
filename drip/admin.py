@@ -2,7 +2,6 @@ import json
 
 from django import forms
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.db.models import UUIDField
 
 
