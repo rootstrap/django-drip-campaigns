@@ -21,14 +21,19 @@ except ImportError:
 import logging
 
 
-def configured_message_classes():
+def configured_message_classes() -> dict:
+    """[summary]
+
+    :return: [description]
+    :rtype: dict
+    """
     conf_dict = getattr(settings, 'DRIP_MESSAGE_CLASSES', {})
     if 'default' not in conf_dict:
         conf_dict['default'] = 'drip.drips.DripMessage'
     return conf_dict
 
 
-def message_class_for(name):
+def message_class_for(name: str):
     path = configured_message_classes()[name]
     mod_name, klass_name = path.rsplit('.', 1)
     mod = import_module(mod_name)
@@ -37,6 +42,11 @@ def message_class_for(name):
 
 
 class DripMessage(object):
+    """[summary]
+
+    :param object: [description]
+    :type object: [type]
+    """
 
     def __init__(self, drip_base, user):
         self.drip_base = drip_base
@@ -163,10 +173,16 @@ class DripBase(object):
         from datetime import timedelta
         return timedelta(*a, **kw)
 
-    def walk(self, into_past=0, into_future=0):
-        """
-        Walk over a date range and create
-        new instances of self with new ranges.
+    def walk(self, into_past: int=0, into_future: int=0):
+        """Walk over a date range and create
+            new instances of self with new ranges.
+
+        :param into_past: [description], defaults to 0
+        :type into_past: int, optional
+        :param into_future: [description], defaults to 0
+        :type into_future: int, optional
+        :return: [description]
+        :rtype: [type]
         """
         walked_range = []
         for shift in range(-into_past, into_future):
@@ -178,10 +194,14 @@ class DripBase(object):
             walked_range.append(self.__class__(**kwargs))
         return walked_range
 
-    def apply_queryset_rules(self, qs):
-        """
-        First collect all filter/exclude kwargs and apply any annotations.
+    def apply_queryset_rules(self, qs: str) -> str:
+        """First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
+
+        :param qs: [description]
+        :type qs: str
+        :return: [description]
+        :rtype: str
         """
         clauses = {
             'filter': [],
@@ -208,6 +228,13 @@ class DripBase(object):
     ##################
 
     def get_queryset(self):
+        """[summary]
+
+        [extended_summary]
+
+        :return: [description]
+        :rtype: [type]
+        """
         queryset = getattr(self, '_queryset', None)
         if queryset is None:
             self._queryset = self.apply_queryset_rules(
@@ -215,9 +242,13 @@ class DripBase(object):
             ).distinct()
         return self._queryset
 
-    def run(self):
-        """
-        Get the queryset, prune sent people, and send it.
+    def run(self) -> int:
+        """Get the queryset, prune sent people, and send it.
+
+        [extended_summary]
+
+        :return: [description]
+        :rtype: int
         """
         if not self.drip_model.enabled:
             return None
@@ -228,8 +259,7 @@ class DripBase(object):
         return count
 
     def prune(self):
-        """
-        Do an exclude for all Users who have a SentDrip already.
+        """Do an exclude for all Users who have a SentDrip already.
         """
         target_user_ids = self.get_queryset().values_list('id', flat=True)
         exclude_user_ids = SentDrip.objects.filter(
@@ -239,7 +269,7 @@ class DripBase(object):
         ).values_list('user_id', flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
-    def get_count_from_queryset(self, MessageClass):
+    def get_count_from_queryset(self, MessageClass) -> int:
         count = 0
         for user in self.get_queryset():
             message_instance = MessageClass(self, user)
@@ -263,8 +293,7 @@ class DripBase(object):
         return count
 
     def send(self):
-        """
-        Send the message to each user on the queryset.
+        """Send the message to each user on the queryset.
 
         Create SentDrip for each user that gets a message.
 
