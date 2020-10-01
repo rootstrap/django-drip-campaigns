@@ -173,7 +173,7 @@ class DripBase(object):
         from datetime import timedelta
         return timedelta(*a, **kw)
 
-    def walk(self, into_past: int=0, into_future: int=0):
+    def walk(self, into_past: int = 0, into_future: int = 0):
         """Walk over a date range and create
             new instances of self with new ranges.
 
