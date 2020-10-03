@@ -19,7 +19,16 @@ elif is_py3:
     unicode = str
 
 
-def check_redundant(model_stack, stack_limit):
+def check_redundant(model_stack: list, stack_limit: int) -> bool:
+    """[summary]
+
+    :param model_stack: [description]
+    :type model_stack: list
+    :param stack_limit: [description]
+    :type stack_limit: int
+    :return: [description]
+    :rtype: bool
+    """
     stop_recursion = False
     if len(model_stack) > stack_limit:
         # rudimentary CustomUser->User->CustomUser->User detection, or
@@ -42,7 +51,16 @@ def get_field_name(field, RelatedObject):
     return field_name
 
 
-def get_full_field(parent_field, field_name):
+def get_full_field(parent_field: str, field_name: str) -> str:
+    """[summary]
+
+    :param parent_field: [description]
+    :type parent_field: str
+    :param field_name: [description]
+    :type field_name: str
+    :return: [description]
+    :rtype: str
+    """
     if parent_field:
         full_field = "__".join([parent_field, field_name])
     else:
@@ -130,14 +148,22 @@ def get_fields(
     return get_out_fields(Model, parent_field, model_stack, excludes, fields)
 
 
-def give_model_field(full_field, Model):
-    """
-    Given a field_name and Model:
+def give_model_field(full_field: str, Model: models.Model) -> tuple:
+    """Given a field_name and Model:
 
     "test_user__unique_id", <AchievedGoal>
 
     Returns "test_user__unique_id", "id", <Model>, <ModelField>
+
+    :param full_field: [description]
+    :type full_field: str
+    :param Model: [description]
+    :type Model: models.Model
+    :raises Exception: [description]
+    :return: [description]
+    :rtype: tuple
     """
+
     field_data = get_fields(Model, '', [])
 
     for full_key, name, _Model, _ModelField in field_data:
