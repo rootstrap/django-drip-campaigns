@@ -2,10 +2,13 @@ import json
 
 from django import forms
 from django.contrib import admin
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.urls import path
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import configured_message_classes, message_class_for
-from drip.utils import get_user_model
+from drip.utils import get_user_model, get_simple_fields
 
 
 class QuerySetRuleInline(admin.TabularInline):
@@ -40,7 +43,6 @@ class DripAdmin(admin.ModelAdmin):
         """
         Return a list of people who should get emails.
         """
-        from django.shortcuts import render, get_object_or_404
 
         drip = get_object_or_404(Drip, id=drip_id)
 
@@ -89,8 +91,6 @@ class DripAdmin(admin.ModelAdmin):
         self, request, drip_id, into_past, into_future, user_id
     ):
 
-        from django.shortcuts import get_object_or_404
-        from django.http import HttpResponse
         drip = get_object_or_404(Drip, id=drip_id)
         User = get_user_model()
         user = get_object_or_404(User, id=user_id)
@@ -100,7 +100,6 @@ class DripAdmin(admin.ModelAdmin):
         return HttpResponse(html, content_type=mime)
 
     def build_extra_context(self, extra_context):
-        from drip.utils import get_simple_fields
         extra_context = extra_context or {}
         User = get_user_model()
         if not self.users_fields:
@@ -121,7 +120,6 @@ class DripAdmin(admin.ModelAdmin):
         )
 
     def get_urls(self):
-        from django.urls import path
         urls = super(DripAdmin, self).get_urls()
         my_urls = [
             path(
