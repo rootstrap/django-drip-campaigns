@@ -164,7 +164,7 @@ class QuerySetRule(models.Model):
         field_name = self.field_name
         if field_name.endswith('__count'):
             agg, _, _ = field_name.rpartition('__')
-            field_name = f'num_{agg.replace('__', '_')}'
+            field_name = f"num_{agg.replace('__', '_')}"
 
         return field_name
 
