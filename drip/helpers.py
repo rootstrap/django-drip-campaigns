@@ -5,7 +5,7 @@ STRFDATETIME = re.compile('([dgGhHis])')
 
 
 def STRFDATETIME_REPL(x):
-    return '%%(%s)s' % x.group()
+    return f'%({x.group()})s'
 
 
 def process_regex(d):
