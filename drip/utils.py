@@ -170,9 +170,7 @@ def give_model_field(full_field: str, Model: models.Model) -> tuple:
         if full_key == full_field:
             return full_key, name, _Model, _ModelField
 
-    raise Exception('Field key `{0}` not found on `{1}`.'.format(
-        full_field, Model.__name__),
-    )
+    raise Exception(f'Field key `{full_field}` not found on `{Model.__name__}`.')
 
 
 def get_simple_fields(Model, **kwargs):

@@ -37,8 +37,8 @@ class DripsTestCase(TestCase):
 
         for i, name in enumerate(num_string):
             user = self.User.objects.create(
-                username='%s_25_credits_a_day' % name,
-                email='%s@test.com' % name,
+                username=f'{name}_25_credits_a_day',
+                email=f'{name}@test.com',
             )
             self.User.objects.filter(id=user.id).update(
                 date_joined=start - timedelta(days=i),
@@ -50,8 +50,8 @@ class DripsTestCase(TestCase):
 
         for i, name in enumerate(num_string):
             user = self.User.objects.create(
-                username='%s_no_credits' % name,
-                email='%s@test.com' % name,
+                username=f'{name}_no_credits',
+                email=f'{name}@test.com',
             )
             self.User.objects.filter(id=user.id).update(
                 date_joined=start - timedelta(days=i),
@@ -162,13 +162,13 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='lt',
-            field_value='now-{0} days'.format(shift_one),
+            field_value=f'now-{shift_one} days',
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value='now-{0} days'.format(shift_two),
+            field_value=f'now-{shift_two} days',
         )
         return model_drip
 

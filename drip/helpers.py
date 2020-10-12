@@ -28,7 +28,7 @@ def get_flexible_regex(string):
         string,
     )
     if not d:
-        raise TypeError("'%s' is not a valid time interval" % string)
+        raise TypeError(f"'{string}' is not a valid time interval")
     d = d.groupdict(0)
     return d
 
@@ -55,5 +55,5 @@ def parse(string):
     string = string.strip()
 
     if string == "":
-        raise TypeError("'%s' is not a valid time interval" % string)
+        raise TypeError(f"'{string}' is not a valid time interval")
     return process_string(string)

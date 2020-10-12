@@ -156,7 +156,7 @@ class QuerySetRule(models.Model):
             self.apply(User.objects.all())
         except Exception as e:
             raise ValidationError(
-                '%s raised trying to apply rule: %s' % (type(e).__name__, e)
+                f'{type(e).__name__} raised trying to apply rule: {str(e)}'
             )
 
     @property
@@ -164,7 +164,7 @@ class QuerySetRule(models.Model):
         field_name = self.field_name
         if field_name.endswith('__count'):
             agg, _, _ = field_name.rpartition('__')
-            field_name = 'num_%s' % agg.replace('__', '_')
+            field_name = f'num_{agg.replace('__', '_')}'
 
         return field_name
 
