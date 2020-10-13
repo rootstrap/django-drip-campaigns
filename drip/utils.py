@@ -171,7 +171,10 @@ def give_model_field(full_field: str, Model: models.Model) -> tuple:
             return full_key, name, _Model, _ModelField
 
     raise Exception(
-        f'Field key `{full_field}` not found on `{Model.__name__}`.'
+        'Field key `{field}` not found on `{model}`.'.format(
+            field=full_field,
+            model=Model.__name__
+        )
     )
 
 

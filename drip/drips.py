@@ -95,9 +95,9 @@ class DripMessage(object):
 
     def get_from_(self):
         if self.drip_base.from_email_name:
-            from_ = (
-                f"{self.drip_base.from_email_name} "
-                f"<{self.drip_base.from_email}>"
+            from_ = "{name} <{email}>".format(
+                name=self.drip_base.from_email_name,
+                email=self.drip_base.from_email
             )
         else:
             from_ = self.drip_base.from_email
@@ -287,8 +287,11 @@ class DripBase(object):
                     count += 1
             except Exception as e:
                 logging.error(
-                    f"Failed to send drip {self.drip_model.id} to user "
-                    f"{str(user)}: {str(e)}"
+                    "Failed to send drip {drip} to user {user}: {err}".format(
+                        drip=self.drip_model.id,
+                        user=str(user),
+                        err=str(e)
+                    )
                 )
         return count
 
