@@ -5,7 +5,7 @@ STRFDATETIME = re.compile('([dgGhHis])')
 
 
 def STRFDATETIME_REPL(x):
-    return '%%(%s)s' % x.group()
+    return '%({group})s'.format(group=x.group())
 
 
 def process_regex(d):
@@ -28,7 +28,9 @@ def get_flexible_regex(string):
         string,
     )
     if not d:
-        raise TypeError("'%s' is not a valid time interval" % string)
+        raise TypeError(
+            "'{string}' is not a valid time interval".format(string=string)
+            )
     d = d.groupdict(0)
     return d
 
@@ -55,5 +57,7 @@ def parse(string):
     string = string.strip()
 
     if string == "":
-        raise TypeError("'%s' is not a valid time interval" % string)
+        raise TypeError(
+            "'{string}' is not a valid time interval".format(string=string)
+            )
     return process_string(string)
