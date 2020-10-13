@@ -158,7 +158,7 @@ class QuerySetRule(models.Model):
             raise ValidationError(
                 '{type_name} raised trying to apply rule: {error}'.format(
                     type_name=type(e).__name__,
-                    error=str(e)
+                    error=str(e),
                 )
             )
 
@@ -167,7 +167,7 @@ class QuerySetRule(models.Model):
         field_name = self.field_name
         if field_name.endswith('__count'):
             agg, _, _ = field_name.rpartition('__')
-            field_name = "num_{agg}".format(agg=agg.replace('__', '_'))
+            field_name = 'num_{agg}'.format(agg=agg.replace('__', '_'))
 
         return field_name
 

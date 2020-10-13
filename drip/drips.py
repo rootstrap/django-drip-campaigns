@@ -97,7 +97,7 @@ class DripMessage(object):
         if self.drip_base.from_email_name:
             from_ = "{name} <{email}>".format(
                 name=self.drip_base.from_email_name,
-                email=self.drip_base.from_email
+                email=self.drip_base.from_email,
             )
         else:
             from_ = self.drip_base.from_email
@@ -290,7 +290,7 @@ class DripBase(object):
                     "Failed to send drip {drip} to user {user}: {err}".format(
                         drip=self.drip_model.id,
                         user=str(user),
-                        err=str(e)
+                        err=str(e),
                     )
                 )
         return count
