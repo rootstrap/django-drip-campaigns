@@ -46,9 +46,9 @@ People *love* thorough bug reports. I'm not even kidding.
 
 - Open an issue with the tag RFC
 - Include the following sections in the issue description
-- - ### What do you want and why?
-- - ### How is this different from what you are currently doing?
-- - ### Possible implementation
+  - ### What do you want and why?
+  - ### How is this different from what you are currently doing?
+  - ### Possible implementation
 
 
 ## Use a Consistent Coding Style
