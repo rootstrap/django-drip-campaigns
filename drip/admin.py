@@ -143,6 +143,14 @@ admin.site.register(Drip, DripAdmin)
 class SentDripAdmin(admin.ModelAdmin):
     list_display = [f.name for f in SentDrip._meta.fields]
     ordering = ['-id']
+    readonly_fields = [f.name for f in SentDrip._meta.fields]
+
+    def has_add_permission(self, request):
+        """
+        SentDrip model is for details about the sent drip campaigns,
+        its data shouldn't be changeable
+        """
+        return False
 
 
 admin.site.register(SentDrip, SentDripAdmin)

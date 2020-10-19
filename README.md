@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 ```
 
 3. (Optional) Set `DRIP_FROM_EMAIL = '<your_app_from_email>'` in your settings, where `<your_app_from_email>` is the email account that is going to be shown in the sent emails. Otherwise `EMAIL_HOST_USER` value will be used.
-
+5. (Optional) To support custom user model set `DRIP_CAMPAIGN_USER_MODEL = '<your_app.model_name>'` in your settings, and make sure to have a field or property named `email` in your custom model.
 4. Finally, run `python manage.py migrate drip` to set up the necessary database tables.
 
 ## Usage
@@ -44,6 +44,21 @@ If you haven't, create a superuser with the [Django createsuperuser command](htt
 - View created drips.
 - Create a new drip.
 - Select and delete drips.
+
+### Support SMS(Optional)
+Since sending an sms can be done via several APIs, different ways and different conditions suitable to each project, we've decide to decoupled the code for sending sms using signals.
+Therefore,
+- In your signals.py use the post_drip signal receiver to handle the logic for sending the sms
+```python
+from django.dispatch import receiver
+from drip.signals import post_drip
+
+@receiver(post_drip)
+def handle_drip_sms(sender, **kwargs):
+    drip = kwargs['drip']
+    user = kwargs['user']
+    # Get the message from the drip and the number from the user and handle the SMS message logic.
+```
 
 ### Create Drip
 

@@ -31,12 +31,15 @@ class Drip(models.Model):
         blank=True,
         help_text='Set a name for a custom from email.'
     )
+
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(
         null=True,
         blank=True,
         help_text='You will have settings and user in the context.'
     )
+    sms_text = models.TextField(null=True, blank=True)
+
     message_class = models.CharField(
         max_length=120, blank=True, default='default'
     )
@@ -60,6 +63,10 @@ class Drip(models.Model):
             body_template=self.body_html_template if (
                 self.body_html_template
             )
+            else None,
+            sms_text=self.sms_text if (
+                self.sms_text
+            )
             else None
         )
         return drip
@@ -79,12 +86,17 @@ class SentDrip(models.Model):
         on_delete=models.CASCADE,
     )
     user = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+        getattr(
+            settings,
+            'DRIP_CAMPAIGN_USER_MODEL',
+            getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+        ),
         related_name='sent_drips',
         on_delete=models.CASCADE,
     )
     subject = models.TextField()
     body = models.TextField()
+    sms = models.TextField()
     from_email = models.EmailField(
         # For south so that it can migrate existing rows.
         null=True, default=None

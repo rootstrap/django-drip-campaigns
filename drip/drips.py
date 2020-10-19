@@ -10,6 +10,7 @@ from django.utils.html import strip_tags
 
 from drip.models import SentDrip
 from drip.utils import get_user_model
+from drip.signals import post_drip
 
 try:
     from django.utils.timezone import now as conditional_now
@@ -54,6 +55,7 @@ class DripMessage(object):
         self._context = None
         self._subject = None
         self._body = None
+        self._sms = None
         self._plain = None
         self._message = None
 
@@ -86,6 +88,12 @@ class DripMessage(object):
                 self.drip_base.body_template,
             ).render(self.context)
         return self._body
+
+    @property
+    def sms(self):
+        if not self._sms:
+            self._sms = self.drip_base.sms_text
+        return self._sms
 
     @property
     def plain(self):
@@ -131,6 +139,7 @@ class DripBase(object):
     name = None
     subject_template = None
     body_template = None
+    sms_text = None
     from_email = None
     from_email_name = None
 
@@ -148,7 +157,7 @@ class DripBase(object):
             self.subject_template,
         )
         self.body_template = kwargs.pop('body_template', self.body_template)
-
+        self.sms_text = kwargs.pop('sms_text', self.sms_text)
         if not self.name:
             raise AttributeError('You must define a name.')
 
@@ -275,6 +284,7 @@ class DripBase(object):
             message_instance = MessageClass(self, user)
             try:
                 result = message_instance.message.send()
+                post_drip.send(sender=message_instance, drip=self, user=user)
                 if result:
                     SentDrip.objects.create(
                         drip=self.drip_model,
@@ -282,7 +292,8 @@ class DripBase(object):
                         from_email=self.from_email,
                         from_email_name=self.from_email_name,
                         subject=message_instance.subject,
-                        body=message_instance.body
+                        body=message_instance.body,
+                        sms=message_instance.sms,
                     )
                     count += 1
             except Exception as e:

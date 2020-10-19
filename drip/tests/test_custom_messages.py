@@ -36,6 +36,7 @@ class CustomMessagesTest(TestCase):
             subject_template='HELLO {{ user.username }}',
             body_html_template='<h2>This</h2> is an <b>example</b>'
             ' html <strong>body</strong>.',
+            sms_text='Test message',
         )
         QuerySetRule.objects.create(
             drip=self.model_drip,

@@ -157,6 +157,7 @@ class DripsTestCase(TestCase):
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
             body_html_template='KETTEHS ROCK!',
+            sms_text='KETTEHS ROCK!',
         )
         QuerySetRule.objects.create(
             drip=model_drip,

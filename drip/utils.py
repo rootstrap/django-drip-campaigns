@@ -1,5 +1,8 @@
 import sys
 
+from django.apps import apps as django_apps
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
@@ -192,10 +195,27 @@ def get_simple_fields(Model, **kwargs):
 
 
 def get_user_model():
-    # handle 1.7 and back
+    """
+    Support the case when the users need in the drip campaign are not from
+    Auth User model
+    """
     try:
-        from django.contrib.auth import get_user_model as django_get_user_model
-        User = django_get_user_model()
-    except ImportError:
-        from django.contrib.auth.models import User
-    return User
+        return django_apps.get_model(
+            getattr(
+                settings,
+                'DRIP_CAMPAIGN_USER_MODEL',
+                getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+            ),
+            require_ready=False
+        )
+    except ValueError:
+        raise ImproperlyConfigured(
+            "DRIP_CAMPAIGN_MODEL must be of the form 'app_label.model_name'"
+        )
+    except LookupError:
+        raise ImproperlyConfigured(
+            'DRIP_CAMPAIGN_MODEL refers to model {model_name}'
+            ' that has not been installed'.format(
+                model_name=settings.AUTH_USER_MODEL
+            )
+        )
