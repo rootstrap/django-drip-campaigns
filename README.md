@@ -111,3 +111,44 @@ python manage.py send_drips
 ```
 
 You can use cron to schedule the drips.
+
+### The cron scheduler
+
+You may want to have an easy way to send drips periodically. It's possible to set a couple of parameters in your settings to do that. First activate the scheduler:
+
+```python
+# your settings file
+DRIP_SCHEDULE = True
+```
+
+After that, choose:
+
+- A day of the week: An integer value between `0-6`, or a string: `'mon'`,`'tue'`, `'wed'`, `'thu'`, '`'fri'`, `'sat'`, `'sun'`. The name in the settings is `DRIP_SCHEDULE_DAY_OF_WEEK` (default is set to `0`).
+- An hour: An integer value between `0-23`. The name in the settings is `DRIP_SCHEDULE_HOUR` (default is set to `0`).
+- A minute: An integer value between `0-59`. The name in the settings is `DRIP_SCHEDULE_MINUTE` (default is set to `0`).
+
+With those values, a cron scheduler will execute the `send_drips` command every week in the specified day/hour/minute. The scheduler will use the timezone of your `TIME_ZONE` parameter in your settings (default is set to `'UTC'`). For example, if you have:
+
+```python
+DRIP_SCHEDULE = True
+DRIP_SCHEDULE_DAY_OF_WEEK = 'mon'
+DRIP_SCHEDULE_HOUR = 13
+DRIP_SCHEDULE_MINUTE = 57
+```
+
+Then every Monday at 13:57 the `send_drips` command will be executed. Last but not least, add this line at the end of your main `urls.py` file to start de scheduler:
+
+```python
+# your main urls.py file
+...
+from drip.scheduler.cron_scheduler import cron_send_drips
+
+...
+cron_send_drips()
+```
+
+We recommend you to do it there because we know for sure that it's a file that is executed once at the beginning.  
+Some tips:
+
+- If you want to run the command every day in the week, hour, or minute, just set the corresponding parameter to `'*'`.
+- If you want to run the command more than a day in the week, just set the `DRIP_SCHEDULE_DAY_OF_WEEK` to more than one value. For example, if you set that to `'mon-fri'` the command will be executed from Monday to Friday.
