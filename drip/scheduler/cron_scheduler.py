@@ -4,20 +4,22 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from django.core.management import call_command
 
 
-DRIP_SCHEDULE = getattr(
-    settings, 'DRIP_SCHEDULE', False
+DRIP_SCHEDULE_SETTINGS = getattr(
+    settings, 'DRIP_SCHEDULE_SETTINGS', {}
 )
-DRIP_SCHEDULE_DAY_OF_WEEK = getattr(
-    settings, 'DRIP_SCHEDULE_DAY_OF_WEEK', 0
+
+
+DRIP_SCHEDULE = DRIP_SCHEDULE_SETTINGS.get(
+    'DRIP_SCHEDULE', False
 )
-DRIP_SCHEDULE_HOUR = getattr(
-    settings, 'DRIP_SCHEDULE_HOUR', 0
+DRIP_SCHEDULE_DAY_OF_WEEK = DRIP_SCHEDULE_SETTINGS.get(
+    'DRIP_SCHEDULE_DAY_OF_WEEK', 0
 )
-DRIP_SCHEDULE_MINUTE = getattr(
-    settings, 'DRIP_SCHEDULE_MINUTE', 0
+DRIP_SCHEDULE_HOUR = DRIP_SCHEDULE_SETTINGS.get(
+    'DRIP_SCHEDULE_HOUR', 0
 )
-DRIP_SCHEDULE_TZ = getattr(
-    settings, 'TIME_ZONE', 'UTC'
+DRIP_SCHEDULE_MINUTE = DRIP_SCHEDULE_SETTINGS.get(
+    'DRIP_SCHEDULE_MINUTE', 0
 )
 
 
@@ -33,6 +35,6 @@ def cron_send_drips():
             day_of_week=DRIP_SCHEDULE_DAY_OF_WEEK,
             hour=DRIP_SCHEDULE_HOUR,
             minute=DRIP_SCHEDULE_MINUTE,
-            timezone=DRIP_SCHEDULE_TZ,
+            timezone=getattr(settings, 'TIME_ZONE', 'UTC'),
         )
         cron_scheduler.start()
