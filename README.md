@@ -9,6 +9,8 @@ Drip campaigns are pre-written sets of emails sent to customers or prospects ove
 
 This project is a fork of the one written by [Zapier](https://zapier.com/z/qO/).
 
+#### You can check out the docs [here](https://django-drip-campaigns.readthedocs.io/en/latest/).
+
 ## Installation:
 
 1. Install django-drip-campaings using pip:
