@@ -1,4 +1,5 @@
 # Contributing to Django-drip-campaigns
+
 We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
 
 - Reporting a bug
@@ -8,9 +9,11 @@ We love your input! We want to make contributing to this project as easy and tra
 - Becoming a maintainer
 
 ## We Develop with Github
+
 We use github to host code, to track issues and feature requests, as well as accept pull requests.
 
 ## We Use [Github Flow](https://guides.github.com/introduction/flow/index.html), So All Code Changes Happen Through Pull Requests
+
 Pull requests are the best way to propose changes to the codebase (we use [Github Flow](https://guides.github.com/introduction/flow/index.html)). We actively welcome your pull requests:
 
 1. Fork the repo and create your branch from `master`.
@@ -21,12 +24,15 @@ Pull requests are the best way to propose changes to the codebase (we use [Githu
 6. Issue that pull request!
 
 ## Any contributions you make will be under the MIT Software License
+
 In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
 
 ## Report bugs using Github's [issues](https://github.com/briandk/transcriptase-atom/issues)
+
 We use GitHub issues to track public bugs. Report a bug by [opening a new issue](); it's that easy!
 
 ## Write bug reports with detail, background, and sample code
+
 [This is an example](http://stackoverflow.com/q/12488905/180626) of a bug report.
 Here's [another example from Craig Hockenberry](http://www.openradar.me/11905408), an app developer whom I greatly respect.
 
@@ -35,12 +41,12 @@ Here's [another example from Craig Hockenberry](http://www.openradar.me/11905408
 - A quick summary and/or background
 - Steps to reproduce
   - Be specific!
-  - Give sample code if you can. [My stackoverflow question](http://stackoverflow.com/q/12488905/180626) includes sample code that *anyone* with a base Project setup can run to reproduce what I was seeing
+  - Give sample code if you can. [My stackoverflow question](http://stackoverflow.com/q/12488905/180626) includes sample code that _anyone_ with a base Project setup can run to reproduce what I was seeing
 - What you expected would happen
 - What actually happens
 - Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
 
-People *love* thorough bug reports. I'm not even kidding.
+People _love_ thorough bug reports. I'm not even kidding.
 
 ## For new feature proposals open a RFC
 
@@ -50,15 +56,23 @@ People *love* thorough bug reports. I'm not even kidding.
   - ### How is this different from what you are currently doing?
   - ### Possible implementation
 
-
 ## Use a Consistent Coding Style
+
 I'm again borrowing these from [Rootstrap Tech Guides](https://github.com/rootstrap/tech-guides/tree/master/python)
 
-* 4 spaces for indentation rather than tabs
-* You can try running `flake8 .` for style unification
+- 4 spaces for indentation rather than tabs
+- You can try running `flake8 .` for style unification
+- In this project we decided to use the `format()` function for string formatting. We prefer to use `f strings`, but since we want to keep support for Python 3.5, we can't use that. So we defined to use the named function. So, if you need to do string formatting in your contribution, please use that for the sake of consistency. For example:
+
+```python
+x = 3
+print('Number in var x is: {x}'.format(x=x))
+```
 
 ## License
+
 By contributing, you agree that your contributions will be licensed under its MIT License.
 
 ## References
+
 This document was adapted from the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebook/draft-js/blob/a9316a723f9e918afde44dea68b5f9f39b7d9b00/CONTRIBUTING.md)
