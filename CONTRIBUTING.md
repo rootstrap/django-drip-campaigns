@@ -62,7 +62,7 @@ I'm again borrowing these from [Rootstrap Tech Guides](https://github.com/rootst
 
 - 4 spaces for indentation rather than tabs
 - You can try running `flake8 .` for style unification
-- In this project we decided to use the `format()` function for string formatting. We prefer to use `f strings`, but since we want to keep support for Python 3.5, we can't use that. So we defined to use the named function. So, if you need to do string formatting in your contribution, please use that for the sake of consistency. For example:
+- In this project we decided to use the `format()` function for string formatting. We prefer to use `f strings`, but since we want to keep support for Python 3.5, we can't use that. Example:
 
 ```python
 x = 3
