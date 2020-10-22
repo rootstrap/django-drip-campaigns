@@ -505,5 +505,5 @@ class UrlsTestCase(TestCase):
 
         self.assertEqual(
             view_drip_email_url,
-            '/admin/drip/drip/1/timeline/2/3/4/',
+            '/admin/drip/drip/1/timeline/2/3/4/email-view',
         )

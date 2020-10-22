@@ -87,6 +87,14 @@ class DripAdmin(admin.ModelAdmin):
         mime = 'text/plain'
         return html, mime
 
+    def get_mime_html_for_sms(self, drip, user):
+        drip_message = message_class_for(
+            drip.message_class,
+        )(drip.drip, user)
+        html = drip_message.sms
+        mime = 'text/plain'
+        return html, mime
+
     def view_drip_email(
         self, request, drip_id, into_past, into_future, user_id
     ):
@@ -97,6 +105,15 @@ class DripAdmin(admin.ModelAdmin):
 
         html, mime = self.get_mime_html(drip, user)
 
+        return HttpResponse(html, content_type=mime)
+
+    def view_drip_sms(
+            self, request, drip_id, into_past, into_future, user_id
+    ):
+        drip = get_object_or_404(Drip, id=drip_id)
+        User = get_user_model()
+        user = get_object_or_404(User, id=user_id)
+        html, mime = self.get_mime_html_for_sms(drip, user)
         return HttpResponse(html, content_type=mime)
 
     def build_extra_context(self, extra_context):
@@ -129,9 +146,15 @@ class DripAdmin(admin.ModelAdmin):
             ),
             path(
                 '<int:drip_id>/timeline/<int:into_past>/'
-                '<int:into_future>/<int:user_id>/',
+                '<int:into_future>/<int:user_id>/email-view',
                 self.av(self.view_drip_email),
                 name='view_drip_email'
+            ),
+            path(
+                '<int:drip_id>/timeline/<int:into_past>/'
+                '<int:into_future>/<int:user_id>/sms-view',
+                self.av(self.view_drip_sms),
+                name='view_drip_sms'
             )
         ]
         return my_urls + urls

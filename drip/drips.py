@@ -92,7 +92,9 @@ class DripMessage(object):
     @property
     def sms(self):
         if not self._sms:
-            self._sms = self.drip_base.sms_text
+            self._sms = str(Template(
+                self.drip_base.sms_text,
+            ).render(self.context))
         return self._sms
 
     @property
@@ -284,7 +286,7 @@ class DripBase(object):
             message_instance = MessageClass(self, user)
             try:
                 result = message_instance.message.send()
-                post_drip.send(sender=message_instance, drip=self, user=user)
+                post_drip.send(sender=self, drip=message_instance, user=user)
                 if result:
                     SentDrip.objects.create(
                         drip=self.drip_model,

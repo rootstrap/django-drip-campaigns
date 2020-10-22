@@ -59,6 +59,7 @@ def handle_drip_sms(sender, **kwargs):
     user = kwargs['user']
     # Get the message from the drip and the number from the user and handle the SMS message logic.
 ```
+- The sms text field supports user object injection, so you can use placeholders for the user data `eg: This sms for {{user.first_name}}` 
 
 ### Create Drip
 
