@@ -285,7 +285,10 @@ class DripBase(object):
         for user in self.get_queryset():
             message_instance = MessageClass(self, user)
             try:
-                result = message_instance.message.send()
+                if settings.DRIP_CAMPAIGN_DRYRUN:
+                    result = True
+                else:
+                    result = message_instance.message.send()
                 post_drip.send(sender=self, drip=message_instance, user=user)
                 if result:
                     SentDrip.objects.create(

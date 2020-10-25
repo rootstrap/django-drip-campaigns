@@ -2,6 +2,12 @@
 DRIP_FROM_EMAIL = ''
 DEBUG = True
 
+"""
+To disable the library from sending emails and send it yourself using
+the post_drip signal.
+"""
+DRIP_CAMPAIGN_DRYRUN = False
+
 SECRET_KEY = 'whatever/you/want-goes-here'
 
 DATABASES = {
