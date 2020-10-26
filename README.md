@@ -129,7 +129,7 @@ DRIP_SCHEDULE_SETTINGS = {
 
 After that, choose:
 
-- A day of the week: An integer value between `0-6`, or a string: `'mon'`,`'tue'`, `'wed'`, `'thu'`, '`'fri'`, `'sat'`, `'sun'`. The name in the settings is `DRIP_SCHEDULE_DAY_OF_WEEK` (default is set to `0`).
+- A day of the week: An integer value between `0-6`, or a string: `'mon'`, `'tue'`, `'wed'`, `'thu'`, `'fri'`, `'sat'`, `'sun'`. The name in the settings is `DRIP_SCHEDULE_DAY_OF_WEEK` (default is set to `0`).
 - An hour: An integer value between `0-23`. The name in the settings is `DRIP_SCHEDULE_HOUR` (default is set to `0`).
 - A minute: An integer value between `0-59`. The name in the settings is `DRIP_SCHEDULE_MINUTE` (default is set to `0`).
 
