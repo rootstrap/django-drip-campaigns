@@ -33,6 +33,7 @@ class Drip(models.Model):
     )
 
     subject_template = models.TextField(null=True, blank=True)
+    pre_header_text = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(
         null=True,
         blank=True,
@@ -58,6 +59,10 @@ class Drip(models.Model):
             else None,
             subject_template=self.subject_template if (
                 self.subject_template
+            )
+            else None,
+            pre_header_text=self.pre_header_text if (
+                self.pre_header_text
             )
             else None,
             body_template=self.body_html_template if (
@@ -95,6 +100,7 @@ class SentDrip(models.Model):
         on_delete=models.CASCADE,
     )
     subject = models.TextField()
+    pre_header = models.TextField()
     body = models.TextField()
     sms = models.TextField()
     from_email = models.EmailField(

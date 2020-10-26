@@ -54,6 +54,7 @@ class DripMessage(object):
         self.user = user
         self._context = None
         self._subject = None
+        self._pre_header = None
         self._body = None
         self._sms = None
         self._plain = None
@@ -80,6 +81,14 @@ class DripMessage(object):
                 self.drip_base.subject_template,
             ).render(self.context)
         return self._subject
+
+    @property
+    def pre_header(self):
+        if not self._pre_header:
+            self._pre_header = str(Template(
+                self.drip_base.pre_header_text,
+            ).render(self.context))
+        return self._pre_header
 
     @property
     def body(self):
@@ -126,7 +135,13 @@ class DripMessage(object):
 
             # check if there are html tags in the rendered template
             if len(self.plain) != len(self.body):
-                self._message.attach_alternative(self.body, 'text/html')
+                message_body = self.body.replace(
+                    '<body>',
+                    '<body><span style="display:none;">{}</span>'.format(
+                        self.pre_header
+                    )
+                ) if self.pre_header else self.plain
+                self._message.attach_alternative(message_body, 'text/html')
         return self._message
 
 
@@ -140,6 +155,7 @@ class DripBase(object):
     #: needs a unique name
     name = None
     subject_template = None
+    pre_header_text = None
     body_template = None
     sms_text = None
     from_email = None
@@ -157,6 +173,10 @@ class DripBase(object):
         self.subject_template = kwargs.pop(
             'subject_template',
             self.subject_template,
+        )
+        self.pre_header_text = kwargs.pop(
+            'pre_header_text',
+            self.pre_header_text,
         )
         self.body_template = kwargs.pop('body_template', self.body_template)
         self.sms_text = kwargs.pop('sms_text', self.sms_text)
@@ -285,22 +305,25 @@ class DripBase(object):
         for user in self.get_queryset():
             message_instance = MessageClass(self, user)
             try:
-                if settings.DRIP_CAMPAIGN_DRYRUN:
-                    result = True
-                else:
+                if not settings.DRIP_CAMPAIGN_DRYRUN:
                     result = message_instance.message.send()
-                post_drip.send(sender=self, drip=message_instance, user=user)
-                if result:
-                    SentDrip.objects.create(
-                        drip=self.drip_model,
-                        user=user,
-                        from_email=self.from_email,
-                        from_email_name=self.from_email_name,
-                        subject=message_instance.subject,
-                        body=message_instance.body,
-                        sms=message_instance.sms,
-                    )
-                    count += 1
+                    if result:
+                        SentDrip.objects.create(
+                            drip=self.drip_model,
+                            user=user,
+                            from_email=self.from_email,
+                            from_email_name=self.from_email_name,
+                            subject=message_instance.subject,
+                            pre_header=message_instance.pre_header,
+                            body=message_instance.body,
+                            sms=message_instance.sms,
+                        )
+                post_drip.send(
+                    sender=self.drip_model,
+                    drip=message_instance,
+                    user=user
+                )
+                count += 1
             except Exception as e:
                 logging.error(
                     "Failed to send drip {drip} to user {user}: {err}".format(

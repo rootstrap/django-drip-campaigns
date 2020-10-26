@@ -156,6 +156,7 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
+            pre_header_text='Pre header test',
             body_html_template='KETTEHS ROCK!',
             sms_text='KETTEHS ROCK!',
         )

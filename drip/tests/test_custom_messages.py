@@ -34,6 +34,7 @@ class CustomMessagesTest(TestCase):
         self.model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
+            pre_header_text='Pre header test',
             body_html_template='<h2>This</h2> is an <b>example</b>'
             ' html <strong>body</strong>.',
             sms_text='Test message',

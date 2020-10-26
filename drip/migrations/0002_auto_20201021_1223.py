@@ -17,6 +17,11 @@ class Migration(migrations.Migration):
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
+            model_name='drip',
+            name='pre_header_text',
+            field=models.TextField(blank=True, null=True),
+        ),
+        migrations.AddField(
             model_name='sentdrip',
             name='sms',
             field=models.TextField(default=None),
@@ -26,5 +31,11 @@ class Migration(migrations.Migration):
             model_name='sentdrip',
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sent_drips', to=getattr(settings, 'DRIP_CAMPAIGN_USER_MODEL', getattr(settings, 'AUTH_USER_MODEL', 'auth.User'))),
+        ),
+        migrations.AddField(
+            model_name='sentdrip',
+            name='pre_header',
+            field=models.TextField(default=None),
+            preserve_default=False,
         ),
     ]
