@@ -60,3 +60,14 @@ jobs:
         - coverage run manage.py test
         - coverage xml
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - stage: Pypi
+      # Do it only when merge on master branch
+      if: (branch = master) AND (commit_message =~ /^Merge pull request.*/)
+      script: skip
+      deploy:
+        provider: pypi
+        username: brunomichetti
+        password:
+          secure: JxVYvA480lbNAGwpJq0nUvVBLDHDblRx+O/Obw2ROpKBIQ1gQoYsY/P3hO0wO1iLcl8YiRP+9vhytKtSEB3xPXYXTQPYnJRdIouuMQ8eL030gsVYtXwem9ZE2FL7+d4oDLJT6HdW300Cloh+kyuYnephMvJ94ZaF00tL4wwGPvCo+3kc05/Vw3Vr89l8rSW44Z9T3iVy5IFZjt6mDFUaKihblJEp7VVANdnU3XHahbuY0R+WR39Tm0G2w2yWtYsnX50sQAuzP+JVy2aKyLYr2lr5Qf3RDXhSsPscYU/fXnph5XPUSpfiCeDH+TVdhu5C9+54Wih963oeMRJVMw4+Z8Kff9b4jvEfxqc+z3QwKwkarfCNYa+YO7mNb+BgOCJr830D++SPcFIxl5hdb8Dkdw/1XlPZBVPOqCU2v9rifs6FhBsvIHnkZsox6xe7u+F6CRPLdXfpwI3CXBlFdJtk9G5j3uXY2R7L5D8uyza48JDe9U80zzX7/rKR72dkNsKrHlJNqQSuSkAjXeBR5ZLzqewLJQtFWrzzQ9h4FRp3DRcAtHMqXTDrIVFfoJ3e0Y6mhcD16+UA1GQFFEHs1nAYNZyK8IHnLr9HCiiIZFHZUAUAMUPuKLeDj7nymPjOkkloTZ+Bfq0qcAy/53fmeWptWEbv1XsmqpImdxsmO3XvhhQ=
+      on:
+        branch: master
