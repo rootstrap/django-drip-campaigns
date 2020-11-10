@@ -11,7 +11,7 @@ from drip.utils import get_user_model
 from drip.helpers import parse
 
 
-class Drip(models.Model):
+class AbstractDrip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
     name = models.CharField(
@@ -41,6 +41,9 @@ class Drip(models.Model):
         max_length=120, blank=True, default='default'
     )
 
+    class Meta:
+        abstract = True
+
     @property
     def drip(self):
         from drip.drips import DripBase
@@ -68,7 +71,11 @@ class Drip(models.Model):
         return self.name
 
 
-class SentDrip(models.Model):
+class Drip(AbstractDrip):
+    pass
+
+
+class AbstractSentDrip(models.Model):
     """
     Keeps a record of all sent drips.
     """
@@ -96,6 +103,13 @@ class SentDrip(models.Model):
         default=None
     )
 
+    class Meta:
+        abstract = True
+
+
+class SentDrip(AbstractSentDrip):
+    pass
+
 
 METHOD_TYPES = (
     ('filter', 'Filter'),
@@ -120,7 +134,7 @@ LOOKUP_TYPES = (
 )
 
 
-class QuerySetRule(models.Model):
+class AbstractQuerySetRule(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
@@ -237,3 +251,10 @@ class QuerySetRule(models.Model):
 
         # catch as default
         return qs.filter(**kwargs)
+
+    class Meta:
+        abstract = True
+
+
+class QuerySetRule(AbstractQuerySetRule):
+    pass
