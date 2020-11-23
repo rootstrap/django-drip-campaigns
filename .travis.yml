@@ -41,45 +41,47 @@ script:
 
 jobs:
   include:
-    - stage: Test 3.5-2.2
-      python:
-        - "3.5"
-      env:
-        - DJANGO_VERSION="2.2"
+    # - stage: Test 3.5-2.2
+    #   python:
+    #     - "3.5"
+    #   env:
+    #     - DJANGO_VERSION="2.2"
 
-    - stage: Test 3.8-2.2
-      python:
-        - "3.8"
-      env:
-        - DJANGO_VERSION="2.2"
+    # - stage: Test 3.8-2.2
+    #   python:
+    #     - "3.8"
+    #   env:
+    #     - DJANGO_VERSION="2.2"
 
-    - stage: Test Reporter
-      python:
-        - "3.8"
-      env:
-        - DJANGO_VERSION="3.0.7"
-      script:
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
-        # makemigrations of each app is needed
-        - python manage.py makemigrations drip
-        - python manage.py makemigrations credits
-        - python manage.py makemigrations auth
-        - python manage.py migrate
-        - flake8 .
-        - coverage run manage.py test
-        - coverage xml
-        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    # - stage: Test Reporter
+    #   python:
+    #     - "3.8"
+    #   env:
+    #     - DJANGO_VERSION="3.0.7"
+    #   script:
+    #     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    #     - chmod +x ./cc-test-reporter
+    #     - ./cc-test-reporter before-build
+    #     # makemigrations of each app is needed
+    #     - python manage.py makemigrations drip
+    #     - python manage.py makemigrations credits
+    #     - python manage.py makemigrations auth
+    #     - python manage.py migrate
+    #     - flake8 .
+    #     - coverage run manage.py test
+    #     - coverage xml
+    #     - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
     - stage: Pypi
       # Do it only when merge on master branch
-      if: (branch = master) AND (commit_message =~ /^Merge pull request.*/)
+      #if: (branch = master) AND (commit_message =~ /^Merge pull request.*/)
+      python:
+        - "3.8"
       script: skip
       deploy:
         provider: pypi
-        username: PYPI_USERNAME
+        username: $PYPI_USERNAME
         password:
-          secure: PYPI_ENCRYPTED_PASS
+          secure: $PYPI_ENCRYPTED_PASS
       on:
-        branch: master
+        branch: fix/pypi-travis-deploy
