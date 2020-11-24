@@ -143,7 +143,7 @@ class AbstractQuerySetRule(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
-    rule_type = models.CharField(max_length=3, choices=RULE_TYPES, default='or')
+    rule_type = models.CharField(max_length=3, choices=RULE_TYPES, default='and')
 
     drip = models.ForeignKey(
         Drip,

@@ -215,7 +215,7 @@ class DripBase(object):
             'exclude': [],
         }
 
-        for rule in self.drip_model.queryset_rules.filter(rule_type='and'):
+        for rule in self.drip_model.queryset_rules.all(): #filter(rule_type='and'):
 
             clause = clauses.get(rule.method_type, clauses['filter'])
 
