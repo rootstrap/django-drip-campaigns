@@ -200,7 +200,6 @@ class DripBase(object):
     def apply_or_queryset_rules(self, qs: str) -> str:
         return qs.none()
 
-
     def apply_and_queryset_rules(self, qs: str) -> str:
         """First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
