@@ -206,10 +206,7 @@ class DripBase(object):
             if query is None:
                 query = qs.none()
             query = query | query_or
-        if query is not None:
-            qs = qs.filter(query)
-        else:
-            qs = qs.none()
+        qs = qs.filter(query) if query is not None else qs.none()
         return qs
 
     def apply_and_queryset_rules(self, qs: str) -> str:
