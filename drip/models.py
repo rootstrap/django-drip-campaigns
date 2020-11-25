@@ -201,8 +201,7 @@ class AbstractQuerySetRule(models.Model):
         * "now+"
         * "today-"
         * "today+"
-        If field_value does not start with one of the substrings above,
-        it will remain unchanged.
+        Otherwise returns field_value unchanged.
         :param now: datetime.now
         :param field_value: str
         :return: datetime.TimeDelta
@@ -223,6 +222,13 @@ class AbstractQuerySetRule(models.Model):
         return field_value
 
     def set_f_expressions(self, field_value):
+        """
+        If field_value starts with the substring "F_", returns an instance
+        of models.F within the field_value expression, otherwise returns
+        field_value unchanged.
+        :param field_value: str
+        :return: models.F or str
+        """
         # F expressions
         if self.field_value.startswith('F_'):
             field_value = self.field_value.replace('F_', '')
