@@ -195,6 +195,24 @@ class DripBase(object):
         return walked_range
 
     def apply_queryset_rules(self, qs: str) -> str:
+        return (self.apply_and_queryset_rules(qs) | self.apply_or_queryset_rules(qs))
+
+    def apply_or_queryset_rules(self, qs: str) -> str:
+        query = None
+        rule_set = self.drip_model.queryset_rules.filter(rule_type='or')
+        for rule in rule_set:
+            kwargs = rule.filter_kwargs(qs, now=self.now)
+            query_or = Q(**kwargs)
+            if query is None:
+                query = qs.none()
+            query = query | query_or
+        if query is not None:
+            qs = qs.filter(query)
+        else:
+            qs = qs.none()
+        return qs
+
+    def apply_and_queryset_rules(self, qs: str) -> str:
         """First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
 
@@ -208,7 +226,7 @@ class DripBase(object):
             'exclude': [],
         }
 
-        for rule in self.drip_model.queryset_rules.all():
+        for rule in self.drip_model.queryset_rules.filter(rule_type='and'):
 
             clause = clauses.get(rule.method_type, clauses['filter'])
 
