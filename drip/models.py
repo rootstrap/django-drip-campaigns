@@ -193,6 +193,17 @@ class AbstractQuerySetRule(models.Model):
         return qs
 
     def set_time_deltas_and_dates(self, now, field_value):
+        """
+        Parses the field_value parameter and returns a TimeDelta object
+        The field_value string might start with one of the following substrings:
+        * "now-"
+        * "now+"
+        * "today-"
+        * "today+"
+        :param now: datetime.now
+        :param field_value: str
+        :return: datetime.TimeDelta
+        """
         # set time deltas and dates
         if self.field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
