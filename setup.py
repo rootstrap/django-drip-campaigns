@@ -20,7 +20,7 @@ url = 'https://github.com/rootstrap/django-drip-campaigns'
 author = 'Kalil de Lima'
 author_email = 'kalil@rootstrap.com'
 license = 'MIT'
-install_requires = ['Django>=2.2', 'django-timedeltafield']
+install_requires = ['Django>=2.2', 'apscheduler']
 keywords = 'django drip email user query'
 
 

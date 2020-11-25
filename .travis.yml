@@ -1,17 +1,24 @@
 language: python
 
+
 dist: xenial
 
+
 python:
-  - "3.5"
   - "3.6"
   - "3.7"
-  - "3.8"
   - "pypy3"
+
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID
+
 
 env:
   - DJANGO_VERSION="2.2"
   - DJANGO_VERSION="3.0.7"
+
 
 install:
   - pip3 install "Django==${DJANGO_VERSION}"
@@ -19,10 +26,6 @@ install:
   - pip3 install flake8
   - pip install coverage
 
-before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
 
 script:
   # makemigrations of each app is needed
@@ -33,11 +36,48 @@ script:
   - flake8 .
   - coverage run manage.py test
 
-after_script:
-  - coverage xml
-  - if [[ "$DJANGO_VERSION" == "3.0.7" && "$TRAVIS_PYTHON_VERSION" == "pypy3" ]]; then ./cc-test-reporter after-build -r 022c7b78c0d0c1af735f968d236d9a0691025b2c7746b5030522e07405084c9c --exit-code $TRAVIS_TEST_RESULT; fi
 
-matrix:
-  exclude:
-    - python: "3.5"
-      env: DJANGO_VERSION="3.0.7" #To use this version of django, a python version > 3.5 is needed
+jobs:
+  include:
+    - stage: Test 3.5-2.2
+      python:
+        - "3.5"
+      env:
+        - DJANGO_VERSION="2.2"
+
+    - stage: Test 3.8-2.2
+      python:
+        - "3.8"
+      env:
+        - DJANGO_VERSION="2.2"
+
+    - stage: Test Reporter
+      python:
+        - "3.8"
+      env:
+        - DJANGO_VERSION="3.0.7"
+      script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+        # makemigrations of each app is needed
+        - python manage.py makemigrations drip
+        - python manage.py makemigrations credits
+        - python manage.py makemigrations auth
+        - python manage.py migrate
+        - flake8 .
+        - coverage run manage.py test
+        - coverage xml
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+    - stage: Pypi
+      # Do it only when merge on master branch
+      if: (branch = master) AND (commit_message =~ /^Merge pull request.*/)
+      python:
+        - "3.8"
+      script: skip
+      deploy:
+        provider: pypi
+        username: "__token__"
+        password:
+          secure: "W+dg4Ho478+F90rgOHxJu3uz2EjtfS1aUZkLo0pJIxtAsGjpMytcBK41OpxDJ9QcBpq9btKXH/L5Y7OAfSsMX2MSVIr6bwxfOvG2704KVtBFGxbMxiNXmWdfBn9Bp8ccB0NHdUZiyI0nbLwlb8tpHKPv/I5KfdgIv30gf/MXrvAygo6LrDk2OZP0ihRJAb1viFyfFH8t3kwv3tDINEqZC7G+9OMPJBgiBaWE/3yS9AV8te53yfS54AXRXIrwgPmMXsV5zylg2vtKyS+I2qMN217sy11B057uw6AfH/k8rL6xsbssielT4IegYpbe8NsU7etKbU6s+XZu/pyn7XpDLzmLQ+1HfoH9F5B32Osv18j70lqRnjU8kXjz+EEJWy9zWZ1QBGWB4SQX5uHOARttELchHF6lE1TUjBUDiFDc9MYo+7ipSC+kn3h+hAZPi5nIt4dmaf7pddNM6ba01DT/TP0AVs4m1EJamONUPNd/vPcuxj5Pu575GYvsDFu4HYtKvf1MR9P8QoZkGU/XGcC86oz2iSvRQJqaK2EAe+p8D4LOmkWxLdFRD/SQKj7g/Ymwlg5N/ffg3JyNfOrBCxldiihae92QMMiryw067oIYu/yA++I5nbq/3OodZmezlAZu/F3jAIwt1o3I8KgkvJVGj3bTRW6Nfl1lwznwyYTdOVE="
