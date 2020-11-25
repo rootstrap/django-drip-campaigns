@@ -204,7 +204,7 @@ class AbstractQuerySetRule(models.Model):
         Otherwise returns field_value unchanged.
         :param now: datetime.now
         :param field_value: str
-        :return: datetime.TimeDelta
+        :return: datetime.TimeDelta or str
         """
         # set time deltas and dates
         if self.field_value.startswith('now-'):
@@ -236,6 +236,13 @@ class AbstractQuerySetRule(models.Model):
         return field_value
 
     def set_booleans(self, field_value):
+        """
+        Returns True or False whether field value is 'True' or
+        'False' respectively.
+        Otherwise returns field_value unchanged.
+        :param field_value:
+        :return: bool or str
+        """
         # set booleans
         if self.field_value == 'True':
             field_value = True
