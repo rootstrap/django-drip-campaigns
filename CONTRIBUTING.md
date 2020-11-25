@@ -69,6 +69,16 @@ x = 3
 print('Number in var x is: {x}'.format(x=x))
 ```
 
+## Update the version
+
+Before creating the pull request, please update the version in `drip/__inti__.py` following the next rules:
+
+- If you are doing a fix, then bump the third digit.
+- If you are doing a non breaking change, then bump the second digit.
+- If you are doing a breaking change, then bump the first digit.
+
+We have travis-ci configured to automatically release the changes in master branch.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under its MIT License.
