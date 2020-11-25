@@ -200,6 +200,7 @@ class AbstractQuerySetRule(models.Model):
         * "now+"
         * "today-"
         * "today+"
+        If field_value does not start with one of the substrings above, it will remain unchanged.
         :param now: datetime.now
         :param field_value: str
         :return: datetime.TimeDelta
