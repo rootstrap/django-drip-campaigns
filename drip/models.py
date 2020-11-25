@@ -251,6 +251,21 @@ class AbstractQuerySetRule(models.Model):
         return field_value
 
     def filter_kwargs(self, qs, now=datetime.now):
+        """
+        Returns a dictionary {field_name: field_value} where:
+        * field_name is self.annotated_field_name in addition to
+        self.lookup_type in the form FIELD_NAME__LOOKUP.
+        * field_value is the result of passing self.field_value through
+        parsing methods.
+
+        The resulting dict can be used to apply filters over querysets.
+
+        For example:
+            queryset.filter(**obj.filter_kwargs(datetime.now()))
+        :param qs: queryset  #TODO: remove this parameter since is not used.
+        :param now: datetime.datetime() instance
+        :return: dict
+        """
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
