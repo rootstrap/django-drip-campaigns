@@ -195,7 +195,10 @@ class DripBase(object):
         return walked_range
 
     def apply_queryset_rules(self, qs: str) -> str:
-        return (self.apply_and_queryset_rules(qs) | self.apply_or_queryset_rules(qs))
+        return (
+            self.apply_and_queryset_rules(qs) |
+            self.apply_or_queryset_rules(qs)
+        )
 
     def apply_or_queryset_rules(self, qs: str) -> str:
         query = None
