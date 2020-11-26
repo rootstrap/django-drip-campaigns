@@ -198,15 +198,17 @@ class DripBase(object):
         return (self.apply_and_queryset_rules(qs) | self.apply_or_queryset_rules(qs))
 
     def apply_or_queryset_rules(self, qs: str) -> str:
-        query = None
+        rules = []
         rule_set = self.drip_model.queryset_rules.filter(rule_type='or')
         for rule in rule_set:
             kwargs = rule.filter_kwargs(qs, now=self.now)
             query_or = Q(**kwargs)
-            if query is None:
-                query = qs.none()
-            query = query | query_or
-        qs = qs.filter(query) if query is not None else qs.none()
+            rules.append(query_or)
+
+        query = rules.pop() if rules else None
+        for rule in rules:
+            query |= rule
+        qs = qs.filter(query) if query else qs.none()
         return qs
 
     def apply_and_queryset_rules(self, qs: str) -> str:
@@ -222,8 +224,9 @@ class DripBase(object):
             'filter': [],
             'exclude': [],
         }
-
+        rules = []
         for rule in self.drip_model.queryset_rules.filter(rule_type='and'):
+            rules.append(rule)
 
             clause = clauses.get(rule.method_type, clauses['filter'])
 
@@ -234,7 +237,8 @@ class DripBase(object):
 
         if clauses['exclude']:
             qs = qs.exclude(functools.reduce(operator.or_, clauses['exclude']))
-        qs = qs.filter(*clauses['filter'])
+
+        qs = qs.filter(*clauses['filter']) if len(rules) > 0 else qs.none()
 
         return qs
 
