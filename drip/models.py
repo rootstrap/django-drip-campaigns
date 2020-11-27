@@ -223,7 +223,7 @@ class AbstractQuerySetRule(models.Model):
             field_value = False
         return field_value
 
-    def filter_kwargs(self, qs, now=datetime.now):
+    def filter_kwargs(self, now=datetime.now):
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
@@ -241,7 +241,7 @@ class AbstractQuerySetRule(models.Model):
 
     def apply(self, qs, now=datetime.now):
 
-        kwargs = self.filter_kwargs(qs, now)
+        kwargs = self.filter_kwargs(now)
         qs = self.apply_any_annotation(qs)
 
         if self.method_type == 'filter':

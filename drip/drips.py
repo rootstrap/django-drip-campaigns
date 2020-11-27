@@ -212,7 +212,7 @@ class DripBase(object):
 
             clause = clauses.get(rule.method_type, clauses['filter'])
 
-            kwargs = rule.filter_kwargs(qs, now=self.now)
+            kwargs = rule.filter_kwargs(now=self.now)
             clause.append(Q(**kwargs))
 
             qs = rule.apply_any_annotation(qs)
