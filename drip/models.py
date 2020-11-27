@@ -5,6 +5,13 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from drip.utils import get_user_model
+from .types import (
+    AbstractQuerySetRuleQuerySet,
+    DateTime,
+    BoolOrStr,
+    FExpressionOrStr,
+    TimeDeltaOrStr
+)
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
@@ -172,7 +179,7 @@ class AbstractQuerySetRule(models.Model):
         )
     )
 
-    def clean(self):
+    def clean(self) -> None:
         User = get_user_model()
         try:
             self.apply(User.objects.all())
@@ -185,7 +192,10 @@ class AbstractQuerySetRule(models.Model):
             )
 
     @property
-    def annotated_field_name(self):
+    def annotated_field_name(self) -> str:
+        """
+        Generates an annotated version of this field's name, based on self.field_name
+        """
         field_name = self.field_name
         if field_name.endswith('__count'):
             agg, _, _ = field_name.rpartition('__')
@@ -193,14 +203,17 @@ class AbstractQuerySetRule(models.Model):
 
         return field_name
 
-    def apply_any_annotation(self, qs):
+    def apply_any_annotation(self, qs: AbstractQuerySetRuleQuerySet) -> AbstractQuerySetRuleQuerySet:
+        """
+        Returns qs annotated with Count over this field's name.
+        """
         if self.field_name.endswith('__count'):
             field_name = self.annotated_field_name
             agg, _, _ = self.field_name.rpartition('__')
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def set_time_deltas_and_dates(self, now, field_value):
+    def set_time_deltas_and_dates(self, now: DateTime, field_value: str) -> TimeDeltaOrStr:
         """
         Parses the field_value parameter and returns a TimeDelta object
         The field_value string might start with one of
@@ -229,7 +242,7 @@ class AbstractQuerySetRule(models.Model):
             field_value = now().date() + parse(field_value)
         return field_value
 
-    def set_f_expressions(self, field_value):
+    def set_f_expressions(self, field_value: str) -> FExpressionOrStr:
         """
         If field_value starts with the substring "F_", returns an instance
         of models.F within the field_value expression, otherwise returns
@@ -243,13 +256,11 @@ class AbstractQuerySetRule(models.Model):
             field_value = models.F(field_value)
         return field_value
 
-    def set_booleans(self, field_value):
+    def set_booleans(self, field_value: str) -> BoolOrStr:
         """
         Returns True or False whether field value is 'True' or
         'False' respectively.
         Otherwise returns field_value unchanged.
-        :param field_value:
-        :return: bool or str
         """
         # set booleans
         if self.field_value == 'True':
@@ -258,7 +269,7 @@ class AbstractQuerySetRule(models.Model):
             field_value = False
         return field_value
 
-    def filter_kwargs(self, qs, now=datetime.now):
+    def filter_kwargs(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> dict:
         """
         Returns a dictionary {field_name: field_value} where:
         * field_name is self.annotated_field_name in addition to
@@ -270,9 +281,6 @@ class AbstractQuerySetRule(models.Model):
 
         For example:
             queryset.filter(**obj.filter_kwargs(datetime.now()))
-        :param qs: queryset  #TODO: remove this parameter since is not used.
-        :param now: datetime.datetime() instance
-        :return: dict
         """
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
@@ -289,8 +297,17 @@ class AbstractQuerySetRule(models.Model):
 
         return kwargs
 
-    def apply(self, qs, now=datetime.now):
-
+    def apply(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> AbstractQuerySetRuleQuerySet:
+        """
+        Returns qs filtered/excluded by any filter resulting from self.filter_kwargs
+        depending on whether self.method_type is one of the following:
+            * 'filter'
+            * 'exclude'
+        Also annotates qs by calling self.apply_any_annotation.
+        :param qs:
+        :param now:
+        :return:
+        """
         kwargs = self.filter_kwargs(qs, now)
         qs = self.apply_any_annotation(qs)
 
