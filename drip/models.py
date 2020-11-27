@@ -133,6 +133,11 @@ LOOKUP_TYPES = (
     ('iendswith', 'ends with (case insensitive)'),
 )
 
+RULE_TYPES = (
+    ('or', 'Or'),
+    ('and', 'And'),
+)
+
 
 class AbstractQuerySetRule(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -154,6 +159,9 @@ class AbstractQuerySetRule(models.Model):
     )
     lookup_type = models.CharField(
         max_length=12, default='exact', choices=LOOKUP_TYPES
+    )
+    rule_type = models.CharField(
+        max_length=3, default='and', choices=RULE_TYPES
     )
 
     field_value = models.CharField(
