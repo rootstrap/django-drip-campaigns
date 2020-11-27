@@ -319,7 +319,7 @@ class DripsTestCase(TestCase):
         for count, shifted_drip in zip(
             [4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)
         ):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+            self.assertEqual(count - 2, shifted_drip.get_queryset().count())
 
     def test_admin_timeline_prunes_user_output(self):
         """
@@ -475,7 +475,7 @@ class DripsTestCase(TestCase):
             model_drip.drip.get_queryset()
         )
 
-        self.assertEqual(qs.count(), 4)
+        self.assertEqual(qs.count(), 2)
 
     def test_apply_and_or_queryset_ruletype(self):
 
@@ -509,7 +509,6 @@ class DripsTestCase(TestCase):
 
         self.assertEqual(qs.count(), 20)
 
-
     def test_apply_or_queryset_ruletype(self):
 
         model_drip = Drip.objects.create(
@@ -518,13 +517,15 @@ class DripsTestCase(TestCase):
             body_html_template='KETTEHS ROCK!',
         )
 
+        # returns 9 entries
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__credits',
             lookup_type='gte',
             field_value='5',
             rule_type='or',
-        ) # returns 9 entries
+        )
+        # returns 4 entries
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
@@ -533,14 +534,13 @@ class DripsTestCase(TestCase):
                     timezone.now() - timedelta(days=1)
             ).strftime('%Y-%m-%d 00:00:00'),
             rule_type='or',
-        ) # returns 3 entries
-
+        )
         qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(
             model_drip.drip.get_queryset()
         )
 
-        self.assertEqual(qs.count(), 12)
+        self.assertEqual(qs.count(), 11)
 
 
 class UrlsTestCase(TestCase):
