@@ -477,7 +477,7 @@ class DripsTestCase(TestCase):
 
         self.assertEqual(qs.count(), 4)
 
-    def test_apply_or_queryset_ruletype(self):
+    def test_apply_and_or_queryset_ruletype(self):
 
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
@@ -496,10 +496,10 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            rule_type='or',
             field_value=(
                     timezone.now() - timedelta(days=1)
             ).strftime('%Y-%m-%d 00:00:00'),
+            rule_type='or',
         )
 
         qsr.clean()
@@ -508,6 +508,39 @@ class DripsTestCase(TestCase):
         )
 
         self.assertEqual(qs.count(), 20)
+
+
+    def test_apply_or_queryset_ruletype(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!',
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            lookup_type='gte',
+            field_value='5',
+            rule_type='or',
+        ) # returns 9 entries
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='gte',
+            field_value=(
+                    timezone.now() - timedelta(days=1)
+            ).strftime('%Y-%m-%d 00:00:00'),
+            rule_type='or',
+        ) # returns 3 entries
+
+        qsr.clean()
+        qs = model_drip.drip.apply_queryset_rules(
+            model_drip.drip.get_queryset()
+        )
+
+        self.assertEqual(qs.count(), 12)
 
 
 class UrlsTestCase(TestCase):
