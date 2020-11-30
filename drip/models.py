@@ -194,7 +194,8 @@ class AbstractQuerySetRule(models.Model):
     @property
     def annotated_field_name(self) -> str:
         """
-        Generates an annotated version of this field's name, based on self.field_name
+        Generates an annotated version of this field's name,
+        based on self.field_name
         """
         field_name = self.field_name
         if field_name.endswith('__count'):
@@ -203,7 +204,7 @@ class AbstractQuerySetRule(models.Model):
 
         return field_name
 
-    def apply_any_annotation(self, qs: AbstractQuerySetRuleQuerySet) -> AbstractQuerySetRuleQuerySet:
+    def apply_any_annotation(self, qs: AbstractQuerySetRuleQuerySet) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
         """
         Returns qs annotated with Count over this field's name.
         """
@@ -213,7 +214,7 @@ class AbstractQuerySetRule(models.Model):
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def set_time_deltas_and_dates(self, now: DateTime, field_value: str) -> TimeDeltaOrStr:
+    def set_time_deltas_and_dates(self, now: DateTime, field_value: str) -> TimeDeltaOrStr:  # noqa: E501
         """
         Parses the field_value parameter and returns a TimeDelta object
         The field_value string might start with one of
@@ -269,7 +270,7 @@ class AbstractQuerySetRule(models.Model):
             field_value = False
         return field_value
 
-    def filter_kwargs(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> dict:
+    def filter_kwargs(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> dict:  # noqa: E501
         """
         Returns a dictionary {field_name: field_value} where:
         * field_name is self.annotated_field_name in addition to
@@ -297,10 +298,11 @@ class AbstractQuerySetRule(models.Model):
 
         return kwargs
 
-    def apply(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> AbstractQuerySetRuleQuerySet:
+    def apply(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
         """
-        Returns qs filtered/excluded by any filter resulting from self.filter_kwargs
-        depending on whether self.method_type is one of the following:
+        Returns qs filtered/excluded by any filter resulting
+        from self.filter_kwargs depending on whether self.method_type is
+        one of the following:
             * 'filter'
             * 'exclude'
         Also annotates qs by calling self.apply_any_annotation.
