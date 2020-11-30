@@ -224,9 +224,6 @@ class AbstractQuerySetRule(models.Model):
         * "today-"
         * "today+"
         Otherwise returns field_value unchanged.
-        :param now: datetime.now
-        :param field_value: str
-        :return: datetime.TimeDelta or str
         """
         # set time deltas and dates
         if self.field_value.startswith('now-'):
@@ -248,8 +245,6 @@ class AbstractQuerySetRule(models.Model):
         If field_value starts with the substring "F_", returns an instance
         of models.F within the field_value expression, otherwise returns
         field_value unchanged.
-        :param field_value: str
-        :return: models.F or str
         """
         # F expressions
         if self.field_value.startswith('F_'):
@@ -306,9 +301,6 @@ class AbstractQuerySetRule(models.Model):
             * 'filter'
             * 'exclude'
         Also annotates qs by calling self.apply_any_annotation.
-        :param qs:
-        :param now:
-        :return:
         """
         kwargs = self.filter_kwargs(qs, now)
         qs = self.apply_any_annotation(qs)
