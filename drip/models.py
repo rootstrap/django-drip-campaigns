@@ -147,6 +147,9 @@ RULE_TYPES = (
 
 
 class AbstractQuerySetRule(models.Model):
+    """
+    Allows to apply filters to drips
+    """
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
