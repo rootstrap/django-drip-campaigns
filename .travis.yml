@@ -71,7 +71,7 @@ jobs:
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
     - stage: Pypi
-      # Publish in pypi only when you aren't merging from a documentation branch
+      # Publish in pypi only when you are not merging from a documentation branch
       if: NOT (head_branch =~ /^docs\/.*/) AND (branch = master)
       python:
         - "3.8"
