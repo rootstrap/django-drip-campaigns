@@ -4,6 +4,8 @@
 
 # Django Drip Campaigns
 
+# THIS IS A TEST CHANGE
+
 [![Build Status](https://travis-ci.com/rootstrap/django-drip-campaigns.svg?branch=master)](https://travis-ci.com/rootstrap/django-drip-campaigns)
 
 Drip campaigns are pre-written sets of emails sent to customers or prospects over time. Django Drips lets you use the admin to manage drip campaign emails using querysets on Django's User model.
