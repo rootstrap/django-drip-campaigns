@@ -79,6 +79,11 @@ Before creating the pull request, please update the version in `drip/__inti__.py
 
 We have travis-ci configured to automatically release the changes in master branch.
 
+If you are doing changes in the docs, you have to:
+
+- Keep the version unchanged.
+- Make sure the branch name starts with `docs/`. For example: `docs/update-drip-class-description`.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under its MIT License.
