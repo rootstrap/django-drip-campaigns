@@ -72,7 +72,7 @@ jobs:
 
     - stage: Pypi
       # Publish in pypi only when you aren't merging from a documentation branch
-      if: NOT (head_branch =~ /^docs\/.*/)
+      if: NOT (head_branch =~ /^docs\/.*/) AND (branch = master)
       python:
         - "3.8"
       script: skip
