@@ -271,15 +271,18 @@ class AbstractQuerySetRule(models.Model):
     def filter_kwargs(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> dict:  # noqa: E501
         """
         Returns a dictionary {field_name: field_value} where:
-        * field_name is self.annotated_field_name in addition to
-        self.lookup_type in the form FIELD_NAME__LOOKUP.
-        * field_value is the result of passing self.field_value through
-        parsing methods.
+
+        - field_name is self.annotated_field_name in addition to
+          self.lookup_type in the form FIELD_NAME__LOOKUP.
+        - field_value is the result of passing self.field_value
+          through parsing methods.
 
         The resulting dict can be used to apply filters over querysets.
 
-        For example:
-            queryset.filter(**obj.filter_kwargs(datetime.now()))
+        .. code-block:: python
+
+          queryset.filter(**obj.filter_kwargs(datetime.now()))
+
         """
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
@@ -298,12 +301,14 @@ class AbstractQuerySetRule(models.Model):
 
     def apply(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
         """
-        Returns qs filtered/excluded by any filter resulting
-        from self.filter_kwargs depending on whether self.method_type is
-        one of the following:
-            * 'filter'
-            * 'exclude'
-        Also annotates qs by calling self.apply_any_annotation.
+        Returns ``qs`` filtered/excluded by any filter resulting
+        from ``self.filter_kwargs`` depending on whether
+        ``self.method_type`` is one of the following:
+
+        - "filter"
+        - "exclude"
+
+        Also annotates ``qs`` by calling ``self.apply_any_annotation``.
         """
         kwargs = self.filter_kwargs(qs, now)
         qs = self.apply_any_annotation(qs)
