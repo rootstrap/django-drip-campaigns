@@ -4,7 +4,7 @@
 
 # Django Drip Campaigns
 
-# THIS IS A TEST CHANGE
+# THIS IS A TEST CHANGE. 
 
 [![Build Status](https://travis-ci.com/rootstrap/django-drip-campaigns.svg?branch=master)](https://travis-ci.com/rootstrap/django-drip-campaigns)
 
