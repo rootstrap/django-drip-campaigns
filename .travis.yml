@@ -83,6 +83,6 @@ jobs:
           secure: "W+dg4Ho478+F90rgOHxJu3uz2EjtfS1aUZkLo0pJIxtAsGjpMytcBK41OpxDJ9QcBpq9btKXH/L5Y7OAfSsMX2MSVIr6bwxfOvG2704KVtBFGxbMxiNXmWdfBn9Bp8ccB0NHdUZiyI0nbLwlb8tpHKPv/I5KfdgIv30gf/MXrvAygo6LrDk2OZP0ihRJAb1viFyfFH8t3kwv3tDINEqZC7G+9OMPJBgiBaWE/3yS9AV8te53yfS54AXRXIrwgPmMXsV5zylg2vtKyS+I2qMN217sy11B057uw6AfH/k8rL6xsbssielT4IegYpbe8NsU7etKbU6s+XZu/pyn7XpDLzmLQ+1HfoH9F5B32Osv18j70lqRnjU8kXjz+EEJWy9zWZ1QBGWB4SQX5uHOARttELchHF6lE1TUjBUDiFDc9MYo+7ipSC+kn3h+hAZPi5nIt4dmaf7pddNM6ba01DT/TP0AVs4m1EJamONUPNd/vPcuxj5Pu575GYvsDFu4HYtKvf1MR9P8QoZkGU/XGcC86oz2iSvRQJqaK2EAe+p8D4LOmkWxLdFRD/SQKj7g/Ymwlg5N/ffg3JyNfOrBCxldiihae92QMMiryw067oIYu/yA++I5nbq/3OodZmezlAZu/F3jAIwt1o3I8KgkvJVGj3bTRW6Nfl1lwznwyYTdOVE="
 
     - stage: Prueba
-      if: (commit_message =~ /.*docs\/.*/)
+      if: (commit_message =~ /^Merge pull request .*docs\/.*/)
       python:
         - "3.8"
