@@ -204,7 +204,7 @@ class DripBase(object):
         rules = []
         rule_set = self.drip_model.queryset_rules.filter(rule_type='or')
         for rule in rule_set:
-            kwargs = rule.filter_kwargs(qs, now=self.now)
+            kwargs = rule.filter_kwargs(now=self.now)
             query_or = Q(**kwargs)
             rules.append(query_or)
 
@@ -233,7 +233,7 @@ class DripBase(object):
 
             clause = clauses.get(rule.method_type, clauses['filter'])
 
-            kwargs = rule.filter_kwargs(qs, now=self.now)
+            kwargs = rule.filter_kwargs(now=self.now)
             clause.append(Q(**kwargs))
 
             qs = rule.apply_any_annotation(qs)

@@ -268,7 +268,7 @@ class AbstractQuerySetRule(models.Model):
             field_value = False
         return field_value
 
-    def filter_kwargs(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> dict:  # noqa: E501
+    def filter_kwargs(self, now: DateTime = datetime.now) -> dict:
         """
         Returns a dictionary {field_name: field_value} where:
 
@@ -310,7 +310,7 @@ class AbstractQuerySetRule(models.Model):
 
         Also annotates ``qs`` by calling ``self.apply_any_annotation``.
         """
-        kwargs = self.filter_kwargs(qs, now)
+        kwargs = self.filter_kwargs(now)
         qs = self.apply_any_annotation(qs)
 
         if self.method_type == 'filter':
