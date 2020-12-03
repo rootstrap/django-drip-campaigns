@@ -5,6 +5,13 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from drip.utils import get_user_model
+from .types import (
+    AbstractQuerySetRuleQuerySet,
+    DateTime,
+    BoolOrStr,
+    FExpressionOrStr,
+    TimeDeltaOrStr
+)
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
@@ -140,6 +147,9 @@ RULE_TYPES = (
 
 
 class AbstractQuerySetRule(models.Model):
+    """
+    Allows to apply filters to drips
+    """
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
@@ -172,7 +182,7 @@ class AbstractQuerySetRule(models.Model):
         )
     )
 
-    def clean(self):
+    def clean(self) -> None:
         User = get_user_model()
         try:
             self.apply(User.objects.all())
@@ -185,7 +195,11 @@ class AbstractQuerySetRule(models.Model):
             )
 
     @property
-    def annotated_field_name(self):
+    def annotated_field_name(self) -> str:
+        """
+        Generates an annotated version of this field's name,
+        based on self.field_name
+        """
         field_name = self.field_name
         if field_name.endswith('__count'):
             agg, _, _ = field_name.rpartition('__')
@@ -193,14 +207,27 @@ class AbstractQuerySetRule(models.Model):
 
         return field_name
 
-    def apply_any_annotation(self, qs):
+    def apply_any_annotation(self, qs: AbstractQuerySetRuleQuerySet) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
+        """
+        Returns qs annotated with Count over this field's name.
+        """
         if self.field_name.endswith('__count'):
             field_name = self.annotated_field_name
             agg, _, _ = self.field_name.rpartition('__')
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def set_time_deltas_and_dates(self, now, field_value):
+    def set_time_deltas_and_dates(self, now: DateTime, field_value: str) -> TimeDeltaOrStr:  # noqa: E501
+        """
+        Parses the field_value parameter and returns a TimeDelta object
+        The field_value string might start with one of
+        the following substrings:
+        * "now-"
+        * "now+"
+        * "today-"
+        * "today+"
+        Otherwise returns field_value unchanged.
+        """
         # set time deltas and dates
         if self.field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
@@ -216,14 +243,24 @@ class AbstractQuerySetRule(models.Model):
             field_value = now().date() + parse(field_value)
         return field_value
 
-    def set_f_expressions(self, field_value):
+    def set_f_expressions(self, field_value: str) -> FExpressionOrStr:
+        """
+        If field_value starts with the substring "F_", returns an instance
+        of models.F within the field_value expression, otherwise returns
+        field_value unchanged.
+        """
         # F expressions
         if self.field_value.startswith('F_'):
             field_value = self.field_value.replace('F_', '')
             field_value = models.F(field_value)
         return field_value
 
-    def set_booleans(self, field_value):
+    def set_booleans(self, field_value: str) -> BoolOrStr:
+        """
+        Returns True or False whether field value is 'True' or
+        'False' respectively.
+        Otherwise returns field_value unchanged.
+        """
         # set booleans
         if self.field_value == 'True':
             field_value = True
@@ -231,7 +268,22 @@ class AbstractQuerySetRule(models.Model):
             field_value = False
         return field_value
 
-    def filter_kwargs(self, now=datetime.now):
+    def filter_kwargs(self, now: DateTime = datetime.now) -> dict:
+        """
+        Returns a dictionary {field_name: field_value} where:
+
+        - field_name is self.annotated_field_name in addition to
+          self.lookup_type in the form FIELD_NAME__LOOKUP.
+        - field_value is the result of passing self.field_value
+          through parsing methods.
+
+        The resulting dict can be used to apply filters over querysets.
+
+        .. code-block:: python
+
+          queryset.filter(**obj.filter_kwargs(datetime.now()))
+
+        """
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
@@ -247,9 +299,19 @@ class AbstractQuerySetRule(models.Model):
 
         return kwargs
 
-    def apply(self, qs, now=datetime.now):
+    def apply(self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
+        """
+        Returns ``qs`` filtered/excluded by any filter resulting
+        from ``self.filter_kwargs`` depending on whether
+        ``self.method_type`` is one of the following:
 
+        - "filter"
+        - "exclude"
+
+        Also annotates ``qs`` by calling ``self.apply_any_annotation``.
+        """
         kwargs = self.filter_kwargs(now)
+
         qs = self.apply_any_annotation(qs)
 
         if self.method_type == 'filter':
