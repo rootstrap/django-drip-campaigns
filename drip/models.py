@@ -308,10 +308,9 @@ class AbstractQuerySetRule(models.Model):
         - "filter"
         - "exclude"
 
-        kwargs = self.filter_kwargs(now)
         Also annotates ``qs`` by calling ``self.apply_any_annotation``.
         """
-        kwargs = self.filter_kwargs(qs, now)
+        kwargs = self.filter_kwargs(now)
         qs = self.apply_any_annotation(qs)
 
         if self.method_type == 'filter':
