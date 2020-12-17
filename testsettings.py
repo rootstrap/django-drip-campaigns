@@ -20,6 +20,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
 
     'drip',
+    'campaigns',
 
     # testing only
     'credits',
@@ -68,3 +69,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = ()
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DRIP_CLASS_NAME = 'drip.Drip'
