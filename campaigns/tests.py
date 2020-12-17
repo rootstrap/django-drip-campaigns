@@ -4,6 +4,7 @@ from campaigns.models import Campaign, CampaignDrip
 
 DRIP_AMOUNT = 10
 
+
 class DripsTestCase(TestCase):
 
     def test_campaings_creation(self):
@@ -12,8 +13,7 @@ class DripsTestCase(TestCase):
         drips = Drip.objects.all()
         campaign = Campaign()
         campaign.save()
-        campaign_drips = [CampaignDrip(campaign=campaign, drip=d) for d in drips]
+        campaign_drips = [CampaignDrip(campaign=campaign, drip=d) for d in drips]  # noqa: E501
         CampaignDrip.objects.bulk_create(campaign_drips)
 
         assert len(campaign.drips) == DRIP_AMOUNT
-
