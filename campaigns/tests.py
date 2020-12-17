@@ -8,7 +8,7 @@ DRIP_AMOUNT = 10
 class DripsTestCase(TestCase):
 
     def test_campaings_creation(self):
-        drips = [Drip(name=f'{i}-th drip') for i in range(DRIP_AMOUNT)]
+        drips = [Drip(name='{}th drip'.format(i)) for i in range(DRIP_AMOUNT)]
         Drip.objects.bulk_create(drips)
         drips = Drip.objects.all()
         campaign = Campaign()
