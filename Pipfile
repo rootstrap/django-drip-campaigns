@@ -48,6 +48,7 @@ sphinx-rtd-theme = "*"
 [packages]
 Django = "==3.0.7"
 apscheduler = "*"
+lark-parser = "*"
 
 [requires]
 python_version = "3.8"
