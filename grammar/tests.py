@@ -11,9 +11,9 @@ class GrammarTest(TestCase):
         grammar = Path(Path(__file__).parent, "grammar.lark").open()
         grammar = "".join(grammar.readlines())
 
-        drip1 = Drip(name="Nacho's Drip").save()
-        drip2 = Drip(name="Nice Drip").save()
-        drip3 = Drip(name="Not so nice").save()
+        Drip(name="Nacho's Drip").save()
+        Drip(name="Nice Drip").save()
+        Drip(name="Not so nice").save()
 
         input_expression = "(enabled is False)" \
                            "and (sent_drips null True)" \
