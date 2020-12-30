@@ -11,5 +11,5 @@ class Campaign(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         if self.delete_drips:
-            self.drips.delete()
+            self.drip_set.all().delete()
         super().delete(using, keep_parents)
