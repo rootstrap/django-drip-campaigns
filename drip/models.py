@@ -48,6 +48,8 @@ class AbstractDrip(models.Model):
         max_length=120, blank=True, default='default'
     )
 
+    campaign = models.ForeignKey('campaigns.Campaign', on_delete=models.CASCADE)
+
     class Meta:
         abstract = True
 
