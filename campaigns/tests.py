@@ -12,6 +12,5 @@ class DripsTestCase(TestCase):
         campaign.save()
         drips = [Drip(name='{}th drip'.format(i), campaign=campaign) for i in range(DRIP_AMOUNT)]
         Drip.objects.bulk_create(drips)
-        drips = Drip.objects.all()
 
         assert len(campaign.drip_set.all()) == DRIP_AMOUNT
