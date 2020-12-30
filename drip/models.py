@@ -42,7 +42,13 @@ class AbstractDrip(models.Model):
     )
     message_class = models.CharField(max_length=120, blank=True, default="default")
 
-    campaign = models.ForeignKey('campaigns.Campaign', on_delete=models.CASCADE)
+    campaign = models.ForeignKey(
+        'campaigns.Campaign',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text='If set, this is the campaign to which this Drip belongs to.'
+    )
 
     class Meta:
         abstract = True
