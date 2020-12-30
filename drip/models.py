@@ -46,7 +46,8 @@ class AbstractDrip(models.Model):
         'campaigns.Campaign',
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        default=None,
+        on_delete=models.SET_DEFAULT,
         help_text='If set, this is the campaign to which this Drip belongs to.'
     )
 
