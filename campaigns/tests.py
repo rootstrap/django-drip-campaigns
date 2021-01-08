@@ -45,7 +45,10 @@ class DripsTestCase(TestCase):
 
         assert drips_before_delete > Drip.objects.count()
 
-        campaign_do_not_delete_drips = Campaign(name='remove me, but keep my drips alive!', delete_drips=False)
+        campaign_do_not_delete_drips = Campaign(
+            name='remove me, but keep my drips alive!',
+            delete_drips=False,
+        )
         campaign_do_not_delete_drips.save()
 
         Drip.objects.bulk_create(
