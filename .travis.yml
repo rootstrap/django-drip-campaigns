@@ -21,7 +21,7 @@ env:
 
 install:
   - pip3 install pipenv
-  - pipenv install --dev
+  - pipenv install --dev --skip-lock
   - pip3 install "Django==${DJANGO_VERSION}"
 
 script:
