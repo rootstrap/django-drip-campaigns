@@ -1,8 +1,4 @@
 from django.db import models
-from django.conf import settings
-from django.apps import apps as django_apps
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 class Campaign(models.Model):
