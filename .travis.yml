@@ -11,13 +11,10 @@ python:
 
 
 env:
-  global:
-    - CC_TEST_REPORTER_ID
-
-
-env:
   - DJANGO_VERSION="2.2"
   - DJANGO_VERSION="3.0.7"
+  global:
+    - CC_TEST_REPORTER_ID
 
 
 install:
@@ -35,6 +32,7 @@ script:
   - python manage.py migrate
   - flake8 .
   - coverage run manage.py test
+  - python setup.py -q install
 
 
 jobs:
