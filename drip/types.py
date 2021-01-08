@@ -11,3 +11,5 @@ DateTime = datetime
 TimeDeltaOrStr = TypeVar('TimeDeltaOrStr', timedelta, str)
 BoolOrStr = TypeVar('BoolOrStr', bool, str)
 FExpressionOrStr = TypeVar('FExpressionOrStr', F, str)
+
+UserQuerySet = Iterable[Type['User']]  # noqa: F821, E501

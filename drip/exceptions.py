@@ -1,0 +1,4 @@
+
+
+class MessageClassNotFound(Exception):
+    pass
