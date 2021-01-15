@@ -25,6 +25,9 @@ except ImportError:
     conditional_now = datetime.now
 
 
+DEFAULT_DRIP_MESSAGE_CLASS = 'drip.drips.DripMessage'
+
+
 def configured_message_classes() -> ChainMap:
     """
     Returns a ChainMap (basically a dict), between default settings and
@@ -35,33 +38,33 @@ def configured_message_classes() -> ChainMap:
     For example, if you define this at DRIP_MESSAGE_CLASSES:
 
         {
-            'default': 'my.path.to.Drip',
-            'my_other_class': 'my.other.path.to.Drip',
+            'default': 'my.path.to.DripMessage',
+            'my_other_class': 'my.other.path.to.DripMessage',
         }
 
     The returning value of this method would be:
 
         {
             'default': 'my.path.to.Drip',
-            'my_other_class': 'my.other.path.to.Drip',
+            'my_other_class': 'my.other.path.to.DripMessage',
         }
 
     But, if you define this:
 
         {
-            'my_other_class': 'my.other.path.to.Drip',
+            'my_other_class': 'my.other.path.to.DripMessage',
         }
 
     The returning value of this method would be:
 
         {
-            'default': 'drip.drips.Drip',
-            'my_other_class': 'my.other.path.to.Drip',
+            'default': 'drip.drips.DripMessage',
+            'my_other_class': 'my.other.path.to.DripMessage',
         }
 
     A 'default' key is added when it's not present on DRIP_MESSAGE_CLASSES.
     """
-    default_config = {'default': 'drip.drips.DripMessage'}
+    default_config = {'default': DEFAULT_DRIP_MESSAGE_CLASS}
     user_defined_config = getattr(settings, 'DRIP_MESSAGE_CLASSES', {})
     return ChainMap(user_defined_config, default_config)
 
