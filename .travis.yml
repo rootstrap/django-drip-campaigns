@@ -24,14 +24,15 @@ install:
   - pip3 install "Django==${DJANGO_VERSION}"
   - pip3 install Sphinx
   - pip3 install flake8
-  - pip install coverage
-
+  - pip3 install coverage
+  - pip3 install lark-parser
 
 script:
   # makemigrations of each app is needed
   - python manage.py makemigrations drip
   - python manage.py makemigrations credits
   - python manage.py makemigrations auth
+  - python manage.py makemigrations grammar
   - python manage.py migrate
   - flake8 .
   - coverage run manage.py test
