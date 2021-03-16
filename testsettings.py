@@ -57,9 +57,6 @@ TEMPLATES = [
     },
 ]
 
-USE_TZ = True
-TIME_ZONE = 'UTC'
-
 AUTH_PROFILE_MODULE = 'credits.Profile'
 
 ROOT_URLCONF = 'test_urls'
