@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from django.db.models import F
 
 
+AbstractQuerySetRule = TypeVar('AbstractQuerySetRule')
 AbstractQuerySetRuleQuerySet = Iterable[Type['AbstractQuerySetRule']]  # noqa: F821, E501
 DateTime = datetime
 TimeDeltaOrStr = TypeVar('TimeDeltaOrStr', timedelta, str)

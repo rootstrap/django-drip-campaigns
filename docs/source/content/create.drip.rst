@@ -24,8 +24,8 @@ The `FIELD VALUE` input can be a string, a number, or a regular expression. The 
 
 When you enter a user field that has a date type, Django Drip Campaigns allows you to enter a date value in natural language combining the current time and some operation with seconds, hours, days, etc. For example, if you have selected the field `last_login` that has a date type, and you want to create a drip to send emails to the users who logged in exactly one week ago; you can enter:
 
-Finally you have the `rule_type` field this field determines how the queryset will be filtered by that particular rule.
-At the moment, all the rules with rule type `And` narrow a queryset and all the rules with rule type `Or` generate different branches for example if you have the following conditions:
+Finally you have the `rule_type` field. This field determines how the queryset will be filtered by that particular rule.
+At the moment, all the rules with rule type `And` narrows a queryset, and all the rules with rule type `Or` generate different branches, for example, if you have the following conditions:
 `friends__count greater than 3 rule_type AND`, `friends__count less than 5 rule_type AND`, `name equals "john" rule_type OR`, `name equals "joe" rule_type OR`,
 will be interpreted as follows
 `(name == john) OR (name == joe) OR ((friends__count > 3) AND friends__count < 5))``
