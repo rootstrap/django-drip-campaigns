@@ -245,10 +245,10 @@ class AbstractQuerySetRule(models.Model):
 
     def set_f_expressions(self, field_value: str) -> FExpressionOrStr:
         """
-        If field_value starts with the substring "F_", returns an instance
+        If field_value starts with the substring 'F\_', returns an instance
         of models.F within the field_value expression, otherwise returns
         field_value unchanged.
-        """
+        """  # noqa: W605
         # F expressions
         if self.field_value.startswith('F_'):
             field_value = self.field_value.replace('F_', '')
