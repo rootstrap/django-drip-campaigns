@@ -43,11 +43,11 @@ Pygments = "==2.6.1"
 sphinx = "*"
 sphinxcontrib-django = "*"
 twine = "*"
+sphinx-rtd-theme = "*"
 
 [packages]
 Django = "==3.0.7"
 apscheduler = "*"
-sphinx-rtd-theme = "*"
 
 [requires]
 python_version = "3.8"
