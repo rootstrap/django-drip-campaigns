@@ -72,7 +72,7 @@ def configured_message_classes() -> ChainMap:
 @lru_cache()
 def message_class_for(name: str) -> Any:
     """
-    Given a class' path, returns a reference to it.
+    Given a class's path, returns a reference to it.
     Raises MessageClassNotFound exception if name is not present in
     the ChainMap produced by configured_message_classes.
     """
