@@ -17,3 +17,6 @@ __pycache__
 *DS_Store
 
 .vscode
+
+#pyenv
+.python-version
