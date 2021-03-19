@@ -46,7 +46,7 @@ twine = "*"
 sphinx-rtd-theme = "*"
 
 [packages]
-Django = "==3.0.7"
+Django = "==3.1.7"
 apscheduler = "*"
 
 [requires]
