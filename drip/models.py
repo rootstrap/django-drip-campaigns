@@ -327,3 +327,10 @@ class AbstractQuerySetRule(models.Model):
 
 class QuerySetRule(AbstractQuerySetRule):
     pass
+
+
+class TestUserUUIDModel(models.Model):
+    """
+    Class to test UUID field as id in User model
+    """
+    id = models.UUIDField(primary_key=True)
