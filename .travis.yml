@@ -1,5 +1,6 @@
 language: python
 
+cache: pip
 
 dist: xenial
 
@@ -17,7 +18,7 @@ env:
 
 env:
   - DJANGO_VERSION="2.2"
-  - DJANGO_VERSION="3.0.7"
+  - DJANGO_VERSION="3.1.7"
 
 
 install:
@@ -39,23 +40,23 @@ script:
 
 jobs:
   include:
-    - stage: Test 3.5-2.2
+    - stage: Test Python 3.5 - Django 2.2
       python:
         - "3.5"
       env:
         - DJANGO_VERSION="2.2"
 
-    - stage: Test 3.8-2.2
+    - stage: Test Python 3.8 - Django 2.2
       python:
         - "3.8"
       env:
         - DJANGO_VERSION="2.2"
 
-    - stage: Test Reporter
+    - stage: Test Reporter - Python 3.8 and Django 3.1.7
       python:
         - "3.8"
       env:
-        - DJANGO_VERSION="3.0.7"
+        - DJANGO_VERSION="3.1.7"
       script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
