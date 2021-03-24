@@ -114,6 +114,8 @@ jobs:
         - DJANGO_VERSION="3.1.7"
       script:
         - pip3 install Sphinx
+        - pip3 install sphinxcontrib-django
+        - pip3 install sphinx-rtd-theme
         - sphinx-build -b html docs/source/ build/
         - sudo rm -r build/
 
