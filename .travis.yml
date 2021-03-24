@@ -41,36 +41,43 @@ jobs:
       env:
         - DJANGO_VERSION="2.2"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "3.6"
       env:
         - DJANGO_VERSION="2.2"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "3.6"
       env:
         - DJANGO_VERSION="3.1.7"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "3.7"
       env:
         - DJANGO_VERSION="2.2"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "3.7"
       env:
         - DJANGO_VERSION="3.1.7"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "3.8"
       env:
         - DJANGO_VERSION="2.2"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "pypy3"
       env:
         - DJANGO_VERSION="2.2"
     - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "pypy3"
       env:

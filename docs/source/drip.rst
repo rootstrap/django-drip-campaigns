@@ -56,27 +56,4 @@ drip.tests module
    :undoc-members:
    :show-inheritance:
 
-drip.utils module
------------------
-
-.. automodule:: drip.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-drip.views module
------------------
-
-.. automodule:: drip.views
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: drip
-   :members:
-   :undoc-members:
-   :show-inheritance:
+drip.uti
