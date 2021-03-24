@@ -1,15 +1,22 @@
 from datetime import timedelta
-
+from drip.admin import DripAdmin
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import resolve, reverse
 from django.utils import timezone
+from unittest.mock import patch
+from django.contrib.admin.sites import AdminSite
+
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase
 from drip.utils import get_user_model, unicode
-
 from credits.models import Profile
+
+
+def get_user_model_mock():
+    from drip.models import TestUserUUIDModel
+    return TestUserUUIDModel
 
 
 class DripsTestCase(TestCase):
@@ -556,7 +563,7 @@ class UrlsTestCase(TestCase):
 
         self.assertEqual(timeline_url, '/admin/drip/drip/1/timeline/2/3/')
 
-    def test_view_drip_email_url_url(self):
+    def test_view_drip_email_url(self):
         view_drip_email_url = reverse(
             'admin:view_drip_email',
             kwargs={
@@ -570,4 +577,19 @@ class UrlsTestCase(TestCase):
         self.assertEqual(
             view_drip_email_url,
             '/admin/drip/drip/1/timeline/2/3/4/',
+        )
+
+    @patch('drip.admin.get_user_model', new=get_user_model_mock)
+    def test_drip_timeline_url_user_uuid(self):
+        test_admin = DripAdmin(model=Drip, admin_site=AdminSite())
+        new_urls = test_admin.get_urls()
+        test_url_pattern = None
+        for url_pattern in new_urls:
+            if url_pattern.name == 'view_drip_email':
+                test_url_pattern = url_pattern
+                break
+        self.assertIsNotNone(test_url_pattern)
+        self.assertEqual(
+            test_url_pattern.pattern._route,
+            '<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/',  # noqa
         )

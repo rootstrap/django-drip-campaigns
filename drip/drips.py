@@ -1,5 +1,6 @@
 import operator
 import functools
+import logging
 
 from django.conf import settings
 from django.db.models import Q
@@ -16,9 +17,6 @@ try:
 except ImportError:
     from datetime import datetime
     conditional_now = datetime.now
-
-
-import logging
 
 
 def configured_message_classes() -> dict:
@@ -95,7 +93,7 @@ class DripMessage(object):
 
     def get_from_(self):
         if self.drip_base.from_email_name:
-            from_ = "{name} <{email}>".format(
+            from_ = '{name} <{email}>'.format(
                 name=self.drip_base.from_email_name,
                 email=self.drip_base.from_email,
             )

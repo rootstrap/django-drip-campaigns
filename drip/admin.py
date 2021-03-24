@@ -127,13 +127,26 @@ class DripAdmin(admin.ModelAdmin):
                 self.av(self.timeline),
                 name='drip_timeline'
             ),
-            path(
-                '<int:drip_id>/timeline/<int:into_past>/'
-                '<int:into_future>/<int:user_id>/',
-                self.av(self.view_drip_email),
-                name='view_drip_email'
-            )
         ]
+
+        User = get_user_model()
+        if User._meta.get_field('id').get_internal_type() == 'UUIDField':
+            my_urls += [
+                path(
+                    '<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/',  # noqa
+                    self.av(self.view_drip_email),
+                    name='view_drip_email',
+                ),
+            ]
+        else:
+            my_urls += [
+                path(
+                    '<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<int:user_id>/',  # noqa
+                    self.av(self.view_drip_email),
+                    name='view_drip_email',
+                ),
+            ]
+
         return my_urls + urls
 
 
