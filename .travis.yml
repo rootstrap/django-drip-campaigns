@@ -4,29 +4,20 @@ cache: pip
 
 dist: xenial
 
-
+# This Python and Django versions will be used only by the Test Reporter stage 
 python:
-  - "3.6"
-  - "3.7"
-  - "pypy3"
-
-
+  - "3.8"
 env:
-  global:
+  - jobs:
+    - DJANGO_VERSION="3.1.7"
+  - global:
     - CC_TEST_REPORTER_ID
-
-
-env:
-  - DJANGO_VERSION="2.2"
-  - DJANGO_VERSION="3.1.7"
-
+#--------------------------------------------------------------------
 
 install:
   - pip3 install "Django==${DJANGO_VERSION}"
-  - pip3 install Sphinx
   - pip3 install flake8
-  - pip install coverage
-
+  - pip3 install coverage
 
 script:
   # makemigrations of each app is needed
@@ -37,26 +28,60 @@ script:
   - flake8 .
   - coverage run manage.py test
 
-
 jobs:
   include:
-    - stage: Test Python 3.5 - Django 2.2
+    # Test combinations: From Python 3.5 to pypy3 combining with Django 2.2 and 3.1.7.
+    # Excluding: Python 3.5 and Django 3.1.7 because they are no compatible.
+    # Also excluding: Python 3.8 and Django 3.1.7 because they are used in Test Reporter. 
+    # Test stage is executed if it is not a docs PR.
+    - stage: Test
+      if: NOT (branch =~ /^docs\/.*/)
       python:
         - "3.5"
       env:
         - DJANGO_VERSION="2.2"
-
-    - stage: Test Python 3.8 - Django 2.2
+    - stage: Test
+      python:
+        - "3.6"
+      env:
+        - DJANGO_VERSION="2.2"
+    - stage: Test
+      python:
+        - "3.6"
+      env:
+        - DJANGO_VERSION="3.1.7"
+    - stage: Test
+      python:
+        - "3.7"
+      env:
+        - DJANGO_VERSION="2.2"
+    - stage: Test
+      python:
+        - "3.7"
+      env:
+        - DJANGO_VERSION="3.1.7"
+    - stage: Test
       python:
         - "3.8"
       env:
         - DJANGO_VERSION="2.2"
-
-    - stage: Test Reporter - Python 3.8 and Django 3.1.7
+    - stage: Test
       python:
-        - "3.8"
+        - "pypy3"
+      env:
+        - DJANGO_VERSION="2.2"
+    - stage: Test
+      python:
+        - "pypy3"
       env:
         - DJANGO_VERSION="3.1.7"
+
+    # Test Reporter
+    # Test and report the resultant coverage.
+    # Combination of Python 3.8 and Django 3.1.7. It uses from the configuration at the beggining of this file.
+    # Test Reporter stage is executed if it is not a docs PR.
+    - stage: Test Reporter
+      if: NOT (branch =~ /^docs\/.*/)
       script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
@@ -70,9 +95,26 @@ jobs:
         - coverage run manage.py test
         - coverage xml
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    
+    # Build docs
+    # Builds the docs to see that there is no error in documentation.
+    # Build docs stage is executed only on docs PR.
+    - stage: Build docs
+      if: branch =~ /^docs\/.*/
+      python:
+        - "3.8"
+      env:
+        - DJANGO_VERSION="3.1.7"
+      install: skip
+      script:
+        - pip3 install Sphinx
+        - sphinx-build -b html docs/source/ build/
+        - sudo rm -r build/
 
-    - stage: Pypi
-      # Publish in pypi only when you are not merging from a documentation branch
+    # Publish on Pypi
+    # Publish the master branch in Pypi.
+    # Publish on Pypi stage is executed when merging on master branch and it is not a docs PR.
+    - stage: Publish on Pypi
       if: NOT (commit_message =~ /^Merge pull request .*docs\/.*/) AND (branch = master)
       python:
         - "3.8"
