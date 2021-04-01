@@ -570,29 +570,29 @@ class DripsTestCase(TestCase):
 
         self.assertEqual(
             len(message_classes.items()),
-            default_message_classes_length + 1
+            default_message_classes_length + 1,
         )
         self.assertEqual(
             message_classes['default'],
-            DEFAULT_DRIP_MESSAGE_CLASS
+            DEFAULT_DRIP_MESSAGE_CLASS,
         )
 
         # Replacing an existing Message Class
         setattr(
             settings,
             'DRIP_MESSAGE_CLASSES',
-            {'default': 'drip.drips.OtherDripClass'}
+            {'default': 'drip.drips.OtherDripClass'},
         )
 
         message_classes = configured_message_classes()
 
         self.assertEqual(
             len(message_classes.items()),
-            default_message_classes_length
+            default_message_classes_length,
         )
         self.assertEqual(
             message_classes['default'],
-            'drip.drips.OtherDripClass'
+            'drip.drips.OtherDripClass',
         )
 
         # Mixing replacing and adding a new class
@@ -609,15 +609,15 @@ class DripsTestCase(TestCase):
 
         self.assertEqual(
             len(message_classes.items()),
-            default_message_classes_length + 1
+            default_message_classes_length + 1,
         )
         self.assertEqual(
             message_classes['default'],
-            'drip.drips.OtherDripClass'
+            'drip.drips.OtherDripClass',
         )
         self.assertEqual(
             message_classes['custom'],
-            'custom.module.ClassName'
+            'custom.module.ClassName',
         )
 
 
