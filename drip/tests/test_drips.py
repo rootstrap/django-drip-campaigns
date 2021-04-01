@@ -592,7 +592,7 @@ class DripsTestCase(TestCase):
         )
         self.assertEqual(
             message_classes['default'],
-            "drip.drips.OtherDripClass"
+            'drip.drips.OtherDripClass'
         )
 
         # Mixing replacing and adding a new class
@@ -613,11 +613,11 @@ class DripsTestCase(TestCase):
         )
         self.assertEqual(
             message_classes['default'],
-            "drip.drips.OtherDripClass"
+            'drip.drips.OtherDripClass'
         )
         self.assertEqual(
             message_classes['custom'],
-            "custom.module.ClassName"
+            'custom.module.ClassName'
         )
 
 
