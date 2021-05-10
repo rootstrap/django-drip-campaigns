@@ -563,7 +563,7 @@ class DripsTestCase(TestCase):
         setattr(
             settings,
             'DRIP_MESSAGE_CLASSES',
-            {'non-default-class': 'drip.drips.OtherDripClass'}
+            {'non-default-class': 'drip.drips.OtherDripClass'},
         )
 
         message_classes = configured_message_classes()
