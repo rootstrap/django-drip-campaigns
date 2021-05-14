@@ -295,7 +295,7 @@ class DripBase(object):
             message_instance = MessageClass(self, user)
             try:
                 result = message_instance.message.send()
-                if result:
+                if not result:
                     SentDrip.objects.create(
                         drip=self.drip_model,
                         user=user,
