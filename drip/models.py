@@ -92,6 +92,13 @@ class AbstractSentDrip(models.Model):
         related_name='sent_drips',
         on_delete=models.CASCADE,
     )
+    name = models.ForeignKey(
+        'drip.Drip',
+        null=True,
+        to_field='name',
+        db_column='name',
+        on_delete=models.CASCADE,
+    )
     user = models.ForeignKey(
         getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
         related_name='sent_drips',

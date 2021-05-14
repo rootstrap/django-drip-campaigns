@@ -298,6 +298,7 @@ class DripBase(object):
                 if result:
                     SentDrip.objects.create(
                         drip=self.drip_model,
+                        name=self.drip_model,
                         user=user,
                         from_email=self.from_email,
                         from_email_name=self.from_email_name,
