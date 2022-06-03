@@ -31,8 +31,6 @@ jobs:
           - python-version: "pypy3"
             django-version: "3.2"
     runs-on: ubuntu-latest
-    # env:
-    #   DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
 
     steps:
     - uses: actions/checkout@v2
