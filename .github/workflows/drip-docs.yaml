@@ -16,4 +16,3 @@ jobs:
         pip install sphinx-rtd-theme
         sphinx-build -b html docs/source/ build/
         sudo rm -r build/
-    
