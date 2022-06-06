@@ -77,7 +77,7 @@ Before creating the pull request, please update the version in `drip/__inti__.py
 - If you are doing a non breaking change, then bump the second digit.
 - If you are doing a breaking change, then bump the first digit.
 
-We have travis-ci configured to automatically release the changes in master branch.
+We have Github Actions configured to automatically release the changes in master branch.
 
 If you are doing changes in the docs, you have to:
 
