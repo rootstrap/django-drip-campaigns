@@ -1,0 +1,19 @@
+name: Django Drip Campaigns Docs build
+
+on:
+  push:
+    branches:
+      - "docs/*"
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Build docs
+      run: |
+        pip install Sphinx
+        pip install sphinxcontrib-django
+        pip install sphinx-rtd-theme
+        sphinx-build -b html docs/source/ build/
+        sudo rm -r build/
+    
