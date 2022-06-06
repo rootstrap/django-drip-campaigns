@@ -11,8 +11,23 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python version 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install pypa/build
+      run: |
+        python -m pip install build
+
+    - name: Build a binary wheel and a source tarball
+      run: |
+        python -m  build --sdist --wheel --outdir dist/ .
+
     - name: Publish a Python distribution to PyPI
-      if: github.head_ref != 'docs/'
+      if: ${{ !startsWith(github.head_ref, 'docs/') }}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
