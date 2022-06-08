@@ -1,12 +1,12 @@
-import operator
 import functools
 import logging
+import operator
+from importlib import import_module
 
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template import Context, Template
-from importlib import import_module
-from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
 from drip.models import SentDrip
@@ -16,6 +16,7 @@ try:
     from django.utils.timezone import now as conditional_now
 except ImportError:
     from datetime import datetime
+
     conditional_now = datetime.now
 
 
@@ -25,15 +26,15 @@ def configured_message_classes() -> dict:
     :return: [description]
     :rtype: dict
     """
-    conf_dict = getattr(settings, 'DRIP_MESSAGE_CLASSES', {})
-    if 'default' not in conf_dict:
-        conf_dict['default'] = 'drip.drips.DripMessage'
+    conf_dict = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
+    if "default" not in conf_dict:
+        conf_dict["default"] = "drip.drips.DripMessage"
     return conf_dict
 
 
 def message_class_for(name: str):
     path = configured_message_classes()[name]
-    mod_name, klass_name = path.rsplit('.', 1)
+    mod_name, klass_name = path.rsplit(".", 1)
     mod = import_module(mod_name)
     klass = getattr(mod, klass_name)
     return klass
@@ -66,7 +67,7 @@ class DripMessage(object):
     @property
     def context(self):
         if not self._context:
-            self._context = Context({'user': self.user})
+            self._context = Context({"user": self.user})
         return self._context
 
     @property
@@ -93,7 +94,7 @@ class DripMessage(object):
 
     def get_from_(self):
         if self.drip_base.from_email_name:
-            from_ = '{name} <{email}>'.format(
+            from_ = "{name} <{email}>".format(
                 name=self.drip_base.from_email_name,
                 email=self.drip_base.from_email,
             )
@@ -108,13 +109,14 @@ class DripMessage(object):
 
             self._message = EmailMultiAlternatives(
                 self.subject,
-                self.plain, from_,
+                self.plain,
+                from_,
                 [self.user.email],
             )
 
             # check if there are html tags in the rendered template
             if len(self.plain) != len(self.body):
-                self._message.attach_alternative(self.body, 'text/html')
+                self._message.attach_alternative(self.body, "text/html")
         return self._message
 
 
@@ -125,6 +127,7 @@ class DripBase(object):
     You can extend this manually, or you can create full querysets
     and templates from the admin.
     """
+
     #: needs a unique name
     name = None
     subject_template = None
@@ -135,22 +138,22 @@ class DripBase(object):
     def __init__(self, drip_model, *args, **kwargs):
         self.drip_model = drip_model
 
-        self.name = kwargs.pop('name', self.name)
-        self.from_email = kwargs.pop('from_email', self.from_email)
+        self.name = kwargs.pop("name", self.name)
+        self.from_email = kwargs.pop("from_email", self.from_email)
         self.from_email_name = kwargs.pop(
-            'from_email_name',
+            "from_email_name",
             self.from_email_name,
         )
         self.subject_template = kwargs.pop(
-            'subject_template',
+            "subject_template",
             self.subject_template,
         )
-        self.body_template = kwargs.pop('body_template', self.body_template)
+        self.body_template = kwargs.pop("body_template", self.body_template)
 
         if not self.name:
-            raise AttributeError('You must define a name.')
+            raise AttributeError("You must define a name.")
 
-        self.now_shift_kwargs = kwargs.get('now_shift_kwargs', {})
+        self.now_shift_kwargs = kwargs.get("now_shift_kwargs", {})
 
     #########################
     #   DATE MANIPULATION   #
@@ -169,6 +172,7 @@ class DripBase(object):
         to manipulate the slicing of time.
         """
         from datetime import timedelta
+
         return timedelta(*a, **kw)
 
     def walk(self, into_past: int = 0, into_future: int = 0):
@@ -187,20 +191,17 @@ class DripBase(object):
             kwargs = dict(
                 drip_model=self.drip_model,
                 name=self.name,
-                now_shift_kwargs={'days': shift},
+                now_shift_kwargs={"days": shift},
             )
             walked_range.append(self.__class__(**kwargs))
         return walked_range
 
     def apply_queryset_rules(self, qs: str) -> str:
-        return (
-                self.apply_and_queryset_rules(qs) |
-                self.apply_or_queryset_rules(qs)
-               )
+        return self.apply_and_queryset_rules(qs) | self.apply_or_queryset_rules(qs)
 
     def apply_or_queryset_rules(self, qs: str) -> str:
         rules = []
-        rule_set = self.drip_model.queryset_rules.filter(rule_type='or')
+        rule_set = self.drip_model.queryset_rules.filter(rule_type="or")
         for rule in rule_set:
             kwargs = rule.filter_kwargs(now=self.now)
             query_or = Q(**kwargs)
@@ -222,24 +223,24 @@ class DripBase(object):
         :rtype: str
         """
         clauses = {
-            'filter': [],
-            'exclude': [],
+            "filter": [],
+            "exclude": [],
         }
         rules = []
-        for rule in self.drip_model.queryset_rules.filter(rule_type='and'):
+        for rule in self.drip_model.queryset_rules.filter(rule_type="and"):
             rules.append(rule)
 
-            clause = clauses.get(rule.method_type, clauses['filter'])
+            clause = clauses.get(rule.method_type, clauses["filter"])
 
             kwargs = rule.filter_kwargs(now=self.now)
             clause.append(Q(**kwargs))
 
             qs = rule.apply_any_annotation(qs)
 
-        if clauses['exclude']:
-            qs = qs.exclude(functools.reduce(operator.or_, clauses['exclude']))
+        if clauses["exclude"]:
+            qs = qs.exclude(functools.reduce(operator.or_, clauses["exclude"]))
 
-        qs = qs.filter(*clauses['filter']) if len(rules) > 0 else qs.none()
+        qs = qs.filter(*clauses["filter"]) if len(rules) > 0 else qs.none()
 
         return qs
 
@@ -255,7 +256,7 @@ class DripBase(object):
         :return: [description]
         :rtype: [type]
         """
-        queryset = getattr(self, '_queryset', None)
+        queryset = getattr(self, "_queryset", None)
         if queryset is None:
             self._queryset = self.apply_queryset_rules(
                 self.queryset(),
@@ -279,14 +280,13 @@ class DripBase(object):
         return count
 
     def prune(self):
-        """Do an exclude for all Users who have a SentDrip already.
-        """
-        target_user_ids = self.get_queryset().values_list('id', flat=True)
+        """Do an exclude for all Users who have a SentDrip already."""
+        target_user_ids = self.get_queryset().values_list("id", flat=True)
         exclude_user_ids = SentDrip.objects.filter(
             date__lt=conditional_now(),
             drip=self.drip_model,
-            user__id__in=target_user_ids
-        ).values_list('user_id', flat=True)
+            user__id__in=target_user_ids,
+        ).values_list("user_id", flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
     def get_count_from_queryset(self, MessageClass) -> int:
@@ -302,7 +302,7 @@ class DripBase(object):
                         from_email=self.from_email,
                         from_email_name=self.from_email_name,
                         subject=message_instance.subject,
-                        body=message_instance.body
+                        body=message_instance.body,
                     )
                     count += 1
             except Exception as e:
@@ -326,7 +326,7 @@ class DripBase(object):
         if not self.from_email:
             self.from_email = getattr(
                 settings,
-                'DRIP_FROM_EMAIL',
+                "DRIP_FROM_EMAIL",
                 settings.DEFAULT_FROM_EMAIL,
             )
         MessageClass = message_class_for(self.drip_model.message_class)

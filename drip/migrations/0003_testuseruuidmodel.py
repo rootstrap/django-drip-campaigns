@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('drip', '0002_querysetrule_rule_type'),
+        ("drip", "0002_querysetrule_rule_type"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TestUserUUIDModel',
+            name="TestUserUUIDModel",
             fields=[
-                ('id', models.UUIDField(primary_key=True, serialize=False)),
+                ("id", models.UUIDField(primary_key=True, serialize=False)),
             ],
         ),
     ]

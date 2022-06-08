@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('drip', '0001_initial'),
+        ("drip", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='querysetrule',
-            name='rule_type',
-            field=models.CharField(choices=[('or', 'Or'), ('and', 'And')], default='and', max_length=3),
+            model_name="querysetrule",
+            name="rule_type",
+            field=models.CharField(
+                choices=[("or", "Or"), ("and", "And")], default="and", max_length=3
+            ),
         ),
     ]
