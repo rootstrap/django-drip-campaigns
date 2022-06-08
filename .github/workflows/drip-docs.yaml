@@ -9,10 +9,22 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python version 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Installing resources
+      run: |
+        pip install --upgrade pip==20.0.2
+        pip install pipenv
+    - name: Installing requirements pipenv
+      run: |
+        pipenv install --dev
     - name: Build docs
       run: |
         pip install Sphinx
         pip install sphinxcontrib-django
         pip install sphinx-rtd-theme
-        sphinx-build -b html docs/source/ build/
-        sudo rm -r build/
+        pipenv run sphinx-build -b html ./docs/source/ build/
