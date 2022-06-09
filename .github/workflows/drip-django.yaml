@@ -55,6 +55,12 @@ jobs:
     - name: Checking PEP8 code style
       run: |
         pipenv run flake8 --count
+    - name: Checking Black code formatter
+      run: |
+        pipenv run black . --check
+    - name: Check typing
+      run: |
+        pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports .
     - name: Running tests
       run: |
         pipenv run coverage run manage.py test
