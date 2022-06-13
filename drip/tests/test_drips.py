@@ -406,7 +406,7 @@ class DripsTestCase(TestCase):
             body_html_template="KETTEHS ROCK!",
         )
 
-        qsr = QuerySetRule.objects.create(
+        qsr: QuerySetRule = QuerySetRule.objects.create(
             drip=model_drip,
             field_name="date_joined",
             lookup_type="exact",
@@ -425,7 +425,7 @@ class DripsTestCase(TestCase):
             body_html_template="KETTEHS ROCK!",
         )
 
-        qsr = QuerySetRule.objects.create(
+        qsr: QuerySetRule = QuerySetRule.objects.create(
             drip=model_drip,
             field_name="profile__user__groups__count",
             lookup_type="exact",
@@ -434,7 +434,7 @@ class DripsTestCase(TestCase):
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
         self.assertEqual(
-            list(qs.query.annotation_select.keys()),
+            list(qs.query.annotation_select.keys()),  # type: ignore
             ["num_profile_user_groups"],
         )
 
@@ -563,6 +563,6 @@ class UrlsTestCase(TestCase):
                 break
         self.assertIsNotNone(test_url_pattern)
         self.assertEqual(
-            test_url_pattern.pattern._route,
+            test_url_pattern.pattern._route,  # type: ignore
             "<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/",  # noqa
         )

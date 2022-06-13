@@ -29,8 +29,8 @@ def get_flexible_regex(string):
     )
     if not d:
         raise TypeError("'{string}' is not a valid time interval".format(string=string))
-    d = d.groupdict(0)
-    return d
+    flexible_regex = d.groupdict(0)
+    return flexible_regex
 
 
 def process_string(string):
@@ -42,10 +42,10 @@ def process_string(string):
         str(string),
     )
     if d:
-        d = process_regex(d)
+        formated_dict = process_regex(d)
     else:
-        d = get_flexible_regex(string)
-    return datetime.timedelta(**dict(((k, float(v)) for k, v in d.items())))
+        formated_dict = get_flexible_regex(string)
+    return datetime.timedelta(**dict(((k, float(v)) for k, v in formated_dict.items())))
 
 
 def parse(string):

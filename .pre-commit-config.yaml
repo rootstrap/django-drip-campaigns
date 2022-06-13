@@ -32,4 +32,4 @@ repos:
     hooks:
       - id: mypy
         args: ['--namespace-packages', '--explicit-package-bases', '--ignore-missing-imports']
-        additional_dependencies: [django-stubs]
+        additional_dependencies: [django-stubs, six, types-six]

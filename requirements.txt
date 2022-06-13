@@ -74,3 +74,4 @@ wcwidth==0.2.5
 webencodings==0.5.1
 wrapt==1.12.1
 zipp==3.4.1
+types-six==1.16.16

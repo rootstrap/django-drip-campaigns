@@ -1,13 +1,15 @@
 from datetime import datetime
+from typing import Callable, Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.query import QuerySet
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
 from drip.helpers import parse
-from drip.types import AbstractQuerySetRuleQuerySet, BoolOrStr, DateTime, FExpressionOrStr, TimeDeltaOrStr
+from drip.types import BoolOrStr, FExpressionOrStr, FieldValue, TimeDeltaOrStr
 from drip.utils import get_user_model
 
 
@@ -184,17 +186,17 @@ class AbstractQuerySetRule(models.Model):
 
         return field_name
 
-    def apply_any_annotation(self, qs: AbstractQuerySetRuleQuerySet) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
+    def apply_any_annotation(self, qs: Optional[QuerySet]) -> Optional[QuerySet]:
         """
         Returns qs annotated with Count over this field's name.
         """
-        if self.field_name.endswith("__count"):
+        if self.field_name.endswith("__count") and qs is not None:
             field_name = self.annotated_field_name
             agg, _, _ = self.field_name.rpartition("__")
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def set_time_deltas_and_dates(self, now: DateTime, field_value: str) -> TimeDeltaOrStr:  # noqa: E501
+    def set_time_deltas_and_dates(self, now: Callable, field_value: str) -> TimeDeltaOrStr:  # noqa: E501
         """
         Parses the field_value parameter and returns a TimeDelta object
         The field_value string might start with one of
@@ -205,20 +207,21 @@ class AbstractQuerySetRule(models.Model):
         * "today+"
         Otherwise returns field_value unchanged.
         """
+        time_delta_value: TimeDeltaOrStr = field_value
         # set time deltas and dates
         if self.field_value.startswith("now-"):
             field_value = self.field_value.replace("now-", "")
-            field_value = now() - parse(field_value)
+            time_delta_value = now() - parse(field_value)
         elif self.field_value.startswith("now+"):
             field_value = self.field_value.replace("now+", "")
-            field_value = now() + parse(field_value)
+            time_delta_value = now() + parse(field_value)
         elif self.field_value.startswith("today-"):
             field_value = self.field_value.replace("today-", "")
-            field_value = now().date() - parse(field_value)
+            time_delta_value = now().date() - parse(field_value)
         elif self.field_value.startswith("today+"):
             field_value = self.field_value.replace("today+", "")
-            field_value = now().date() + parse(field_value)
-        return field_value
+            time_delta_value = now().date() + parse(field_value)
+        return time_delta_value
 
     def set_f_expressions(self, field_value: str) -> FExpressionOrStr:
         """
@@ -227,10 +230,11 @@ class AbstractQuerySetRule(models.Model):
         field_value unchanged.
         """  # noqa: W605
         # F expressions
+        f_expr: FExpressionOrStr = field_value
         if self.field_value.startswith("F_"):
             field_value = self.field_value.replace("F_", "")
-            field_value = models.F(field_value)
-        return field_value
+            f_expr = models.F(field_value)
+        return f_expr
 
     def set_booleans(self, field_value: str) -> BoolOrStr:
         """
@@ -239,13 +243,14 @@ class AbstractQuerySetRule(models.Model):
         Otherwise returns field_value unchanged.
         """
         # set booleans
+        booleans: BoolOrStr = field_value
         if self.field_value == "True":
-            field_value = True
+            booleans = True
         if self.field_value == "False":
-            field_value = False
-        return field_value
+            booleans = False
+        return booleans
 
-    def filter_kwargs(self, now: DateTime = datetime.now) -> dict:
+    def filter_kwargs(self, now: Callable = datetime.now) -> dict:
         """
         Returns a dictionary {field_name: field_value} where:
 
@@ -264,21 +269,18 @@ class AbstractQuerySetRule(models.Model):
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
         field_name = "__".join([field_name, self.lookup_type])
-        field_value = self.field_value
 
-        field_value = self.set_time_deltas_and_dates(now, field_value)
+        field_value: FieldValue = self.set_time_deltas_and_dates(now, self.field_value)
 
-        field_value = self.set_f_expressions(field_value)
+        field_value = self.set_f_expressions(field_value) if type(field_value) == str else field_value
 
-        field_value = self.set_booleans(field_value)
+        field_value = self.set_booleans(field_value) if type(field_value) == str else field_value
 
         kwargs = {field_name: field_value}
 
         return kwargs
 
-    def apply(
-        self, qs: AbstractQuerySetRuleQuerySet, now: DateTime = datetime.now
-    ) -> AbstractQuerySetRuleQuerySet:  # noqa: E501
+    def apply(self, qs: QuerySet, now: Callable = datetime.now) -> QuerySet:
         """
         Returns ``qs`` filtered/excluded by any filter resulting
         from ``self.filter_kwargs`` depending on whether
@@ -290,7 +292,7 @@ class AbstractQuerySetRule(models.Model):
         Also annotates ``qs`` by calling ``self.apply_any_annotation``.
         """
         kwargs = self.filter_kwargs(now)
-        qs = self.apply_any_annotation(qs)
+        qs = self.apply_any_annotation(qs)  # type: ignore
 
         if self.method_type == "filter":
             return qs.filter(**kwargs)

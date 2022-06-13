@@ -60,7 +60,7 @@ jobs:
         pipenv run black . --check
     - name: Check typing
       run: |
-        pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports .
+        pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports . --exclude docs --exclude setup.py
     - name: Running tests
       run: |
         pipenv run coverage run manage.py test

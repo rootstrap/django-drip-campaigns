@@ -1,4 +1,5 @@
 import json
+from typing import List, Set, Union
 
 from django import forms
 from django.contrib import admin
@@ -22,7 +23,7 @@ class DripForm(forms.ModelForm):
 
     class Meta:
         model = Drip
-        exclude = []
+        exclude: List[str] = []
 
 
 class DripAdmin(admin.ModelAdmin):
@@ -31,7 +32,7 @@ class DripAdmin(admin.ModelAdmin):
         QuerySetRuleInline,
     ]
     form = DripForm
-    users_fields = []
+    users_fields: Union[str, List[str]] = []
 
     def av(self, view):
         return self.admin_site.admin_view(view)
@@ -44,7 +45,7 @@ class DripAdmin(admin.ModelAdmin):
         drip = get_object_or_404(Drip, id=drip_id)
 
         shifted_drips = []
-        seen_users = set()
+        seen_users: Set[int] = set()
         for shifted_drip in drip.drip.walk(into_past=int(into_past), into_future=int(into_future) + 1):
             shifted_drip.prune()
             shifted_drips.append(
