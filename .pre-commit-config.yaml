@@ -1,6 +1,8 @@
 exclude: 'docs|node_modules|migrations|.git|.tox'
 default_stages: [commit]
 fail_fast: true
+default_language_version:
+  python: python3.8
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -31,5 +33,5 @@ repos:
     rev: v0.942
     hooks:
       - id: mypy
-        args: ['--namespace-packages', '--explicit-package-bases', '--ignore-missing-imports']
+        args: ['--namespace-packages', '--explicit-package-bases', '--ignore-missing-imports', '--no-warn-unused-ignores']
         additional_dependencies: [django-stubs, six, types-six]

@@ -1,25 +1,26 @@
 import datetime
 import re
+from typing import Dict, Match, Union
 
 STRFDATETIME = re.compile("([dgGhHis])")
 
 
-def STRFDATETIME_REPL(x):
+def STRFDATETIME_REPL(x) -> str:
     return "%({group})s".format(group=x.group())
 
 
-def process_regex(d):
-    d = d.groupdict(0)
-    if d["sign"] == "-":
+def process_regex(matches: Match[str]) -> Dict[str, Union[str, int]]:
+    matches_dict = matches.groupdict(0)
+    if matches_dict["sign"] == "-":
         for k in "hours", "minutes", "seconds":
-            d[k] = "-" + d[k]
-    d.pop("sign", None)
-    return d
+            matches_dict[k] = "-" + str(matches_dict[k])
+    matches_dict.pop("sign", None)
+    return matches_dict
 
 
-def get_flexible_regex(string):
+def get_flexible_regex(string: str) -> Dict[str, Union[str, int]]:
     # This is the more flexible format
-    d = re.match(
+    matches = re.match(
         r"^((?P<weeks>-?((\d*\.\d+)|\d+))\W*w((ee)?(k(s)?)?)(,)?\W*)?"
         r"((?P<days>-?((\d*\.\d+)|\d+))\W*d(ay(s)?)?(,)?\W*)?"
         r"((?P<hours>-?((\d*\.\d+)|\d+))\W*h(ou)?(r(s)?)?(,)?\W*)?"
@@ -27,28 +28,28 @@ def get_flexible_regex(string):
         r"((?P<seconds>-?((\d*\.\d+)|\d+))\W*s(ec(ond)?(s)?)?)?\W*$",
         string,
     )
-    if not d:
+    if not matches:
         raise TypeError("'{string}' is not a valid time interval".format(string=string))
-    flexible_regex = d.groupdict(0)
+    flexible_regex = matches.groupdict(0)
     return flexible_regex
 
 
-def process_string(string):
+def process_string(string: str) -> datetime.timedelta:
     # This is the format we get from sometimes Postgres, sqlite,
     # and from serialization
-    d = re.match(
+    matches = re.match(
         r"^((?P<days>[-+]?\d+) days?,? )?(?P<sign>[-+]?)(?P<hours>\d+):"
         r"(?P<minutes>\d+)(:(?P<seconds>\d+(\.\d+)?))?$",
         str(string),
     )
-    if d:
-        formated_dict = process_regex(d)
+    if matches:
+        formated_dict = process_regex(matches)
     else:
         formated_dict = get_flexible_regex(string)
     return datetime.timedelta(**dict(((k, float(v)) for k, v in formated_dict.items())))
 
 
-def parse(string):
+def parse(string: str) -> datetime.timedelta:
     """
     Parse a string into a timedelta object.
     """
