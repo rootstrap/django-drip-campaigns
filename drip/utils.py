@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Type
 
 import six
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
@@ -177,15 +178,12 @@ def get_simple_fields(Model, **kwargs):
     return ret_list
 
 
-def get_user_model():
-    from django.contrib.auth.models import User
-
-    UserModel = User
+def get_user_model() -> Type[User]:
     # handle 1.7 and back
     try:
         from django.contrib.auth import get_user_model as django_get_user_model
 
-        UserModel = django_get_user_model()
+        User = django_get_user_model()
     except ImportError:
         pass
-    return UserModel
+    return User

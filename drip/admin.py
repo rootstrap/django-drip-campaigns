@@ -1,15 +1,18 @@
 import json
-from typing import List, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from django import forms
 from django.contrib import admin
-from django.http import HttpResponse
+from django.core.handlers.wsgi import WSGIRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.urls import path
+from django.urls import URLPattern, path
 
 from drip.drips import configured_message_classes, message_class_for
 from drip.models import Drip, QuerySetRule, SentDrip
 from drip.utils import get_simple_fields, get_user_model
+
+User = get_user_model()
 
 
 class QuerySetRuleInline(admin.TabularInline):
@@ -34,10 +37,16 @@ class DripAdmin(admin.ModelAdmin):
     form = DripForm
     users_fields: Union[str, List[str]] = []
 
-    def av(self, view):
+    def av(self, view: Callable) -> Callable:
         return self.admin_site.admin_view(view)
 
-    def timeline(self, request, drip_id, into_past, into_future):
+    def timeline(
+        self,
+        request: WSGIRequest,
+        drip_id: int,
+        into_past: int,
+        into_future: int,
+    ) -> HttpResponse:
         """
         Return a list of people who should get emails.
         """
@@ -60,7 +69,7 @@ class DripAdmin(admin.ModelAdmin):
 
         return render(request, "drip/timeline.html", locals())
 
-    def get_mime_html_from_alternatives(self, alternatives):
+    def get_mime_html_from_alternatives(self, alternatives: List[Tuple[str, str]]) -> Tuple[str, str]:
         html = ""
         mime = ""
         for body, mime in alternatives:
@@ -69,8 +78,10 @@ class DripAdmin(admin.ModelAdmin):
                 mime = "text/html"
         return html, mime
 
-    def get_mime_html(self, drip, user):
-        drip_message = message_class_for(
+    # Ignoring this line because mypy says User is not a valid type
+    def get_mime_html(self, drip: Drip, user: User) -> Tuple[str, str]:  # type: ignore
+        # Ignoring this line because mypy says DripMessage is not callable
+        drip_message = message_class_for(  # type: ignore
             drip.message_class,
         )(drip.drip, user)
         if drip_message.message.alternatives:
@@ -79,17 +90,22 @@ class DripAdmin(admin.ModelAdmin):
         mime = "text/plain"
         return html, mime
 
-    def view_drip_email(self, request, drip_id, into_past, into_future, user_id):
-
+    def view_drip_email(
+        self,
+        request: WSGIRequest,
+        drip_id: int,
+        into_past: int,
+        into_future: int,
+        user_id: int,
+    ) -> HttpResponse:
         drip = get_object_or_404(Drip, id=drip_id)
-        User = get_user_model()
         user = get_object_or_404(User, id=user_id)
 
         html, mime = self.get_mime_html(drip, user)
 
         return HttpResponse(html, content_type=mime)
 
-    def build_extra_context(self, extra_context):
+    def build_extra_context(self, extra_context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         extra_context = extra_context or {}
         User = get_user_model()
         if not self.users_fields:
@@ -97,18 +113,19 @@ class DripAdmin(admin.ModelAdmin):
         extra_context["field_data"] = self.users_fields
         return extra_context
 
-    def add_view(self, request, extra_context=None):
+    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Any = None) -> HttpResponse:
         return super(DripAdmin, self).add_view(
             request,
-            extra_context=self.build_extra_context(extra_context),
+            form_url=form_url,
+            extra_context=self.build_extra_context(extra_context),  # type: ignore
         )
 
-    def change_view(self, request, object_id, extra_context=None):
+    def change_view(self, request: HttpRequest, object_id: str, form_url="", extra_context: Any = None) -> HttpResponse:
         return super(DripAdmin, self).change_view(
-            request, object_id, extra_context=self.build_extra_context(extra_context)
+            request, object_id, form_url=form_url, extra_context=self.build_extra_context(extra_context)
         )
 
-    def get_urls(self):
+    def get_urls(self) -> List[URLPattern]:
         urls = super(DripAdmin, self).get_urls()
         my_urls = [
             path(

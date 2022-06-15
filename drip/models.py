@@ -1,5 +1,8 @@
 from datetime import datetime
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, Callable, Dict, Union
+
+if TYPE_CHECKING:
+    from drip.drips import DripBase
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -43,11 +46,12 @@ class AbstractDrip(models.Model):
         abstract = True
 
     @property
-    def drip(self):
+    def drip(self) -> "DripBase":
         from drip.drips import DripBase
 
+        # Ignoring this line because we are using AbstractDrip here
         drip = DripBase(
-            drip_model=self,
+            drip_model=self,  # type: ignore
             name=self.name,
             from_email=self.from_email if self.from_email else None,
             from_email_name=self.from_email_name if (self.from_email_name) else None,
@@ -56,7 +60,7 @@ class AbstractDrip(models.Model):
         )
         return drip
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -186,17 +190,17 @@ class AbstractQuerySetRule(models.Model):
 
         return field_name
 
-    def apply_any_annotation(self, qs: Optional[QuerySet]) -> Optional[QuerySet]:
+    def apply_any_annotation(self, qs: QuerySet) -> QuerySet:
         """
         Returns qs annotated with Count over this field's name.
         """
-        if self.field_name.endswith("__count") and qs is not None:
+        if self.field_name.endswith("__count"):
             field_name = self.annotated_field_name
             agg, _, _ = self.field_name.rpartition("__")
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def set_time_deltas_and_dates(self, now: Callable, field_value: str) -> TimeDeltaOrStr:  # noqa: E501
+    def set_time_deltas_and_dates(self, now: Callable, field_value: str) -> TimeDeltaOrStr:
         """
         Parses the field_value parameter and returns a TimeDelta object
         The field_value string might start with one of
@@ -250,7 +254,9 @@ class AbstractQuerySetRule(models.Model):
             booleans = False
         return booleans
 
-    def filter_kwargs(self, now: Callable = datetime.now) -> dict:
+    def filter_kwargs(
+        self, now: Callable = datetime.now
+    ) -> Dict[str, Union[BoolOrStr, FExpressionOrStr, TimeDeltaOrStr]]:
         """
         Returns a dictionary {field_name: field_value} where:
 
@@ -292,7 +298,7 @@ class AbstractQuerySetRule(models.Model):
         Also annotates ``qs`` by calling ``self.apply_any_annotation``.
         """
         kwargs = self.filter_kwargs(now)
-        qs = self.apply_any_annotation(qs)  # type: ignore
+        qs = self.apply_any_annotation(qs)
 
         if self.method_type == "filter":
             return qs.filter(**kwargs)

@@ -410,12 +410,12 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name="date_joined",
             lookup_type="exact",
-            field_value=2,
+            field_value=(timezone.now()).strftime("%Y-%m-%d 00:00:00"),
         )
+        base_queryset = model_drip.drip.get_queryset()
+        qs = qsr.apply_any_annotation(base_queryset)
 
-        qs = qsr.apply_any_annotation(None)
-
-        self.assertEqual(qs, None)
+        self.assertEqual(qs, base_queryset)
 
     def test_apply_annotations_with_count(self):
 

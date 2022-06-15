@@ -1,33 +1,36 @@
 import functools
 import logging
 import operator
+from datetime import datetime, timedelta
 from importlib import import_module
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict, Union
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db.models import Q
 from django.db.models.manager import BaseManager
 from django.db.models.query import QuerySet
 from django.template import Context, Template
 from django.utils.html import strip_tags
+from django.utils.safestring import SafeString
+from typing_extensions import TypeAlias
 
-from drip.models import SentDrip
+from drip.models import Drip, SentDrip
 from drip.utils import get_user_model
+
+User = get_user_model()
 
 try:
     from django.utils.timezone import now as conditional_now
 except ImportError:
-    from datetime import datetime
-
     conditional_now = datetime.now
 
 
-def configured_message_classes() -> dict:
+def configured_message_classes() -> Dict[str, Any]:
     """[summary]
 
     :return: [description]
-    :rtype: dict
+    :rtype: Dict[str, Any]
     """
     conf_dict = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
     if "default" not in conf_dict:
@@ -35,12 +38,18 @@ def configured_message_classes() -> dict:
     return conf_dict
 
 
-def message_class_for(name: str):
+def message_class_for(name: str) -> "DripMessage":
     path = configured_message_classes()[name]
     mod_name, klass_name = path.rsplit(".", 1)
     mod = import_module(mod_name)
     klass = getattr(mod, klass_name)
     return klass
+
+
+class DripBaseParamsOptions(TypedDict):
+    drip_model: "Drip"
+    name: str
+    now_shift_kwargs: Dict[str, Any]
 
 
 class DripMessage(object):
@@ -50,52 +59,61 @@ class DripMessage(object):
     :type object: [type]
     """
 
-    def __init__(self, drip_base, user):
+    # Ignoring this line because mypy says User is not a valid type
+    def __init__(self, drip_base: "DripBase", user: User):  # type: ignore
         self.drip_base = drip_base
-        self.user = user
-        self._context = None
-        self._subject = None
-        self._body = None
-        self._plain = None
-        self._message = None
+        self.user: TypeAlias = user
+        self._context: Optional[Context] = None
+        self._subject: Optional[SafeString] = None
+        self._body: Optional[SafeString] = None
+        self._plain: str = ""
+        self._message: Union[EmailMessage, EmailMultiAlternatives, None] = None
 
     @property
-    def from_email(self):
+    def from_email(self) -> Optional[str]:
         return self.drip_base.from_email
 
     @property
-    def from_email_name(self):
+    def from_email_name(self) -> Optional[str]:
         return self.drip_base.from_email_name
 
     @property
-    def context(self):
+    def context(self) -> Context:
         if not self._context:
             self._context = Context({"user": self.user})
         return self._context
 
     @property
-    def subject(self):
+    def subject(self) -> SafeString:
+        drip_subject: SafeString
         if not self._subject:
-            self._subject = Template(
+            drip_subject = Template(
                 self.drip_base.subject_template,
             ).render(self.context)
-        return self._subject
+            self._subject = drip_subject
+        else:
+            drip_subject = self._subject
+        return drip_subject
 
     @property
-    def body(self):
+    def body(self) -> SafeString:
+        drip_body: SafeString
         if not self._body:
-            self._body = Template(
+            drip_body = Template(
                 self.drip_base.body_template,
             ).render(self.context)
-        return self._body
+            self._body = drip_body
+        else:
+            drip_body = self._body
+        return drip_body
 
     @property
-    def plain(self):
+    def plain(self) -> str:
         if not self._plain:
             self._plain = strip_tags(self.body)
         return self._plain
 
-    def get_from_(self):
+    def get_from_(self) -> str:
         if self.drip_base.from_email_name:
             from_ = "{name} <{email}>".format(
                 name=self.drip_base.from_email_name,
@@ -106,7 +124,7 @@ class DripMessage(object):
         return from_
 
     @property
-    def message(self):
+    def message(self) -> Union[EmailMessage, EmailMultiAlternatives]:
         if not self._message:
             from_ = self.get_from_()
 
@@ -132,26 +150,26 @@ class DripBase(object):
     """
 
     #: needs a unique name
-    name = None
-    subject_template = None
-    body_template = None
-    from_email = None
-    from_email_name = None
+    name: str
+    subject_template: str
+    body_template: str
+    from_email: str
+    from_email_name: str
 
-    def __init__(self, drip_model, *args, **kwargs):
+    def __init__(self, drip_model: Drip, *args, **kwargs):
         self.drip_model = drip_model
 
-        self.name = kwargs.pop("name", self.name)
-        self.from_email = kwargs.pop("from_email", self.from_email)
+        self.name = kwargs.pop("name", None)
+        self.from_email = kwargs.pop("from_email", None)
         self.from_email_name = kwargs.pop(
             "from_email_name",
-            self.from_email_name,
+            None,
         )
         self.subject_template = kwargs.pop(
             "subject_template",
-            self.subject_template,
+            None,
         )
-        self.body_template = kwargs.pop("body_template", self.body_template)
+        self.body_template = kwargs.pop("body_template", None)
 
         if not self.name:
             raise AttributeError("You must define a name.")
@@ -162,23 +180,21 @@ class DripBase(object):
     #   DATE MANIPULATION   #
     #########################
 
-    def now(self):
+    def now(self) -> datetime:
         """
         This allows us to override what we consider "now", making it easy
         to build timelines of who gets what when.
         """
         return conditional_now() + self.timedelta(**self.now_shift_kwargs)
 
-    def timedelta(self, *a, **kw):
+    def timedelta(self, *args, **kwargs) -> timedelta:
         """
         If needed, this allows us the ability
         to manipulate the slicing of time.
         """
-        from datetime import timedelta
+        return timedelta(*args, **kwargs)
 
-        return timedelta(*a, **kw)
-
-    def walk(self, into_past: int = 0, into_future: int = 0):
+    def walk(self, into_past: int = 0, into_future: int = 0) -> List["DripBase"]:
         """Walk over a date range and create
             new instances of self with new ranges.
 
@@ -191,7 +207,7 @@ class DripBase(object):
         """
         walked_range = []
         for shift in range(-into_past, into_future):
-            kwargs = dict(
+            kwargs: DripBaseParamsOptions = dict(
                 drip_model=self.drip_model,
                 name=self.name,
                 now_shift_kwargs={"days": shift},
@@ -199,24 +215,24 @@ class DripBase(object):
             walked_range.append(self.__class__(**kwargs))
         return walked_range
 
-    def apply_queryset_rules(self, manager: BaseManager) -> QuerySet:
-        return self.apply_and_queryset_rules(manager) | self.apply_or_queryset_rules(manager)
+    def apply_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
+        return self.apply_and_queryset_rules(manager_qs) | self.apply_or_queryset_rules(manager_qs)
 
-    def apply_or_queryset_rules(self, manager: BaseManager) -> QuerySet:
-        rules = []
+    def apply_or_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
+        rules: List[Q] = []
         rule_set = self.drip_model.queryset_rules.filter(rule_type="or")
-        for rule in rule_set:
-            kwargs = rule.filter_kwargs(now=self.now)
+        for query_rule in rule_set:
+            kwargs = query_rule.filter_kwargs(now=self.now)
             query_or = Q(**kwargs)
             rules.append(query_or)
 
-        query = rules.pop() if rules else None
+        query: Q = rules.pop() if rules else Q()
         for rule in rules:
             query |= rule
-        qs = manager.filter(query) if query else manager.none()
+        qs = manager_qs.filter(query) if query != Q() else manager_qs.none()
         return qs
 
-    def apply_and_queryset_rules(self, manager: BaseManager) -> QuerySet:
+    def apply_and_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
         """First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
 
@@ -230,7 +246,7 @@ class DripBase(object):
             "exclude": [],
         }
         rules = []
-        qs = manager.all()
+        qs = manager_qs.all()
         for rule in self.drip_model.queryset_rules.filter(rule_type="and"):
             rules.append(rule)
 
@@ -252,7 +268,7 @@ class DripBase(object):
     #   MANAGEMENT   #
     ##################
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         """[summary]
 
         [extended_summary]
@@ -283,7 +299,7 @@ class DripBase(object):
 
         return count
 
-    def prune(self):
+    def prune(self) -> None:
         """Do an exclude for all Users who have a SentDrip already."""
         target_user_ids = self.get_queryset().values_list("id", flat=True)
         exclude_user_ids = SentDrip.objects.filter(
@@ -319,7 +335,7 @@ class DripBase(object):
                 )
         return count
 
-    def send(self):
+    def send(self) -> int:
         """Send the message to each user on the queryset.
 
         Create SentDrip for each user that gets a message.
@@ -341,7 +357,7 @@ class DripBase(object):
     #   USER DEFINED   #
     ####################
 
-    def queryset(self):
+    def queryset(self) -> BaseManager:
         """
         Returns a queryset of auth.User who meet the
         criteria of the drip.
