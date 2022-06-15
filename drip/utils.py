@@ -1,13 +1,13 @@
 import sys
 
 from django.db import models
-from django.db.models import ForeignKey, OneToOneField, ManyToManyField
+from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
 # taking a nod from python-requests and skipping six
 _ver = sys.version_info
-is_py2 = (_ver[0] == 2)
-is_py3 = (_ver[0] == 3)
+is_py2 = _ver[0] == 2
+is_py3 = _ver[0] == 3
 basestring = None
 unicode = None
 
@@ -35,9 +35,9 @@ def check_redundant(model_stack: list, stack_limit: int) -> bool:
         # stack depth shouldn't exceed x, or
         # we've hit a point where we are repeating models
         if (
-            (model_stack[-3] == model_stack[-1]) or
-            (len(model_stack) > 5) or
-            (len(set(model_stack)) != len(model_stack))
+            (model_stack[-3] == model_stack[-1])
+            or (len(model_stack) > 5)
+            or (len(set(model_stack)) != len(model_stack))
         ):
             stop_recursion = True
     return stop_recursion
@@ -79,10 +79,10 @@ def get_rel_model(field, RelatedObject):
 
 def is_valid_instance(field):
     return (
-        isinstance(field, ForeignKey) or
-        isinstance(field, OneToOneField) or
-        isinstance(field, RelatedObject) or
-        isinstance(field, ManyToManyField)
+        isinstance(field, ForeignKey)
+        or isinstance(field, OneToOneField)
+        or isinstance(field, RelatedObject)
+        or isinstance(field, ManyToManyField)
     )
 
 
@@ -116,7 +116,7 @@ def get_fields(
     parent_field="",
     model_stack=[],
     stack_limit=2,
-    excludes=['permissions', 'comment', 'content_type']
+    excludes=["permissions", "comment", "content_type"],
 ):
     """
     Given a Model, return a list of lists of strings with important stuff:
@@ -126,16 +126,14 @@ def get_fields(
     ['test_user__confirmed', 'confirmed', 'TestUser', 'BooleanField']
     ...
 
-     """
+    """
 
     # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
     if isinstance(Model, basestring):
-        app_label, model_name = Model.split('.')
+        app_label, model_name = Model.split(".")
         Model = models.get_model(app_label, model_name)
 
-    fields = Model._meta.fields + \
-        Model._meta.many_to_many + \
-        Model._meta.get_fields()
+    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()
     model_stack.append(Model)
 
     # do a variety of checks to ensure recursion isnt being redundant
@@ -164,27 +162,22 @@ def give_model_field(full_field: str, Model: models.Model) -> tuple:
     :rtype: tuple
     """
 
-    field_data = get_fields(Model, '', [])
+    field_data = get_fields(Model, "", [])
 
     for full_key, name, _Model, _ModelField in field_data:
         if full_key == full_field:
             return full_key, name, _Model, _ModelField
 
-    raise Exception(
-        'Field key `{field}` not found on `{model}`.'.format(
-            field=full_field,
-            model=Model.__name__
-        )
-    )
+    raise Exception("Field key `{field}` not found on `{model}`.".format(field=full_field, model=Model.__name__))
 
 
 def get_simple_fields(Model, **kwargs):
     ret_list = []
     for f in get_fields(Model, **kwargs):
-        if '__' in f[0]:
+        if "__" in f[0]:
             # Add __user__ to the fields in related models
-            parts = f[0].split('__')
-            f[0] = parts[0] + '__user__' + parts[1]
+            parts = f[0].split("__")
+            f[0] = parts[0] + "__user__" + parts[1]
         if f[0] not in [x[0] for x in ret_list]:
             # Add field if not already in list
             ret_list.append([f[0], f[3].__name__])
@@ -195,6 +188,7 @@ def get_user_model():
     # handle 1.7 and back
     try:
         from django.contrib.auth import get_user_model as django_get_user_model
+
         User = django_get_user_model()
     except ImportError:
         from django.contrib.auth.models import User

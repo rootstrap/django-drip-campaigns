@@ -6,6 +6,7 @@ astroid==2.5.1
 autopep8==1.5.6
 Babel==2.10.1
 backcall==0.2.0
+black==22.3.0
 bleach==3.3.0
 certifi==2020.12.5
 chardet==4.0.0
@@ -13,7 +14,8 @@ colorama==0.4.4
 decorator==4.4.2
 Django==3.2.13
 docutils==0.16
-flake8==3.9.0
+flake8==4.0.1
+flake8-isort==4.1.1
 idna==2.10
 imagesize==1.2.0
 importlib-metadata==3.7.3
@@ -25,6 +27,7 @@ jedi==0.18.0
 Jinja2==2.11.3
 keyring==23.0.0
 lazy-object-proxy==1.5.2
+mypy==0.942
 MarkupSafe==1.1.1
 mccabe==0.6.1
 packaging==20.9
@@ -34,8 +37,9 @@ pickleshare==0.7.5
 pkginfo==1.7.0
 prompt-toolkit==3.0.17
 ptyprocess==0.7.0
-pycodestyle==2.7.0
-pyflakes==2.3.0
+pycodestyle==2.8.0
+pyflakes==2.4.0
+pre-commit==2.18.1
 Pygments==2.8.1
 pylint==2.7.2
 pyparsing==2.4.7

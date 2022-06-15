@@ -1,0 +1,4 @@
+[tool.black]
+skip_string_normalization = false
+line-length = 120
+exclude = '.*\/(migrations|settings)\/.*'
