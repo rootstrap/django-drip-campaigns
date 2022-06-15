@@ -49,6 +49,7 @@ class AbstractDrip(models.Model):
     def drip(self) -> "DripBase":
         from drip.drips import DripBase
 
+        # Ignoring this line because we are using AbstractDrip here
         drip = DripBase(
             drip_model=self,  # type: ignore
             name=self.name,

@@ -78,7 +78,9 @@ class DripAdmin(admin.ModelAdmin):
                 mime = "text/html"
         return html, mime
 
+    # Ignoring this line because mypy says User is not a valid type
     def get_mime_html(self, drip: Drip, user: User) -> Tuple[str, str]:  # type: ignore
+        # Ignoring this line because mypy says DripMessage is not callable
         drip_message = message_class_for(  # type: ignore
             drip.message_class,
         )(drip.drip, user)

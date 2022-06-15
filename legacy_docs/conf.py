@@ -13,6 +13,7 @@
 
 import os
 import sys
+from typing import Any, Dict, List
 
 sys.path.insert(0, os.path.abspath(".."))
 version = __import__("drip").__version__
@@ -29,7 +30,7 @@ version = __import__("drip").__version__
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = []
+extensions: List[str] = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -173,7 +174,7 @@ htmlhelp_basename = "DjangoDripdoc"
 
 # -- Options for LaTeX output --------------------------------------------------
 
-latex_elements = {
+latex_elements: Dict[str, Any] = {
     # The paper size ('letterpaper' or 'a4paper').
     # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').

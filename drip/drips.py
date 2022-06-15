@@ -3,7 +3,7 @@ import logging
 import operator
 from datetime import datetime, timedelta
 from importlib import import_module
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, TypedDict, Union
 
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -46,6 +46,12 @@ def message_class_for(name: str) -> "DripMessage":
     return klass
 
 
+class DripBaseParamsOptions(TypedDict):
+    drip_model: "Drip"
+    name: str
+    now_shift_kwargs: Dict[str, Any]
+
+
 class DripMessage(object):
     """[summary]
 
@@ -53,6 +59,7 @@ class DripMessage(object):
     :type object: [type]
     """
 
+    # Ignoring this line because mypy says User is not a valid type
     def __init__(self, drip_base: "DripBase", user: User):  # type: ignore
         self.drip_base = drip_base
         self.user: TypeAlias = user
@@ -200,12 +207,12 @@ class DripBase(object):
         """
         walked_range = []
         for shift in range(-into_past, into_future):
-            kwargs = dict(
+            kwargs: DripBaseParamsOptions = dict(
                 drip_model=self.drip_model,
                 name=self.name,
                 now_shift_kwargs={"days": shift},
             )
-            walked_range.append(self.__class__(**kwargs))  # type: ignore
+            walked_range.append(self.__class__(**kwargs))
         return walked_range
 
     def apply_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
