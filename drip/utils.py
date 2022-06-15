@@ -1,22 +1,12 @@
-import sys
+from typing import List
 
+import six
 from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
-# taking a nod from python-requests and skipping six
-_ver = sys.version_info
-is_py2 = _ver[0] == 2
-is_py3 = _ver[0] == 3
-basestring = None
-unicode = None
-
-if is_py2:
-    basestring = basestring
-    unicode = unicode
-elif is_py3:
-    basestring = (str, bytes)
-    unicode = str
+basestring = (str, bytes)
+unicode = str
 
 
 def check_redundant(model_stack: list, stack_limit: int) -> bool:
@@ -129,9 +119,9 @@ def get_fields(
     """
 
     # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
-    if isinstance(Model, basestring):
+    if isinstance(Model, six.string_types):
         app_label, model_name = Model.split(".")
-        Model = models.get_model(app_label, model_name)
+        Model = models.get_model(app_label, model_name)  # type: ignore
 
     fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()
     model_stack.append(Model)
@@ -167,12 +157,15 @@ def give_model_field(full_field: str, Model: models.Model) -> tuple:
     for full_key, name, _Model, _ModelField in field_data:
         if full_key == full_field:
             return full_key, name, _Model, _ModelField
-
-    raise Exception("Field key `{field}` not found on `{model}`.".format(field=full_field, model=Model.__name__))
+    message_exception = "Field key `{field}` not found on `{model}`.".format(
+        field=full_field,
+        model=Model.__name__,  # type: ignore
+    )
+    raise Exception(message_exception)
 
 
 def get_simple_fields(Model, **kwargs):
-    ret_list = []
+    ret_list: List = []
     for f in get_fields(Model, **kwargs):
         if "__" in f[0]:
             # Add __user__ to the fields in related models
@@ -185,11 +178,14 @@ def get_simple_fields(Model, **kwargs):
 
 
 def get_user_model():
+    from django.contrib.auth.models import User
+
+    UserModel = User
     # handle 1.7 and back
     try:
         from django.contrib.auth import get_user_model as django_get_user_model
 
-        User = django_get_user_model()
+        UserModel = django_get_user_model()
     except ImportError:
-        from django.contrib.auth.models import User
-    return User
+        pass
+    return UserModel

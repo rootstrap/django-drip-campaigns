@@ -2,10 +2,13 @@ import functools
 import logging
 import operator
 from importlib import import_module
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
+from django.db.models.manager import BaseManager
+from django.db.models.query import QuerySet
 from django.template import Context, Template
 from django.utils.html import strip_tags
 
@@ -196,10 +199,10 @@ class DripBase(object):
             walked_range.append(self.__class__(**kwargs))
         return walked_range
 
-    def apply_queryset_rules(self, qs: str) -> str:
-        return self.apply_and_queryset_rules(qs) | self.apply_or_queryset_rules(qs)
+    def apply_queryset_rules(self, manager: BaseManager) -> QuerySet:
+        return self.apply_and_queryset_rules(manager) | self.apply_or_queryset_rules(manager)
 
-    def apply_or_queryset_rules(self, qs: str) -> str:
+    def apply_or_queryset_rules(self, manager: BaseManager) -> QuerySet:
         rules = []
         rule_set = self.drip_model.queryset_rules.filter(rule_type="or")
         for rule in rule_set:
@@ -210,10 +213,10 @@ class DripBase(object):
         query = rules.pop() if rules else None
         for rule in rules:
             query |= rule
-        qs = qs.filter(query) if query else qs.none()
+        qs = manager.filter(query) if query else manager.none()
         return qs
 
-    def apply_and_queryset_rules(self, qs: str) -> str:
+    def apply_and_queryset_rules(self, manager: BaseManager) -> QuerySet:
         """First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
 
@@ -222,11 +225,12 @@ class DripBase(object):
         :return: [description]
         :rtype: str
         """
-        clauses = {
+        clauses: Dict[str, List] = {
             "filter": [],
             "exclude": [],
         }
         rules = []
+        qs = manager.all()
         for rule in self.drip_model.queryset_rules.filter(rule_type="and"):
             rules.append(rule)
 
@@ -263,7 +267,7 @@ class DripBase(object):
             ).distinct()
         return self._queryset
 
-    def run(self) -> int:
+    def run(self) -> Optional[int]:
         """Get the queryset, prune sent people, and send it.
 
         [extended_summary]

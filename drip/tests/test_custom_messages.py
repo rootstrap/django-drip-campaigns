@@ -43,13 +43,6 @@ class CustomMessagesTest(TestCase):
             field_value=self.user.id,
         )
 
-    def tearDown(self):
-        if self.old_msg_classes is None:
-            if hasattr(settings, "DRIP_MESSAGE_CLASSES"):
-                del settings.DRIP_MESSAGE_CLASSES
-        else:
-            settings.DRIP_MESSAGE_CLASSES = self.old_msg_classes
-
     def test_default_email(self):
         result = self.model_drip.drip.send()
         self.assertEqual(1, result)
