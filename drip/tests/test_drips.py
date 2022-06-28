@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List
+from typing import Any, Dict, List
 from unittest.mock import patch
 
 import pytest
@@ -78,79 +78,28 @@ class TestCaseDrips:
     def test_users_exists(self):
         assert 20 == User.objects.all().count()
 
-    def test_day_zero_users(self):
-        start = timezone.now() - timedelta(days=1)
-        end = timezone.now()
+    @pytest.mark.parametrize(
+        "start_days, end_days, filter_dict, count_users",
+        (
+            (1, 0, {}, 2),  # test_day_zero_users
+            (3, 2, {"profile__credits__gt": 0}, 1),  # test_day_two_users_active
+            (3, 2, {"profile__credits": 0}, 1),  # test_day_two_users_inactive
+            (8, 7, {"profile__credits__gt": 0}, 1),  # test_day_seven_users_active
+            (8, 7, {"profile__credits": 0}, 1),  # test_day_seven_users_inactive
+            (15, 14, {"profile__credits__gt": 0}, 0),  # test_day_fourteen_users_active
+            (15, 14, {"profile__credits": 0}, 0),  # test_day_fourteen_users_inactive
+        ),
+    )
+    def test_multiple_days_users_filter(
+        self, start_days: int, end_days: int, filter_dict: Dict[str, Any], count_users: int
+    ):
+        start = timezone.now() - timedelta(days=start_days)
+        end = timezone.now() - timedelta(days=end_days)
         assert (
-            2
+            count_users
             == User.objects.filter(
                 date_joined__range=(start, end),
-            ).count()
-        )
-
-    def test_day_two_users_active(self):
-        start = timezone.now() - timedelta(days=3)
-        end = timezone.now() - timedelta(days=2)
-        assert (
-            1
-            == User.objects.filter(
-                date_joined__range=(start, end),
-                profile__credits__gt=0,
-            ).count()
-        )
-
-    def test_day_two_users_inactive(self):
-        start = timezone.now() - timedelta(days=3)
-        end = timezone.now() - timedelta(days=2)
-        assert (
-            1
-            == User.objects.filter(
-                date_joined__range=(start, end),
-                profile__credits=0,
-            ).count()
-        )
-
-    def test_day_seven_users_active(self):
-        start = timezone.now() - timedelta(days=8)
-        end = timezone.now() - timedelta(days=7)
-        assert (
-            1
-            == User.objects.filter(
-                date_joined__range=(start, end),
-                profile__credits__gt=0,
-            ).count()
-        )
-
-    def test_day_seven_users_inactive(self):
-        start = timezone.now() - timedelta(days=8)
-        end = timezone.now() - timedelta(days=7)
-        assert (
-            1
-            == User.objects.filter(
-                date_joined__range=(start, end),
-                profile__credits=0,
-            ).count()
-        )
-
-    def test_day_fourteen_users_active(self):
-        start = timezone.now() - timedelta(days=15)
-        end = timezone.now() - timedelta(days=14)
-        assert (
-            0
-            == User.objects.filter(
-                date_joined__range=(start, end),
-                profile__credits__gt=0,
-            ).count()
-        )
-
-    def test_day_fourteen_users_inactive(self):
-        start = timezone.now() - timedelta(days=15)
-        end = timezone.now() - timedelta(days=14)
-        assert (
-            0
-            == User.objects.filter(
-                date_joined__range=(start, end),
-                profile__credits=0,
+                **filter_dict,
             ).count()
         )
 
