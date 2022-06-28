@@ -1,6 +1,8 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
+from typing import List
 from unittest.mock import patch
 
+import pytest
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -13,6 +15,8 @@ from drip.drips import DripBase
 from drip.models import Drip, QuerySetRule, SentDrip
 from drip.utils import get_user_model, unicode
 
+pytestmark = pytest.mark.django_db
+
 
 def get_user_model_mock():
     from drip.models import TestUserUUIDModel
@@ -20,16 +24,22 @@ def get_user_model_mock():
     return TestUserUUIDModel
 
 
-class DripsTestCase(TestCase):
-    def setUp(self):
+User = get_user_model()
+
+
+class TestCaseDrips:
+    start: datetime
+    num_string: List[str]
+
+    @classmethod
+    def setup_class(cls):
         """
         Creates 20 users, half of which buy 25 credits a day,
         and the other half that does none.
         """
-        self.User = get_user_model()
 
-        start = timezone.now() - timedelta(hours=2)
-        num_string = [
+        cls.start = timezone.now() - timedelta(hours=2)
+        cls.num_string = [
             "first",
             "second",
             "third",
@@ -42,105 +52,106 @@ class DripsTestCase(TestCase):
             "tenth",
         ]
 
-        for i, name in enumerate(num_string):
-            user = self.User.objects.create(
+    def setup_method(self, test_method):
+        for i, name in enumerate(self.num_string):
+            user = User.objects.create(
                 username="{name}_25_credits_a_day".format(name=name),
                 email="{name}@test.com".format(name=name),
             )
-            self.User.objects.filter(id=user.id).update(
-                date_joined=start - timedelta(days=i),
+            User.objects.filter(id=user.id).update(
+                date_joined=self.start - timedelta(days=i),
             )
 
             profile = Profile.objects.get(user=user)
             profile.credits = i * 25
             profile.save()
 
-        for i, name in enumerate(num_string):
-            user = self.User.objects.create(
+        for i, name in enumerate(self.num_string):
+            user = User.objects.create(
                 username="{name}_no_credits".format(name=name),
                 email="{name}@test.com".format(name=name),
             )
-            self.User.objects.filter(id=user.id).update(
-                date_joined=start - timedelta(days=i),
+            User.objects.filter(id=user.id).update(
+                date_joined=self.start - timedelta(days=i),
             )
 
     def test_users_exists(self):
-        self.assertEqual(20, self.User.objects.all().count())
+        assert 20 == User.objects.all().count()
 
     def test_day_zero_users(self):
         start = timezone.now() - timedelta(days=1)
         end = timezone.now()
-        self.assertEqual(
-            2,
-            self.User.objects.filter(
+        assert (
+            2
+            == User.objects.filter(
                 date_joined__range=(start, end),
-            ).count(),
+            ).count()
         )
 
     def test_day_two_users_active(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
-        self.assertEqual(
-            1,
-            self.User.objects.filter(
+        assert (
+            1
+            == User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits__gt=0,
-            ).count(),
+            ).count()
         )
 
     def test_day_two_users_inactive(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
-        self.assertEqual(
-            1,
-            self.User.objects.filter(
+        assert (
+            1
+            == User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits=0,
-            ).count(),
+            ).count()
         )
 
     def test_day_seven_users_active(self):
         start = timezone.now() - timedelta(days=8)
         end = timezone.now() - timedelta(days=7)
-        self.assertEqual(
-            1,
-            self.User.objects.filter(
+        assert (
+            1
+            == User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits__gt=0,
-            ).count(),
+            ).count()
         )
 
     def test_day_seven_users_inactive(self):
         start = timezone.now() - timedelta(days=8)
         end = timezone.now() - timedelta(days=7)
-        self.assertEqual(
-            1,
-            self.User.objects.filter(
+        assert (
+            1
+            == User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits=0,
-            ).count(),
+            ).count()
         )
 
     def test_day_fourteen_users_active(self):
         start = timezone.now() - timedelta(days=15)
         end = timezone.now() - timedelta(days=14)
-        self.assertEqual(
-            0,
-            self.User.objects.filter(
+        assert (
+            0
+            == User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits__gt=0,
-            ).count(),
+            ).count()
         )
 
     def test_day_fourteen_users_inactive(self):
         start = timezone.now() - timedelta(days=15)
         end = timezone.now() - timedelta(days=14)
-        self.assertEqual(
-            0,
-            self.User.objects.filter(
+        assert (
+            0
+            == User.objects.filter(
                 date_joined__range=(start, end),
                 profile__credits=0,
-            ).count(),
+            ).count()
         )
 
     ########################
@@ -150,10 +161,8 @@ class DripsTestCase(TestCase):
     def test_get_simple_fields(self):
         from drip.utils import get_simple_fields
 
-        simple_fields = get_simple_fields(self.User)
-        self.assertTrue(
-            bool([sf for sf in simple_fields if "profile" in sf[0]]),
-        )
+        simple_fields = get_simple_fields(User)
+        assert bool([sf for sf in simple_fields if "profile" in sf[0]])
 
     ##################
     #   TEST DRIPS   #
@@ -161,7 +170,7 @@ class DripsTestCase(TestCase):
 
     def test_backwards_drip_class(self):
         for drip in Drip.objects.all():
-            self.assertTrue(issubclass(drip.drip.__class__, DripBase))
+            assert issubclass(drip.drip.__class__, DripBase)
 
     def build_joined_date_drip(self, shift_one=7, shift_two=8):
         model_drip = Drip.objects.create(
@@ -192,27 +201,27 @@ class DripsTestCase(TestCase):
 
         # ensure we are starting from a blank slate
         # 2 people meet the criteria
-        self.assertEqual(2, drip.get_queryset().count())
+        assert 2 == drip.get_queryset().count()
         drip.prune()
         # no one is pruned, never sent before
-        self.assertEqual(2, drip.get_queryset().count())
+        assert 2 == drip.get_queryset().count()
         # confirm nothing sent before
-        self.assertEqual(0, SentDrip.objects.count())
+        assert 0 == SentDrip.objects.count()
 
         # send the drip
         drip.send()
-        self.assertEqual(2, SentDrip.objects.count())  # got sent
+        assert 2 == SentDrip.objects.count()  # got sent
 
         for sent in SentDrip.objects.all():
-            self.assertIn("HELLO", sent.subject)
-            self.assertIn("KETTEHS ROCK", sent.body)
+            assert "HELLO" in sent.subject
+            assert "KETTEHS ROCK" in sent.body
 
         # subsequent runs reflect previous activity
         drip = Drip.objects.get(id=model_drip.id).drip
         # 2 people meet the criteria
-        self.assertEqual(2, drip.get_queryset().count())
+        assert 2 == drip.get_queryset().count()
         drip.prune()
-        self.assertEqual(0, drip.get_queryset().count())  # everyone is pruned
+        assert 0 == drip.get_queryset().count()  # everyone is pruned
 
     def test_custom_short_term_drip(self):
         model_drip = self.build_joined_date_drip(shift_one=3, shift_two=4)
@@ -220,7 +229,7 @@ class DripsTestCase(TestCase):
 
         # ensure we are starting from a blank slate
         # 2 people meet the criteria
-        self.assertEqual(2, drip.get_queryset().count())
+        assert 2 == drip.get_queryset().count()
 
     def test_custom_date_range_walk(self):
         model_drip = self.build_joined_date_drip()
@@ -229,7 +238,7 @@ class DripsTestCase(TestCase):
         # vanilla (now-8, now-7), past (now-8-3, now-7-3),
         # future (now-8+1, now-7+1)
         for count, shifted_drip in zip([0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+            assert count == shifted_drip.get_queryset().count()
 
         # no reason to change after a send...
         drip.send()
@@ -238,7 +247,7 @@ class DripsTestCase(TestCase):
         # vanilla (now-8, now-7), past (now-8-3, now-7-3),
         # future (now-8+1, now-7+1)
         for count, shifted_drip in zip([0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+            assert count == shifted_drip.get_queryset().count()
 
     def test_custom_drip_with_count(self):
         model_drip = self.build_joined_date_drip()
@@ -251,10 +260,10 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         # 1 person meet the criteria
-        self.assertEqual(1, drip.get_queryset().count())
+        assert 1 == drip.get_queryset().count()
 
         for count, shifted_drip in zip([0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+            assert count == shifted_drip.get_queryset().count()
 
     def test_exclude_and_include(self):
         model_drip = Drip.objects.create(
@@ -283,7 +292,7 @@ class DripsTestCase(TestCase):
             field_value=125,
         )
         # 7 people meet the criteria
-        self.assertEqual(7, model_drip.drip.get_queryset().count())
+        assert 7 == model_drip.drip.get_queryset().count()
 
     def test_custom_drip_static_datetime(self):
         model_drip = self.build_joined_date_drip()
@@ -296,7 +305,7 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         for count, shifted_drip in zip([0, 2, 2, 0, 0], drip.walk(into_past=3, into_future=2)):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+            assert count == shifted_drip.get_queryset().count()
 
     def test_custom_drip_static_now_datetime(self):
         model_drip = Drip.objects.create(
@@ -314,13 +323,13 @@ class DripsTestCase(TestCase):
 
         # catches "today and yesterday" users
         for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
-            self.assertEqual(count, shifted_drip.get_queryset().count())
+            assert count == shifted_drip.get_queryset().count()
 
     def test_admin_timeline_prunes_user_output(self):
         """
         multiple users in timeline is confusing.
         """
-        admin = self.User.objects.create(username="admin", email="admin@example.com")
+        admin = User.objects.create(username="admin", email="admin@example.com")
         admin.is_staff = True
         admin.is_superuser = True
         admin.save()
@@ -357,7 +366,7 @@ class DripsTestCase(TestCase):
         response = match.func(request, *match.args, **match.kwargs)
 
         # check that our admin (not excluded from test) is shown once.
-        self.assertEqual(unicode(response.content).count(admin.email), 1)
+        assert 1 == unicode(response.content).count(admin.email)
 
     ##################
     #   TEST M2M     #
@@ -376,7 +385,7 @@ class DripsTestCase(TestCase):
             lookup_type="exact",
             field_value=2,
         )
-        self.assertEqual(qsr.annotated_field_name, "date_joined")
+        assert qsr.annotated_field_name == "date_joined"
 
     def test_annotated_field_name_property_with_count(self):
 
@@ -392,11 +401,7 @@ class DripsTestCase(TestCase):
             lookup_type="exact",
             field_value=2,
         )
-
-        self.assertEqual(
-            qsr.annotated_field_name,
-            "num_userprofile_user_groups",
-        )
+        assert qsr.annotated_field_name == "num_userprofile_user_groups"
 
     def test_apply_annotations_no_count(self):
 
@@ -415,7 +420,7 @@ class DripsTestCase(TestCase):
         base_queryset = model_drip.drip.get_queryset()
         qs = qsr.apply_any_annotation(base_queryset)
 
-        self.assertEqual(qs, base_queryset)
+        assert qs == base_queryset
 
     def test_apply_annotations_with_count(self):
 
@@ -433,10 +438,7 @@ class DripsTestCase(TestCase):
         )
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
-        self.assertEqual(
-            list(qs.query.annotation_select.keys()),  # type: ignore
-            ["num_profile_user_groups"],
-        )
+        assert list(qs.query.annotation_select.keys()) == ["num_profile_user_groups"]
 
     def test_apply_multiple_rules_with_aggregation(self):
 
@@ -462,8 +464,7 @@ class DripsTestCase(TestCase):
 
         qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
-
-        self.assertEqual(qs.count(), 4)
+        assert qs.count() == 4
 
     def test_apply_and_or_queryset_ruletype(self):
 
@@ -491,7 +492,7 @@ class DripsTestCase(TestCase):
         qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
 
-        self.assertEqual(qs.count(), 20)
+        assert qs.count() == 20
 
     def test_apply_or_queryset_ruletype(self):
 
@@ -520,7 +521,7 @@ class DripsTestCase(TestCase):
         qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
 
-        self.assertEqual(qs.count(), 12)
+        assert qs.count() == 12
 
 
 class UrlsTestCase(TestCase):
@@ -534,7 +535,7 @@ class UrlsTestCase(TestCase):
             },
         )
 
-        self.assertEqual(timeline_url, "/admin/drip/drip/1/timeline/2/3/")
+        assert timeline_url == "/admin/drip/drip/1/timeline/2/3/"
 
     def test_view_drip_email_url(self):
         view_drip_email_url = reverse(
@@ -547,10 +548,7 @@ class UrlsTestCase(TestCase):
             },
         )
 
-        self.assertEqual(
-            view_drip_email_url,
-            "/admin/drip/drip/1/timeline/2/3/4/",
-        )
+        assert view_drip_email_url == "/admin/drip/drip/1/timeline/2/3/4/"
 
     @patch("drip.admin.get_user_model", new=get_user_model_mock)
     def test_drip_timeline_url_user_uuid(self):
@@ -561,8 +559,8 @@ class UrlsTestCase(TestCase):
             if url_pattern.name == "view_drip_email":
                 test_url_pattern = url_pattern
                 break
-        self.assertIsNotNone(test_url_pattern)
-        self.assertEqual(
-            test_url_pattern.pattern._route,  # type: ignore
-            "<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/",  # noqa
+        assert test_url_pattern is not None
+        assert (
+            test_url_pattern.pattern._route  # type: ignore
+            == "<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/"
         )

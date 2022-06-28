@@ -63,7 +63,7 @@ jobs:
         pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports .
     - name: Running tests
       run: |
-        pipenv run coverage run manage.py test
+        pipenv run coverage run -m pytest --ds=testsettings
     - name: Checking coverage
       run: |
         pipenv run coverage report --fail-under=90 -m

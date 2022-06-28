@@ -1,11 +1,13 @@
+import pytest
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from drip.models import Drip, QuerySetRule
 
+pytestmark = pytest.mark.django_db
 
-class RulesTestCase(TestCase):
-    def setUp(self):
+
+class TestCaseRules:
+    def setup_method(self, test_method):
         self.drip = Drip.objects.create(
             name="A Drip just for Rules",
             subject_template="Hello",
@@ -28,7 +30,8 @@ class RulesTestCase(TestCase):
             lookup_type="lte",
             field_value="now-60 days",
         )
-        self.assertRaises(ValidationError, rule.clean)
+        with pytest.raises(ValidationError):
+            rule.clean()
 
     def test_bad_field_value(self):
         rule = QuerySetRule(
@@ -37,4 +40,5 @@ class RulesTestCase(TestCase):
             lookup_type="lte",
             field_value="now-2 months",
         )
-        self.assertRaises(ValidationError, rule.clean)
+        with pytest.raises(ValidationError):
+            rule.clean()

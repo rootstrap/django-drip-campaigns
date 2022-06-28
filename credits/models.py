@@ -3,7 +3,7 @@ import sys
 from django.contrib.auth.models import User
 from django.db import models
 
-TESTING = "test" in sys.argv
+TESTING = "pytest" in sys.modules
 
 
 class Profile(models.Model):
