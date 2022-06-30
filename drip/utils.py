@@ -6,18 +6,21 @@ from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
+from drip.types import FieldType
+
 basestring = (str, bytes)
 unicode = str
 
 
-def check_redundant(model_stack: list, stack_limit: int) -> bool:
-    """[summary]
+def check_redundant(model_stack: List[Type[models.Model]], stack_limit: int) -> bool:
+    """
+    Checks to ensure recursion isnt being redundant
 
-    :param model_stack: [description]
-    :type model_stack: list
-    :param stack_limit: [description]
+    :param model_stack: List of models.Model
+    :type model_stack: List[Type[models.Model]]
+    :param stack_limit: recursion depth to check redundancy
     :type stack_limit: int
-    :return: [description]
+    :return: Bool that controls if stops recursion
     :rtype: bool
     """
     stop_recursion = False
@@ -43,13 +46,12 @@ def get_field_name(field, RelatedObject):
 
 
 def get_full_field(parent_field: str, field_name: str) -> str:
-    """[summary]
-
-    :param parent_field: [description]
+    """
+    :param parent_field: Name of parent field
     :type parent_field: str
-    :param field_name: [description]
+    :param field_name: Field name
     :type field_name: str
-    :return: [description]
+    :return: It is the join between parent_field and field_name or just the field_name
     :rtype: str
     """
     if parent_field:
@@ -59,16 +61,16 @@ def get_full_field(parent_field: str, field_name: str) -> str:
     return full_field
 
 
-def get_rel_model(field, RelatedObject):
-    if isinstance(field, RelatedObject):
+def get_rel_model(field: FieldType, RelatedObject: RelatedObject) -> Type[models.Model]:
+    if isinstance(field, RelatedObject):  # type: ignore
         RelModel = field.model
         # field_names.extend(get_fields(RelModel, full_field, True))
     else:
-        RelModel = field.related_model
-    return RelModel
+        RelModel = field.related_model  # type: ignore
+    return RelModel  # type: ignore
 
 
-def is_valid_instance(field):
+def is_valid_instance(field: FieldType) -> bool:
     return (
         isinstance(field, ForeignKey)
         or isinstance(field, OneToOneField)
@@ -77,7 +79,13 @@ def is_valid_instance(field):
     )
 
 
-def get_out_fields(Model, parent_field, model_stack, excludes, fields):
+def get_out_fields(
+    Model: Type[models.Model],
+    parent_field: str,
+    model_stack: List[Type[models.Model]],
+    excludes: List[str],
+    fields: List[FieldType],
+):
     out_fields = []
     for field in fields:
 
@@ -93,7 +101,7 @@ def get_out_fields(Model, parent_field, model_stack, excludes, fields):
 
         if is_valid_instance(field):
 
-            RelModel = get_rel_model(field, RelatedObject)
+            RelModel = get_rel_model(field, RelatedObject)  # type: ignore
 
             out_fields.extend(
                 get_fields(RelModel, full_field, list(model_stack)),
@@ -103,11 +111,11 @@ def get_out_fields(Model, parent_field, model_stack, excludes, fields):
 
 
 def get_fields(
-    Model,
-    parent_field="",
-    model_stack=[],
-    stack_limit=2,
-    excludes=["permissions", "comment", "content_type"],
+    Model: Type[models.Model],
+    parent_field: str = "",
+    model_stack: List[Type[models.Model]] = [],
+    stack_limit: int = 2,
+    excludes: List[str] = ["permissions", "comment", "content_type"],
 ):
     """
     Given a Model, return a list of lists of strings with important stuff:
@@ -124,7 +132,7 @@ def get_fields(
         app_label, model_name = Model.split(".")
         Model = models.get_model(app_label, model_name)  # type: ignore
 
-    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()
+    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()  # type: ignore
     model_stack.append(Model)
 
     # do a variety of checks to ensure recursion isnt being redundant
@@ -137,19 +145,19 @@ def get_fields(
     return get_out_fields(Model, parent_field, model_stack, excludes, fields)
 
 
-def give_model_field(full_field: str, Model: models.Model) -> tuple:
+def give_model_field(full_field: str, Model: Type[models.Model]) -> tuple:
     """Given a field_name and Model:
 
     "test_user__unique_id", <AchievedGoal>
 
     Returns "test_user__unique_id", "id", <Model>, <ModelField>
 
-    :param full_field: [description]
+    :param full_field: full field name
     :type full_field: str
-    :param Model: [description]
+    :param Model: models.Model
     :type Model: models.Model
-    :raises Exception: [description]
-    :return: [description]
+    :raises Exception: If the key is not found it raises and exception
+    :return: It is a tuple with field full name, field name, <Model>, <ModelField>
     :rtype: tuple
     """
 
@@ -165,7 +173,7 @@ def give_model_field(full_field: str, Model: models.Model) -> tuple:
     raise Exception(message_exception)
 
 
-def get_simple_fields(Model, **kwargs):
+def get_simple_fields(Model: Type[models.Model], **kwargs) -> List:
     ret_list: List = []
     for f in get_fields(Model, **kwargs):
         if "__" in f[0]:
