@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import pytest
@@ -26,6 +26,8 @@ def get_user_model_mock():
 
 
 User = get_user_model()
+
+DEFAULT_MESSAGE_CLASSES_LENGTH = len(configured_message_classes().items())
 
 
 class TestCaseDrips:
@@ -473,48 +475,51 @@ class TestCaseDrips:
 
         assert qs.count() == 12
 
-    def test_message_class_for(self):
-        default_message_classes_length = len(configured_message_classes().items())
-
-        # adding a brand new MessageClass
+    @pytest.mark.parametrize(
+        "message_class_config, lenght_plus, default_class, custom_class",
+        (
+            (
+                {"non-default-class": "drip.drips.OtherDripClass"},
+                1,
+                DEFAULT_DRIP_MESSAGE_CLASS,
+                None,
+            ),  # adding a brand new MessageClass
+            (
+                {"default": "drip.drips.OtherDripClass"},
+                0,
+                "drip.drips.OtherDripClass",
+                None,
+            ),  # Replacing an existing Message Class
+            (
+                {
+                    "default": "drip.drips.OtherDripClass",
+                    "custom": "custom.module.ClassName",
+                },
+                1,
+                "drip.drips.OtherDripClass",
+                "custom.module.ClassName",
+            ),  # Mixing replacing and adding a new class
+        ),
+    )
+    def test_message_class_for(
+        self,
+        message_class_config: Dict[str, str],
+        lenght_plus: int,
+        default_class: str,
+        custom_class: Optional[str],
+    ):
         setattr(
             settings,
             "DRIP_MESSAGE_CLASSES",
-            {"non-default-class": "drip.drips.OtherDripClass"},
+            message_class_config,
         )
 
         message_classes = configured_message_classes()
 
-        assert len(message_classes.items()) == default_message_classes_length + 1
-        assert message_classes["default"] == DEFAULT_DRIP_MESSAGE_CLASS
-
-        # Replacing an existing Message Class
-        setattr(
-            settings,
-            "DRIP_MESSAGE_CLASSES",
-            {"default": "drip.drips.OtherDripClass"},
-        )
-
-        message_classes = configured_message_classes()
-
-        assert len(message_classes.items()) == default_message_classes_length
-        assert message_classes["default"] == "drip.drips.OtherDripClass"
-
-        # Mixing replacing and adding a new class
-        setattr(
-            settings,
-            "DRIP_MESSAGE_CLASSES",
-            {
-                "default": "drip.drips.OtherDripClass",
-                "custom": "custom.module.ClassName",
-            },
-        )
-
-        message_classes = configured_message_classes()
-
-        assert len(message_classes.items()) == default_message_classes_length + 1
-        assert message_classes["default"] == "drip.drips.OtherDripClass"
-        assert message_classes["custom"] == "custom.module.ClassName"
+        assert len(message_classes.items()) == DEFAULT_MESSAGE_CLASSES_LENGTH + lenght_plus
+        assert message_classes["default"] == default_class
+        if custom_class:
+            assert message_classes["custom"] == custom_class
 
 
 class UrlsTestCase(TestCase):
