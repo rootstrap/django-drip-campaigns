@@ -198,12 +198,12 @@ class DripBase(object):
         """Walk over a date range and create
             new instances of self with new ranges.
 
-        :param into_past: [description], defaults to 0
+        :param into_past: defaults to 0
         :type into_past: int, optional
-        :param into_future: [description], defaults to 0
+        :param into_future: defaults to 0
         :type into_future: int, optional
-        :return: [description]
-        :rtype: [type]
+        :return: List of DripBase instances.
+        :rtype: List[DripBase]
         """
         walked_range = []
         for shift in range(-into_past, into_future):
@@ -216,9 +216,24 @@ class DripBase(object):
         return walked_range
 
     def apply_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
+        """First collect all filter/exclude kwargs and apply any annotations.
+        Then apply all filters at once, and all excludes at once.
+
+        :param manager_qs: Base queryset or manager to apply queryset rules
+        :type manager_qs: Union[BaseManager, QuerySet]
+        :return: Queryset with all (AND/OR) filters applied
+        :rtype: QuerySet
+        """
         return self.apply_and_queryset_rules(manager_qs) | self.apply_or_queryset_rules(manager_qs)
 
     def apply_or_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
+        """First collect all filter kwargs. Then apply OR filters at once.
+
+        :param manager_qs: Base queryset or manager to apply queryset rules
+        :type manager_qs: Union[BaseManager, QuerySet]
+        :return: Queryset with OR filters applied
+        :rtype: QuerySet
+        """
         rules: List[Q] = []
         rule_set = self.drip_model.queryset_rules.filter(rule_type="or")
         for query_rule in rule_set:
@@ -234,12 +249,12 @@ class DripBase(object):
 
     def apply_and_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
         """First collect all filter/exclude kwargs and apply any annotations.
-        Then apply all filters at once, and all excludes at once.
+        Then apply AND filters at once, and all excludes at once.
 
-        :param qs: [description]
-        :type qs: str
-        :return: [description]
-        :rtype: str
+        :param manager_qs: Base queryset or manager to apply queryset rules
+        :type manager_qs: Union[BaseManager, QuerySet]
+        :return: Queryset with AND filters applied
+        :rtype: QuerySet
         """
         clauses: Dict[str, List] = {
             "filter": [],
@@ -269,12 +284,10 @@ class DripBase(object):
     ##################
 
     def get_queryset(self) -> QuerySet:
-        """[summary]
+        """Apply queryset rules or returns the existing queryset
 
-        [extended_summary]
-
-        :return: [description]
-        :rtype: [type]
+        :return: Queryset with all (AND/OR) filters applied
+        :rtype: QuerySet
         """
         queryset = getattr(self, "_queryset", None)
         if queryset is None:
@@ -286,10 +299,8 @@ class DripBase(object):
     def run(self) -> Optional[int]:
         """Get the queryset, prune sent people, and send it.
 
-        [extended_summary]
-
-        :return: [description]
-        :rtype: int
+        :return: Returns count of created SentDrips.
+        :rtype: Optional[int]
         """
         if not self.drip_model.enabled:
             return None
