@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from unittest.mock import patch
 
 import pytest
+from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -11,13 +12,8 @@ from django.utils import timezone
 
 from credits.models import Profile
 from drip.admin import DripAdmin
+from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes
 from drip.models import Drip, QuerySetRule, SentDrip
-from django.conf import settings
-from drip.drips import (
-    DripBase,
-    configured_message_classes,
-    DEFAULT_DRIP_MESSAGE_CLASS,
-)
 from drip.utils import get_user_model, unicode
 
 pytestmark = pytest.mark.django_db
@@ -478,70 +474,47 @@ class TestCaseDrips:
         assert qs.count() == 12
 
     def test_message_class_for(self):
-        default_message_classes_length = len(
-            configured_message_classes().items()
-        )
+        default_message_classes_length = len(configured_message_classes().items())
 
         # adding a brand new MessageClass
         setattr(
             settings,
-            'DRIP_MESSAGE_CLASSES',
-            {'non-default-class': 'drip.drips.OtherDripClass'},
+            "DRIP_MESSAGE_CLASSES",
+            {"non-default-class": "drip.drips.OtherDripClass"},
         )
 
         message_classes = configured_message_classes()
 
-        self.assertEqual(
-            len(message_classes.items()),
-            default_message_classes_length + 1,
-        )
-        self.assertEqual(
-            message_classes['default'],
-            DEFAULT_DRIP_MESSAGE_CLASS,
-        )
+        assert len(message_classes.items()) == default_message_classes_length + 1
+        assert message_classes["default"] == DEFAULT_DRIP_MESSAGE_CLASS
 
         # Replacing an existing Message Class
         setattr(
             settings,
-            'DRIP_MESSAGE_CLASSES',
-            {'default': 'drip.drips.OtherDripClass'},
+            "DRIP_MESSAGE_CLASSES",
+            {"default": "drip.drips.OtherDripClass"},
         )
 
         message_classes = configured_message_classes()
 
-        self.assertEqual(
-            len(message_classes.items()),
-            default_message_classes_length,
-        )
-        self.assertEqual(
-            message_classes['default'],
-            'drip.drips.OtherDripClass',
-        )
+        assert len(message_classes.items()) == default_message_classes_length
+        assert message_classes["default"] == "drip.drips.OtherDripClass"
 
         # Mixing replacing and adding a new class
         setattr(
             settings,
-            'DRIP_MESSAGE_CLASSES',
+            "DRIP_MESSAGE_CLASSES",
             {
-                'default': 'drip.drips.OtherDripClass',
-                'custom': 'custom.module.ClassName',
-            }
+                "default": "drip.drips.OtherDripClass",
+                "custom": "custom.module.ClassName",
+            },
         )
 
         message_classes = configured_message_classes()
 
-        self.assertEqual(
-            len(message_classes.items()),
-            default_message_classes_length + 1,
-        )
-        self.assertEqual(
-            message_classes['default'],
-            'drip.drips.OtherDripClass',
-        )
-        self.assertEqual(
-            message_classes['custom'],
-            'custom.module.ClassName',
-        )
+        assert len(message_classes.items()) == default_message_classes_length + 1
+        assert message_classes["default"] == "drip.drips.OtherDripClass"
+        assert message_classes["custom"] == "custom.module.ClassName"
 
 
 class UrlsTestCase(TestCase):

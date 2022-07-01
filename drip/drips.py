@@ -1,14 +1,11 @@
 import functools
 import logging
 import operator
+from collections import ChainMap
 from datetime import datetime, timedelta
+from functools import lru_cache
 from importlib import import_module
 from typing import Any, Dict, List, Optional, TypedDict, Union
-
-from importlib import import_module
-from collections import ChainMap
-from functools import lru_cache
-from typing import Any
 
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -16,14 +13,13 @@ from django.db.models import Q
 from django.db.models.manager import BaseManager
 from django.db.models.query import QuerySet
 from django.template import Context, Template
-from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django.utils.safestring import SafeString
 from typing_extensions import TypeAlias
 
+from drip.exceptions import MessageClassNotFound
 from drip.models import Drip, SentDrip
 from drip.utils import get_user_model
-from drip.exceptions import MessageClassNotFound
 
 User = get_user_model()
 
@@ -33,7 +29,7 @@ except ImportError:
     conditional_now = datetime.now
 
 
-DEFAULT_DRIP_MESSAGE_CLASS = 'drip.drips.DripMessage'
+DEFAULT_DRIP_MESSAGE_CLASS = "drip.drips.DripMessage"
 
 
 def configured_message_classes() -> ChainMap:
@@ -72,8 +68,8 @@ def configured_message_classes() -> ChainMap:
 
     A 'default' key is added when it's not present on DRIP_MESSAGE_CLASSES.
     """
-    default_config = {'default': DEFAULT_DRIP_MESSAGE_CLASS}
-    user_defined_config = getattr(settings, 'DRIP_MESSAGE_CLASSES', {})
+    default_config = {"default": DEFAULT_DRIP_MESSAGE_CLASS}
+    user_defined_config = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
     return ChainMap(user_defined_config, default_config)
 
 
@@ -87,12 +83,10 @@ def message_class_for(name: str) -> Any:
     try:
         path = configured_message_classes()[name]
     except KeyError:
-        logging.error(
-            'Name "{}" not found in configured message classes.'.format(name)
-        )
+        logging.error('Name "{}" not found in configured message classes.'.format(name))
         raise MessageClassNotFound() from None
     else:
-        mod_name, klass_name = path.rsplit('.', 1)
+        mod_name, klass_name = path.rsplit(".", 1)
         mod = import_module(mod_name)
         klass = getattr(mod, klass_name)
         return klass
