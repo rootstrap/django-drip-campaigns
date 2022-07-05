@@ -53,7 +53,7 @@ django-stubs = "==1.9.0"
 types-six = "1.16.16"
 
 [packages]
-Django = "==3.2.13"
+Django = "==3.2.14"
 apscheduler = "==3.7.0"
 
 [requires]
