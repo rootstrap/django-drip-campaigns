@@ -99,10 +99,14 @@ class DripBaseParamsOptions(TypedDict):
 
 
 class DripMessage(object):
-    """[summary]
+    """
+    Email message abstraction for manage message interactions, based on EmailMultiAlternatives.
+    You can extend this manually overriding any method that you need.
 
-    :param object: [description]
-    :type object: [type]
+    :param drip_base: DripBase object to build email
+    :type drip_base: DripBase
+    :param user: User to send email
+    :type user: User
     """
 
     # Ignoring this line because mypy says User is not a valid type
