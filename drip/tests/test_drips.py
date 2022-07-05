@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import pytest
+from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -11,7 +12,7 @@ from django.utils import timezone
 
 from credits.models import Profile
 from drip.admin import DripAdmin
-from drip.drips import DripBase
+from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes
 from drip.models import Drip, QuerySetRule, SentDrip
 from drip.utils import get_user_model, unicode
 
@@ -25,6 +26,8 @@ def get_user_model_mock():
 
 
 User = get_user_model()
+
+DEFAULT_MESSAGE_CLASSES_LENGTH = len(configured_message_classes().items())
 
 
 class TestCaseDrips:
@@ -471,6 +474,52 @@ class TestCaseDrips:
         qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
 
         assert qs.count() == 12
+
+    @pytest.mark.parametrize(
+        "message_class_config, lenght_plus, default_class, custom_class",
+        (
+            (
+                {"non-default-class": "drip.drips.OtherDripClass"},
+                1,
+                DEFAULT_DRIP_MESSAGE_CLASS,
+                None,
+            ),  # adding a brand new MessageClass
+            (
+                {"default": "drip.drips.OtherDripClass"},
+                0,
+                "drip.drips.OtherDripClass",
+                None,
+            ),  # Replacing an existing Message Class
+            (
+                {
+                    "default": "drip.drips.OtherDripClass",
+                    "custom": "custom.module.ClassName",
+                },
+                1,
+                "drip.drips.OtherDripClass",
+                "custom.module.ClassName",
+            ),  # Mixing replacing and adding a new class
+        ),
+    )
+    def test_message_class_for(
+        self,
+        message_class_config: Dict[str, str],
+        lenght_plus: int,
+        default_class: str,
+        custom_class: Optional[str],
+    ):
+        setattr(
+            settings,
+            "DRIP_MESSAGE_CLASSES",
+            message_class_config,
+        )
+
+        message_classes = configured_message_classes()
+
+        assert len(message_classes.items()) == DEFAULT_MESSAGE_CLASSES_LENGTH + lenght_plus
+        assert message_classes["default"] == default_class
+        if custom_class:
+            assert message_classes["custom"] == custom_class
 
 
 class UrlsTestCase(TestCase):

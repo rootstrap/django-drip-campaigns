@@ -1,7 +1,9 @@
 import functools
 import logging
 import operator
+from collections import ChainMap
 from datetime import datetime, timedelta
+from functools import lru_cache
 from importlib import import_module
 from typing import Any, Dict, List, Optional, TypedDict, Union
 
@@ -15,6 +17,7 @@ from django.utils.html import strip_tags
 from django.utils.safestring import SafeString
 from typing_extensions import TypeAlias
 
+from drip.exceptions import MessageClassNotFound
 from drip.models import Drip, SentDrip
 from drip.utils import get_user_model
 
@@ -26,24 +29,67 @@ except ImportError:
     conditional_now = datetime.now
 
 
-def configured_message_classes() -> Dict[str, Any]:
-    """[summary]
+DEFAULT_DRIP_MESSAGE_CLASS = "drip.drips.DripMessage"
 
-    :return: [description]
-    :rtype: Dict[str, Any]
+
+def configured_message_classes() -> ChainMap:
     """
-    conf_dict = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
-    if "default" not in conf_dict:
-        conf_dict["default"] = "drip.drips.DripMessage"
-    return conf_dict
+    Returns a ChainMap (basically a dict), between default settings and
+    settings.DRIP_MESSAGE_CLASSES which should be a dictionary of the form:
+
+        { message_class_name: class_path }
+
+    For example, if you define this at DRIP_MESSAGE_CLASSES:
+
+        {
+            'default': 'my.path.to.DripMessage',
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    The returning value of this method would be:
+
+        {
+            'default': 'my.path.to.Drip',
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    But, if you define this:
+
+        {
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    The returning value of this method would be:
+
+        {
+            'default': 'drip.drips.DripMessage',
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    A 'default' key is added when it's not present on DRIP_MESSAGE_CLASSES.
+    """
+    default_config = {"default": DEFAULT_DRIP_MESSAGE_CLASS}
+    user_defined_config = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
+    return ChainMap(user_defined_config, default_config)
 
 
+@lru_cache()
 def message_class_for(name: str) -> "DripMessage":
-    path = configured_message_classes()[name]
-    mod_name, klass_name = path.rsplit(".", 1)
-    mod = import_module(mod_name)
-    klass = getattr(mod, klass_name)
-    return klass
+    """
+    Given a class's path, returns a reference to it.
+    Raises MessageClassNotFound exception if name is not present in
+    the ChainMap produced by configured_message_classes.
+    """
+    try:
+        path = configured_message_classes()[name]
+    except KeyError:
+        logging.error('Name "{}" not found in configured message classes.'.format(name))
+        raise MessageClassNotFound() from None
+    else:
+        mod_name, klass_name = path.rsplit(".", 1)
+        mod = import_module(mod_name)
+        klass = getattr(mod, klass_name)
+        return klass
 
 
 class DripBaseParamsOptions(TypedDict):
@@ -320,10 +366,15 @@ class DripBase(object):
         ).values_list("user_id", flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
-    def get_count_from_queryset(self, MessageClass) -> int:
+    def get_count_from_queryset(self, message_class) -> int:
+        """
+        Given a Message Class instance (by default drip.drips.DripMessage),
+        returns the amount of sent Drips.
+        """
+        # TODO: try to reduce the side-effects of this method.
         count = 0
         for user in self.get_queryset():
-            message_instance = MessageClass(self, user)
+            message_instance = message_class(self, user)
             try:
                 result = message_instance.message.send()
                 if result:
@@ -347,7 +398,8 @@ class DripBase(object):
         return count
 
     def send(self) -> int:
-        """Send the message to each user on the queryset.
+        """
+        Send the message to each user on the queryset.
 
         Create SentDrip for each user that gets a message.
 
