@@ -74,7 +74,7 @@ def configured_message_classes() -> ChainMap:
 
 
 @lru_cache()
-def message_class_for(name: str) -> Any:
+def message_class_for(name: str) -> "DripMessage":
     """
     Given a class's path, returns a reference to it.
     Raises MessageClassNotFound exception if name is not present in
