@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Campaign(models.Model):
-    name = models.CharField(max_length=256, default='Unnamed Campaign')
+    name = models.CharField(max_length=256, default="Unnamed Campaign")
     delete_drips = models.BooleanField(default=True)
 
     def delete(self, using=None, keep_parents=False):

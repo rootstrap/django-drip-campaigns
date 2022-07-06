@@ -20,7 +20,6 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "drip",
     "campaigns",
-
     # testing only
     "credits",
 )

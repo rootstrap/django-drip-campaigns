@@ -12,11 +12,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Campaign',
+            name="Campaign",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='Unnamed Campaign', max_length=256)),
-                ('delete_drips', models.BooleanField(default=True)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ("name", models.CharField(default="Unnamed Campaign", max_length=256)),
+                ("delete_drips", models.BooleanField(default=True)),
             ],
         ),
     ]
