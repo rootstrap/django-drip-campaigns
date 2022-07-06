@@ -14,7 +14,7 @@ class CampaignFactory(DjangoModelFactory):
 
 
 class DripFactory(DjangoModelFactory):
-    name = Faker("word")
+    name = Faker("sentences", nb=3)
     campaign = SubFactory(CampaignFactory)
 
     class Meta:
