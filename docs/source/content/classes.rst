@@ -1,6 +1,9 @@
 Classes specification
 =====================
 
+:ref:`Campaign <_campaign-spec>`
+------------------------
+
 :ref:`Drip <drip-spec>`
 ------------------------
 

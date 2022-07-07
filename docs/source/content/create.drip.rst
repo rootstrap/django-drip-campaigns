@@ -14,6 +14,8 @@ The Drip creation page looks like this:
 When you create a drip, you need at least one queryset so the users in it will be the ones that receive the defined email. In the ``METHOD TYPE`` menu you are able to choose to filter or to exclude the users in the defined queryset.  
 On the other hand, when you click in the ``FIELD NAME OF USER`` input, you will see the fields of your User model, and the fields of your user model in the models related to it:
 
+Here you can relate the Drip to the corresponding ``Campaign``. Grouping several drips under a campaign.
+
 .. image:: ../../images/users_lookup_fields.png
   :width: 600
   :alt: User fields

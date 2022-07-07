@@ -7,9 +7,27 @@ If you haven't, create a superuser with the `Django createsuperuser command <htt
 - Create a new drip.
 - Select and delete drips.
 
+Now you can also manage campaigns, select ``Campaigns`` to manage them. You will be able to:
+- View created campaigns.
+- Create a new campaign.
+- Select and delete campaign.
+
+Create Campaign
+-----------
+Click on the ``ADD CAMPAIGNS +`` button to create a new Campaign. In the creation you need to define the email that you want to send, the campaign the Drip belong to and the queryset for the users that will receive it. To see more details, :ref:`click here <create-drip>`.
+
+View timeline of a Drip
+-----------------------
+
+In the django admin, you can select a campaign and then click on the ``VIEW TIMELINE`` button to view the emails expected to be sent with the corresponding receivers grouped by the Drip and with a link to the email and to the Drip itself:
+
+.. image:: ../../images/campaign_timeline.png
+  :width: 400
+  :alt: View timeline campaign
+
 Create Drip
 -----------
-Click on the ``ADD DRIP +`` button to create a new Drip. In the creation you need to define the email that you want to send, and the queryset for the users that will receive it. To see more details, :ref:`click here <create-drip>`.
+Click on the ``ADD DRIP +`` button to create a new Drip. In the creation you need to define the email that you want to send, the campaign the Drip belong to and the queryset for the users that will receive it. To see more details, :ref:`click here <create-drip>`.
 
 View timeline of a Drip
 -----------------------
