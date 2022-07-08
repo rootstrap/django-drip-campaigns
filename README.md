@@ -20,7 +20,7 @@ This project is a fork of the one written by [Zapier](https://zapier.com/z/qO/).
 pip install django-drip-campaigns
 ```
 
-2. Add `'drip'` to your `INSTALLED_APPS` list on your settings.
+2. Add `'drip'` and `'campaigns'` to your `INSTALLED_APPS` list on your settings.
 
 ```python
 INSTALLED_APPS = [
@@ -33,12 +33,13 @@ INSTALLED_APPS = [
     # ...
 
     'drip',
+    'campaigns',
 ]
 ```
 
 3. (Optional) Set `DRIP_FROM_EMAIL = '<your_app_from_email>'` in your settings, where `<your_app_from_email>` is the email account that is going to be shown in the sent emails. Otherwise `EMAIL_HOST_USER` value will be used.
 
-4. Finally, run `python manage.py migrate drip` to set up the necessary database tables.
+4. Finally, run `python manage.py migrate drip` and `python manage.py migrate campaigns` to set up the necessary database tables.
 
 ## Usage
 
@@ -48,11 +49,30 @@ If you haven't, create a superuser with the [Django createsuperuser command](htt
 - Create a new drip.
 - Select and delete drips.
 
+Now you can also manage campaigns, select ``Campaigns`` to manage them. You will be able to:
+- View created campaigns.
+- Create a new campaign.
+- Select and delete campaign.
+
+### Create Campaign
+
+In the Django admin, after select `Campaigns`, you can click on `ADD CAMPAIGN +` button to create a new one. You will see the `add campaign` page:
+
+![Add Campaign](https://raw.githubusercontent.com/rootstrap/django-drip-campaigns/master/docs/images/campaign_creation.png)
+
+When you create a campaign, you need to decide if the related drips will be deleted along with the campaign, using the `Delete drips` field.
+
+Here you will find an inline creation or edition for `Drips` this will not include the `QUERY SET RULES` section. It will only allow you to change the mail content in the Drip.
+
+Campaigns will allow you to manage many Drips that need to be related between them.
+
 ### Create Drip
 
 In the Django admin, after select `Drips`, you can click on `ADD DRIP +` button to create a new one. You will see the `add drip` page:
 
 ![Add Drip](https://raw.githubusercontent.com/rootstrap/django-drip-campaigns/master/docs/images/add_drip_page.png)
+
+Here you can relate the Drip to the corresponding ``Campaign``. Grouping several drips under a campaign.
 
 On the `FIELD NAME OF USER` input, when you click on it, you will be able to view:
 
@@ -63,8 +83,8 @@ Please take a look a this example:
 
 ![Lookup fields](https://raw.githubusercontent.com/rootstrap/django-drip-campaigns/master/docs/images/users_lookup_fields.png)
 
-With this, you can select one or more fields to create useful drips.  
-Additionally if you select a field name of user that has a date type, you can enter in the `FIELD VALUE` input, a date value written in natural language that combines operations on the current datetime.  
+With this, you can select one or more fields to create useful drips.
+Additionally if you select a field name of user that has a date type, you can enter in the `FIELD VALUE` input, a date value written in natural language that combines operations on the current datetime.
 For example, if you have selected the field `last_login` that has a date type, and you want to create a drip to send emails to the users who logged in exactly one week ago; you can enter:
 
 ```
@@ -144,7 +164,7 @@ DRIP_SCHEDULE_SETTINGS = {
 }
 ```
 
-Then every Monday at 13:57 the `send_drips` command will be executed.  
+Then every Monday at 13:57 the `send_drips` command will be executed.
 Last but not least, add this line at the end of your main `urls.py` file to start the scheduler:
 
 ```python

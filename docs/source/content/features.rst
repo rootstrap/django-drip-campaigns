@@ -14,9 +14,9 @@ Now you can also manage campaigns, select ``Campaigns`` to manage them. You will
 
 Create Campaign
 -----------
-Click on the ``ADD CAMPAIGNS +`` button to create a new Campaign. In the creation you need to define the email that you want to send, the campaign the Drip belong to and the queryset for the users that will receive it. To see more details, :ref:`click here <create-drip>`.
+Click on the ``ADD CAMPAIGNS +`` button to create a new Campaign. In the creation you need to define the email that you want to send, the campaign the Drip belong to and the queryset for the users that will receive it. To see more details, :ref:`click here <create-campaign>`.
 
-View timeline of a Drip
+View timeline of a Campaign
 -----------------------
 
 In the django admin, you can select a campaign and then click on the ``VIEW TIMELINE`` button to view the emails expected to be sent with the corresponding receivers grouped by the Drip and with a link to the email and to the Drip itself:
