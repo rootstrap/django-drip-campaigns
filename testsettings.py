@@ -19,6 +19,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.messages",
     "drip",
+    "campaigns",
     # testing only
     "credits",
 )
@@ -66,3 +67,5 @@ STATICFILES_DIRS = ()
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+DRIP_CLASS_NAME = "drip.Drip"

@@ -5,7 +5,9 @@ admin_urls %} {% block object-tools-items %}
     >View Timeline</a
   >
 </li>
-<li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+<li>
+  <a href="{% url 'admin:drip_drip_history' original.pk %}" class="historylink">{% translate "History" %}</a>
+</li>
 {% if has_absolute_url %}
 <li>
   <a
