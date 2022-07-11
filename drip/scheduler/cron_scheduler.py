@@ -9,13 +9,14 @@ DRIP_SCHEDULE = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE", False)
 DRIP_SCHEDULE_DAY_OF_WEEK = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE_DAY_OF_WEEK", 0)
 DRIP_SCHEDULE_HOUR = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE_HOUR", 0)
 DRIP_SCHEDULE_MINUTE = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE_MINUTE", 0)
+CELERY_ENABLED = DRIP_SCHEDULE_SETTINGS.get("CELERY_ENABLED", False)
 
 
 def cron_send_drips():
     def call_send_drips_command():
         call_command("send_drips")
 
-    if DRIP_SCHEDULE:
+    if DRIP_SCHEDULE and not CELERY_ENABLED:
         cron_scheduler = BackgroundScheduler()
         cron_scheduler.add_job(
             call_send_drips_command,
