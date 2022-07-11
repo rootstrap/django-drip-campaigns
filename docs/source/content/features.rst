@@ -132,3 +132,29 @@ Some tips:
 
 - If you want to run the command every day in the week, hour, or minute, just set the corresponding parameter to ``'*'``.
 - If you want to run the command more than a day in the week, just set the ``DRIP_SCHEDULE_DAY_OF_WEEK`` to more than one value. For example, if you set that to ``'mon-fri'`` the command will be executed from Monday to Friday.
+
+
+Celery integration
+------------------
+
+IMPORTANT: We use Celery 5.0.x that supports Django 1.11 LTS or newer versions.
+
+If you need to use celery it can be configured in the same way you just need to add the following key ``SCHEDULER`` setted as ``"CELERY"``:
+
+
+.. code-block:: python
+
+    DRIP_SCHEDULE_SETTINGS = {
+        'DRIP_SCHEDULE': True,
+        'DRIP_SCHEDULE_DAY_OF_WEEK': 'mon',
+        'DRIP_SCHEDULE_HOUR': 13,
+        'DRIP_SCHEDULE_MINUTE': 57,
+        'SCHEDULER': 'CELERY',
+    }
+
+The default value of this key is ``"CRON"``, if you enable ``DRIP_SCHEDULE`` it will work with a Cron by default.
+
+In order to make this happen, the project's ``celery.py`` setup shall invoke the
+`autodiscoverttasks <https://docs.celeryproject.org/en/latest/reference/celery.html#celery.Celery.autodiscover_tasks>`_
+function. This task is scheduled with a simple
+`Celery beat configuration <https://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html#entries>`_.
