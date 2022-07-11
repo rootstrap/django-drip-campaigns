@@ -1,18 +1,19 @@
 from celery import current_app
 from celery.schedules import crontab
-from django.conf import settings
 from django.core.management import call_command
+
+from drip.scheduler.constants import (
+    DRIP_SCHEDULE,
+    DRIP_SCHEDULE_DAY_OF_WEEK,
+    DRIP_SCHEDULE_HOUR,
+    DRIP_SCHEDULE_MINUTE,
+    SCHEDULER,
+    SCHEDULER_CELERY,
+)
 
 app = current_app._get_current_object()
 
-
-DRIP_SCHEDULE_SETTINGS = getattr(settings, "DRIP_SCHEDULE_SETTINGS", {})
-
-DRIP_SCHEDULE = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE", False)
-DRIP_SCHEDULE_DAY_OF_WEEK = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE_DAY_OF_WEEK", 0)
-DRIP_SCHEDULE_HOUR = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE_HOUR", 0)
-DRIP_SCHEDULE_MINUTE = DRIP_SCHEDULE_SETTINGS.get("DRIP_SCHEDULE_MINUTE", 0)
-CELERY_ENABLED = DRIP_SCHEDULE_SETTINGS.get("CELERY_ENABLED", False)
+CELERY_ENABLED = SCHEDULER == SCHEDULER_CELERY
 
 if DRIP_SCHEDULE and CELERY_ENABLED:
 
