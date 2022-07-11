@@ -139,7 +139,7 @@ Celery integration
 
 IMPORTANT: We use Celery 5.0.x that supports Django 1.11 LTS or newer versions.
 
-If you need to use celery it can be configured in the same way you just need to add the following key ``CELERY_ENABLED``:
+If you need to use celery it can be configured in the same way you just need to add the following key ``SCHEDULER`` setted as ``"CELERY"``:
 
 
 .. code-block:: python
@@ -149,10 +149,10 @@ If you need to use celery it can be configured in the same way you just need to 
         'DRIP_SCHEDULE_DAY_OF_WEEK': 'mon',
         'DRIP_SCHEDULE_HOUR': 13,
         'DRIP_SCHEDULE_MINUTE': 57,
-        'CELERY_ENABLED': True,
+        'SCHEDULER': 'CELERY',
     }
 
-The default value of this key is ``False``, if you enable ``DRIP_SCHEDULE`` it will work with a Cron by default.
+The default value of this key is ``"CRON"``, if you enable ``DRIP_SCHEDULE`` it will work with a Cron by default.
 
 In order to make this happen, the project's ``celery.py`` setup shall invoke the
 `autodiscoverttasks <https://docs.celeryproject.org/en/latest/reference/celery.html#celery.Celery.autodiscover_tasks>`_
