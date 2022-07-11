@@ -1,7 +1,9 @@
 import functools
 import logging
 import operator
+from collections import ChainMap
 from datetime import datetime, timedelta
+from functools import lru_cache
 from importlib import import_module
 from typing import Any, Dict, List, Optional, TypedDict, Union
 
@@ -15,6 +17,7 @@ from django.utils.html import strip_tags
 from django.utils.safestring import SafeString
 from typing_extensions import TypeAlias
 
+from drip.exceptions import MessageClassNotFound
 from drip.models import Drip, SentDrip
 from drip.utils import get_user_model
 
@@ -26,24 +29,67 @@ except ImportError:
     conditional_now = datetime.now
 
 
-def configured_message_classes() -> Dict[str, Any]:
-    """[summary]
+DEFAULT_DRIP_MESSAGE_CLASS = "drip.drips.DripMessage"
 
-    :return: [description]
-    :rtype: Dict[str, Any]
+
+def configured_message_classes() -> ChainMap:
     """
-    conf_dict = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
-    if "default" not in conf_dict:
-        conf_dict["default"] = "drip.drips.DripMessage"
-    return conf_dict
+    Returns a ChainMap (basically a dict), between default settings and
+    settings.DRIP_MESSAGE_CLASSES which should be a dictionary of the form:
+
+        { message_class_name: class_path }
+
+    For example, if you define this at DRIP_MESSAGE_CLASSES:
+
+        {
+            'default': 'my.path.to.DripMessage',
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    The returning value of this method would be:
+
+        {
+            'default': 'my.path.to.Drip',
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    But, if you define this:
+
+        {
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    The returning value of this method would be:
+
+        {
+            'default': 'drip.drips.DripMessage',
+            'my_other_class': 'my.other.path.to.DripMessage',
+        }
+
+    A 'default' key is added when it's not present on DRIP_MESSAGE_CLASSES.
+    """
+    default_config = {"default": DEFAULT_DRIP_MESSAGE_CLASS}
+    user_defined_config = getattr(settings, "DRIP_MESSAGE_CLASSES", {})
+    return ChainMap(user_defined_config, default_config)
 
 
+@lru_cache()
 def message_class_for(name: str) -> "DripMessage":
-    path = configured_message_classes()[name]
-    mod_name, klass_name = path.rsplit(".", 1)
-    mod = import_module(mod_name)
-    klass = getattr(mod, klass_name)
-    return klass
+    """
+    Given a class's path, returns a reference to it.
+    Raises MessageClassNotFound exception if name is not present in
+    the ChainMap produced by configured_message_classes.
+    """
+    try:
+        path = configured_message_classes()[name]
+    except KeyError:
+        logging.error('Name "{}" not found in configured message classes.'.format(name))
+        raise MessageClassNotFound() from None
+    else:
+        mod_name, klass_name = path.rsplit(".", 1)
+        mod = import_module(mod_name)
+        klass = getattr(mod, klass_name)
+        return klass
 
 
 class DripBaseParamsOptions(TypedDict):
@@ -53,10 +99,14 @@ class DripBaseParamsOptions(TypedDict):
 
 
 class DripMessage(object):
-    """[summary]
+    """
+    Email message abstraction for manage message interactions, based on EmailMultiAlternatives.
+    You can extend this manually overriding any method that you need.
 
-    :param object: [description]
-    :type object: [type]
+    :param drip_base: DripBase object to build email
+    :type drip_base: DripBase
+    :param user: User to send email
+    :type user: User
     """
 
     # Ignoring this line because mypy says User is not a valid type
@@ -198,12 +248,12 @@ class DripBase(object):
         """Walk over a date range and create
             new instances of self with new ranges.
 
-        :param into_past: [description], defaults to 0
+        :param into_past: defaults to 0
         :type into_past: int, optional
-        :param into_future: [description], defaults to 0
+        :param into_future: defaults to 0
         :type into_future: int, optional
-        :return: [description]
-        :rtype: [type]
+        :return: List of DripBase instances.
+        :rtype: List[DripBase]
         """
         walked_range = []
         for shift in range(-into_past, into_future):
@@ -216,9 +266,24 @@ class DripBase(object):
         return walked_range
 
     def apply_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
+        """First collect all filter/exclude kwargs and apply any annotations.
+        Then apply all filters at once, and all excludes at once.
+
+        :param manager_qs: Base queryset or manager to apply queryset rules
+        :type manager_qs: Union[BaseManager, QuerySet]
+        :return: Queryset with all (AND/OR) filters applied
+        :rtype: QuerySet
+        """
         return self.apply_and_queryset_rules(manager_qs) | self.apply_or_queryset_rules(manager_qs)
 
     def apply_or_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
+        """First collect all filter kwargs. Then apply OR filters at once.
+
+        :param manager_qs: Base queryset or manager to apply queryset rules
+        :type manager_qs: Union[BaseManager, QuerySet]
+        :return: Queryset with OR filters applied
+        :rtype: QuerySet
+        """
         rules: List[Q] = []
         rule_set = self.drip_model.queryset_rules.filter(rule_type="or")
         for query_rule in rule_set:
@@ -234,12 +299,12 @@ class DripBase(object):
 
     def apply_and_queryset_rules(self, manager_qs: Union[BaseManager, QuerySet]) -> QuerySet:
         """First collect all filter/exclude kwargs and apply any annotations.
-        Then apply all filters at once, and all excludes at once.
+        Then apply AND filters at once, and all excludes at once.
 
-        :param qs: [description]
-        :type qs: str
-        :return: [description]
-        :rtype: str
+        :param manager_qs: Base queryset or manager to apply queryset rules
+        :type manager_qs: Union[BaseManager, QuerySet]
+        :return: Queryset with AND filters applied
+        :rtype: QuerySet
         """
         clauses: Dict[str, List] = {
             "filter": [],
@@ -269,12 +334,10 @@ class DripBase(object):
     ##################
 
     def get_queryset(self) -> QuerySet:
-        """[summary]
+        """Apply queryset rules or returns the existing queryset
 
-        [extended_summary]
-
-        :return: [description]
-        :rtype: [type]
+        :return: Queryset with all (AND/OR) filters applied
+        :rtype: QuerySet
         """
         queryset = getattr(self, "_queryset", None)
         if queryset is None:
@@ -286,10 +349,8 @@ class DripBase(object):
     def run(self) -> Optional[int]:
         """Get the queryset, prune sent people, and send it.
 
-        [extended_summary]
-
-        :return: [description]
-        :rtype: int
+        :return: Returns count of created SentDrips.
+        :rtype: Optional[int]
         """
         if not self.drip_model.enabled:
             return None
@@ -309,10 +370,15 @@ class DripBase(object):
         ).values_list("user_id", flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
-    def get_count_from_queryset(self, MessageClass) -> int:
+    def get_count_from_queryset(self, message_class) -> int:
+        """
+        Given a Message Class instance (by default drip.drips.DripMessage),
+        returns the amount of sent Drips.
+        """
+        # TODO: try to reduce the side-effects of this method.
         count = 0
         for user in self.get_queryset():
-            message_instance = MessageClass(self, user)
+            message_instance = message_class(self, user)
             try:
                 result = message_instance.message.send()
                 if result:
@@ -336,7 +402,8 @@ class DripBase(object):
         return count
 
     def send(self) -> int:
-        """Send the message to each user on the queryset.
+        """
+        Send the message to each user on the queryset.
 
         Create SentDrip for each user that gets a message.
 

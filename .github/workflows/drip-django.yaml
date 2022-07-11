@@ -25,6 +25,15 @@ jobs:
             django-version: "2.2"
           - python-version: "3.8"
             django-version: "3.2"
+          - python-version: "3.8"
+            django-version: "4.0"
+        # python 3.9
+          - python-version: "3.9"
+            django-version: "2.2"
+          - python-version: "3.9"
+            django-version: "3.2"
+          - python-version: "3.9"
+            django-version: "4.0"
         # pypy3
           - python-version: "pypy3"
             django-version: "2.2"
@@ -60,10 +69,10 @@ jobs:
         pipenv run black . --check
     - name: Check typing
       run: |
-        pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports .
+        pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports --no-warn-unused-ignores .
     - name: Running tests
       run: |
-        pipenv run coverage run manage.py test
+        pipenv run coverage run -m pytest --ds=testsettings
     - name: Checking coverage
       run: |
         pipenv run coverage report --fail-under=90 -m

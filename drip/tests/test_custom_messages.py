@@ -1,10 +1,15 @@
+from typing import Any, Dict, Optional, Type
+
+import pytest
 from django.conf import settings
 from django.core import mail
-from django.test import TestCase
 
 from drip.drips import DripMessage
 from drip.models import Drip, QuerySetRule
 from drip.utils import get_user_model
+
+pytestmark = pytest.mark.django_db
+User = get_user_model()
 
 
 # Used by CustomMessagesTest
@@ -22,12 +27,15 @@ class PlainDripEmail(DripMessage):
         return self._message
 
 
-class CustomMessagesTest(TestCase):
-    def setUp(self):
-        self.User = get_user_model()
+class TestCustomMessages:
+    old_msg_classes: Optional[str]
 
-        self.old_msg_classes = getattr(settings, "DRIP_MESSAGE_CLASSES", None)
-        self.user = self.User.objects.create(
+    @classmethod
+    def setup_class(cls):
+        cls.old_msg_classes = getattr(settings, "DRIP_MESSAGE_CLASSES", None)
+
+    def setup_method(self, test_method):
+        self.user = User.objects.create(
             username="customuser",
             email="custom@example.com",
         )
@@ -43,42 +51,54 @@ class CustomMessagesTest(TestCase):
             field_value=self.user.id,
         )
 
-    def test_default_email(self):
+    @pytest.mark.parametrize(
+        "settings_message_config, message_class, expected_result, len_mail, mail_instance",
+        (
+            (None, None, 1, 1, mail.EmailMultiAlternatives),  # test_default_email
+            (
+                {"plain": "drip.tests.PlainDripEmail"},
+                None,
+                1,
+                1,
+                mail.EmailMultiAlternatives,  # Since we did not specify custom class, default should be used.
+            ),  # test_custom_added_not_used
+            (
+                {
+                    "plain": "drip.tests.test_custom_messages.PlainDripEmail",
+                },
+                "plain",
+                1,
+                1,
+                mail.EmailMessage,  # In this case we did specify the custom key, so message should be of custom type.
+            ),  # test_custom_added_and_used
+            (
+                {
+                    "default": "drip.tests.test_custom_messages.PlainDripEmail",
+                },
+                None,
+                1,
+                1,
+                mail.EmailMessage,
+            ),  # test_override_default
+        ),
+    )
+    def test_emails(
+        self,
+        settings_message_config: Optional[Dict[str, Any]],
+        message_class: Optional[str],
+        expected_result: int,
+        len_mail: int,
+        mail_instance: Type[mail.EmailMessage],
+    ):
+        if settings_message_config:
+            settings.DRIP_MESSAGE_CLASSES = settings_message_config
+        if message_class:
+            self.model_drip.message_class = message_class
+            self.model_drip.save()
         result = self.model_drip.drip.send()
-        self.assertEqual(1, result)
-        self.assertEqual(1, len(mail.outbox))
-        email = mail.outbox.pop()
-        self.assertIsInstance(email, mail.EmailMultiAlternatives)
 
-    def test_custom_added_not_used(self):
-        settings.DRIP_MESSAGE_CLASSES = {"plain": "drip.tests.PlainDripEmail"}
-        result = self.model_drip.drip.send()
-        self.assertEqual(1, result)
-        self.assertEqual(1, len(mail.outbox))
-        email = mail.outbox.pop()
-        # Since we did not specify custom class, default should be used.
-        self.assertIsInstance(email, mail.EmailMultiAlternatives)
+        assert expected_result == result
+        assert len_mail == len(mail.outbox)
 
-    def test_custom_added_and_used(self):
-        settings.DRIP_MESSAGE_CLASSES = {
-            "plain": "drip.tests.test_custom_messages.PlainDripEmail",
-        }
-        self.model_drip.message_class = "plain"
-        self.model_drip.save()
-        result = self.model_drip.drip.send()
-        self.assertEqual(1, result)
-        self.assertEqual(1, len(mail.outbox))
         email = mail.outbox.pop()
-        # In this case we did specify the custom key,
-        # so message should be of custom type.
-        self.assertIsInstance(email, mail.EmailMessage)
-
-    def test_override_default(self):
-        settings.DRIP_MESSAGE_CLASSES = {
-            "default": "drip.tests.test_custom_messages.PlainDripEmail",
-        }
-        result = self.model_drip.drip.send()
-        self.assertEqual(1, result)
-        self.assertEqual(1, len(mail.outbox))
-        email = mail.outbox.pop()
-        self.assertIsInstance(email, mail.EmailMessage)
+        assert isinstance(email, mail_instance)

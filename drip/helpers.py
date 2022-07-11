@@ -19,7 +19,10 @@ def process_regex(matches: Match[str]) -> Dict[str, Union[str, int]]:
 
 
 def get_flexible_regex(string: str) -> Dict[str, Union[str, int]]:
-    # This is the more flexible format
+    """
+    Matches a string using a more flexible regex expression for parsing
+    it to timedelta object.
+    """
     matches = re.match(
         r"^((?P<weeks>-?((\d*\.\d+)|\d+))\W*w((ee)?(k(s)?)?)(,)?\W*)?"
         r"((?P<days>-?((\d*\.\d+)|\d+))\W*d(ay(s)?)?(,)?\W*)?"
@@ -35,8 +38,11 @@ def get_flexible_regex(string: str) -> Dict[str, Union[str, int]]:
 
 
 def process_string(string: str) -> datetime.timedelta:
-    # This is the format we get from sometimes Postgres, sqlite,
-    # and from serialization
+    """
+    Process a string into a timedelta object, using a standard format used by
+    Postgres, sqlite, or from serialization. Or a flexible regex expression
+    if the standard form is not enough.
+    """
     matches = re.match(
         r"^((?P<days>[-+]?\d+) days?,? )?(?P<sign>[-+]?)(?P<hours>\d+):"
         r"(?P<minutes>\d+)(:(?P<seconds>\d+(\.\d+)?))?$",
