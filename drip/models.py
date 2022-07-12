@@ -12,8 +12,15 @@ from django.db.models.query import QuerySet
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
 from drip.helpers import parse
+from drip.scheduler.constants import VALID_SCHEDULERS, get_drip_scheduler_settings
 from drip.types import BoolOrStr, FExpressionOrStr, FieldValue, TimeDeltaOrStr
-from drip.utils import get_user_model
+from drip.utils import DripScheduleSettingsError, get_user_model
+
+_, _, _, _, SCHEDULER = get_drip_scheduler_settings()
+
+
+if SCHEDULER not in VALID_SCHEDULERS:
+    raise DripScheduleSettingsError(f"{SCHEDULER} is not a valid SCHEDULER configuration")
 
 
 class AbstractDrip(models.Model):

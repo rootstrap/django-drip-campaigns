@@ -195,3 +195,7 @@ def get_user_model() -> Type[User]:
     except ImportError:
         pass
     return User
+
+
+class DripScheduleSettingsError(Exception):
+    pass

@@ -14,6 +14,7 @@ from credits.models import Profile
 from drip.admin import DripAdmin
 from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes
 from drip.models import Drip, QuerySetRule, SentDrip
+from drip.scheduler.cron_scheduler import cron_send_drips
 from drip.utils import get_user_model, unicode
 
 pytestmark = pytest.mark.django_db
@@ -562,3 +563,39 @@ class UrlsTestCase(TestCase):
             test_url_pattern.pattern._route  # type: ignore
             == "<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/"
         )
+
+
+@pytest.fixture(scope="session")
+def celery_includes():
+    return [
+        "drip.tasks",
+    ]
+
+
+class TestScheduler:
+    def test_celery_beat_schedule(self, celery_app, celery_worker):
+        task_name = "drip.tasks.call_send_drips_celery_command()"
+        assert task_name in celery_app.conf.beat_schedule
+
+    def test_cron_jobs_schedule(self):
+        # CELERY default config
+        cron_scheduler = cron_send_drips()
+        assert cron_scheduler is None
+
+        # CRON config
+        setattr(
+            settings,
+            "DRIP_SCHEDULE_SETTINGS",
+            {
+                "DRIP_SCHEDULE": True,
+                "DRIP_SCHEDULE_DAY_OF_WEEK": "*",
+                "DRIP_SCHEDULE_HOUR": 12,
+                "DRIP_SCHEDULE_MINUTE": 00,
+                "SCHEDULER": "CRON",
+            },
+        )
+        cron_scheduler = cron_send_drips()
+        assert cron_scheduler
+        jobs = cron_scheduler.get_jobs()
+        expected_job_name = "cron_send_drips.<locals>.call_send_drips_command"
+        assert expected_job_name in [job.name for job in jobs]
