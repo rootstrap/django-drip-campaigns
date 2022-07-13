@@ -2,14 +2,15 @@ from celery import current_app
 from celery.schedules import crontab
 from django.core.management import call_command
 
-from drip.scheduler.constants import (
+from drip.scheduler.constants import SCHEDULER_CELERY, get_drip_scheduler_settings
+
+(
     DRIP_SCHEDULE,
     DRIP_SCHEDULE_DAY_OF_WEEK,
     DRIP_SCHEDULE_HOUR,
     DRIP_SCHEDULE_MINUTE,
     SCHEDULER,
-    SCHEDULER_CELERY,
-)
+) = get_drip_scheduler_settings()
 
 app = current_app._get_current_object()
 

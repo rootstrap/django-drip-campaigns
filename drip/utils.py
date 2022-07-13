@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
+from drip.scheduler.constants import VALID_SCHEDULERS, get_drip_scheduler_settings
 from drip.types import FieldType
 
 basestring = (str, bytes)
@@ -195,3 +196,13 @@ def get_user_model() -> Type[User]:
     except ImportError:
         pass
     return User
+
+
+class DripScheduleSettingsError(Exception):
+    pass
+
+
+def validate_schedules():
+    _, _, _, _, SCHEDULER = get_drip_scheduler_settings()
+    if SCHEDULER not in VALID_SCHEDULERS:
+        raise DripScheduleSettingsError(f"{SCHEDULER} is not a valid SCHEDULER configuration")
