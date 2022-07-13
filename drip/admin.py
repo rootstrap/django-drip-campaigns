@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from django import forms
@@ -192,22 +193,25 @@ class CampaignAdmin(admin.ModelAdmin):
         """
 
         campaign = get_object_or_404(Campaign, id=drip_id)
-
-        shifted_drips = []
+        new_shifted_drips = OrderedDict()
+        for shift in range(-into_past, into_future + 1):
+            new_shifted_drips[shift] = {"drips": [], "now_shift_kwargs_days": shift}
         for drip in campaign.drip_set.all():
             seen_users: Set[int] = set()
             for shifted_drip in drip.drip.walk(into_past=int(into_past), into_future=int(into_future) + 1):
                 shifted_drip.prune()
-                shifted_drips.append(
-                    {
-                        "drip_model": drip,
-                        "drip": shifted_drip,
-                        "qs": shifted_drip.get_queryset().exclude(
-                            id__in=seen_users,
-                        ),
-                    },
-                )
+                shifted_data = {
+                    "drip_model": drip,
+                    "drip": shifted_drip,
+                    "qs": shifted_drip.get_queryset().exclude(
+                        id__in=seen_users,
+                    ),
+                }
                 seen_users.update(shifted_drip.get_queryset().values_list("id", flat=True))
+                shift_days = shifted_drip.now_shift_kwargs.get("days")
+                if shift_days:
+                    new_shifted_drips[shift_days]["drips"].append(shifted_data)  # type: ignore
+                    new_shifted_drips[shift_days]["now"] = shifted_drip.now()
 
         return render(request, "campaign/timeline.html", locals())
 
