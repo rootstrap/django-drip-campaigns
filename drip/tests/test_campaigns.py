@@ -3,9 +3,8 @@ from typing import Any, List
 
 import pytest
 
-from campaigns.models import Campaign
-from campaigns.tests.factories import CampaignFactory, DripFactory
-from drip.models import Drip
+from drip.models import Campaign, Drip
+from drip.tests.factories import CampaignFactory, DripFactory
 
 pytestmark = pytest.mark.django_db
 

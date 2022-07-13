@@ -19,7 +19,6 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.messages",
     "drip",
-    "campaigns",
     # testing only
     "credits",
 )

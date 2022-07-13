@@ -16,6 +16,20 @@ from drip.types import BoolOrStr, FExpressionOrStr, FieldValue, TimeDeltaOrStr
 from drip.utils import get_user_model
 
 
+# CAMPAIGNS MODELS
+class Campaign(models.Model):
+    name = models.CharField(max_length=256)
+    delete_drips = models.BooleanField(default=True)
+
+    def delete(self, using=None, keep_parents=False):
+        if self.delete_drips:
+            self.drip_set.all().delete()
+        super().delete(using, keep_parents)
+
+
+# CAMPAIGNS MODELS
+
+
 class AbstractDrip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
@@ -43,7 +57,7 @@ class AbstractDrip(models.Model):
     message_class = models.CharField(max_length=120, blank=True, default="default")
 
     campaign = models.ForeignKey(
-        "campaigns.Campaign",
+        "Campaign",
         null=True,
         blank=True,
         default=None,
