@@ -6,7 +6,7 @@ Installation and configuration
 
     pip install django-drip-campaigns
 
-2. Add ``drip`` and ``campaigns`` app to the ``INSTALLED_APPS`` list in your project settings:
+2. Add ``drip`` app to the ``INSTALLED_APPS`` list in your project settings:
 
 .. code-block:: python
 
@@ -30,4 +30,3 @@ Installation and configuration
 .. code-block:: python
 
     python manage.py migrate drip
-    python manage.py migrate campaigns

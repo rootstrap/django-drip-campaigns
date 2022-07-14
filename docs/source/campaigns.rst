@@ -2,40 +2,32 @@
 
 :orphan:
 
-campaigns package
-============
+drip.campaigns package
+======================
 
 Submodules
 ----------
 
-campaigns.admin module
+drip.campaigns.admin module
+---------------------------
+
+.. automodule:: drip.campaigns.admin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+drip.campaigns.models module
+----------------------------
+
+.. automodule:: drip.campaigns.models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+drip.tests module
 -----------------
 
-.. automodule:: campaigns.admin
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-campaigns.models module
-------------------
-
-.. automodule:: campaigns.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-campaigns.tests module
------------------
-
-.. automodule:: campaigns.tests.test_campaigns
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: campaigns
+.. automodule:: drip.tests.test_campaigns
    :members:
    :undoc-members:
    :show-inheritance:

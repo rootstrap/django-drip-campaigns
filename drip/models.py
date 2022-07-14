@@ -9,25 +9,14 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
 
-# just using this to parse, but totally insane package naming...
-# https://bitbucket.org/schinckel/django-timedelta-field/
+from drip.campaigns.models import Campaign
 from drip.helpers import parse
 from drip.types import BoolOrStr, FExpressionOrStr, FieldValue, TimeDeltaOrStr
 from drip.utils import get_user_model
 
-
-# CAMPAIGNS MODELS
-class Campaign(models.Model):
-    name = models.CharField(max_length=256)
-    delete_drips = models.BooleanField(default=True)
-
-    def delete(self, using=None, keep_parents=False):
-        if self.delete_drips:
-            self.drip_set.all().delete()
-        super().delete(using, keep_parents)
-
-
-# CAMPAIGNS MODELS
+# from drip.helpers import parse.
+# just using this to parse, but totally insane package naming...
+# https://bitbucket.org/schinckel/django-timedelta-field/
 
 
 class AbstractDrip(models.Model):
@@ -57,7 +46,7 @@ class AbstractDrip(models.Model):
     message_class = models.CharField(max_length=120, blank=True, default="default")
 
     campaign = models.ForeignKey(
-        "Campaign",
+        Campaign,
         null=True,
         blank=True,
         default=None,
