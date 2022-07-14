@@ -1,6 +1,5 @@
-import json
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Callable, List, Set, Union
 
 from django.contrib import admin
 from django.core.handlers.wsgi import WSGIRequest
@@ -9,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import URLPattern, path
 
 from drip.models import Campaign, Drip
-from drip.utils import get_simple_fields, get_user_model
+from drip.utils import get_user_model
 
 User = get_user_model()
 
@@ -60,14 +59,6 @@ class CampaignAdmin(admin.ModelAdmin):
                     new_shifted_drips[shift_days]["now"] = shifted_drip.now()
 
         return render(request, "campaign/timeline.html", locals())
-
-    def build_extra_context(self, extra_context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        extra_context = extra_context or {}
-        User = get_user_model()
-        if not self.users_fields:
-            self.users_fields = json.dumps(get_simple_fields(User))
-        extra_context["field_data"] = self.users_fields
-        return extra_context
 
     def get_urls(self) -> List[URLPattern]:
         urls = super(CampaignAdmin, self).get_urls()
