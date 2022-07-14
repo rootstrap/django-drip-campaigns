@@ -12,7 +12,10 @@ from django.db.models.query import QuerySet
 from drip.campaigns.models import Campaign
 from drip.helpers import parse
 from drip.types import BoolOrStr, FExpressionOrStr, FieldValue, TimeDeltaOrStr
-from drip.utils import get_user_model
+from drip.utils import get_user_model, validate_schedules
+
+# Raise exception if SCHEDULER is not valid
+validate_schedules()
 
 # from drip.helpers import parse.
 # just using this to parse, but totally insane package naming...

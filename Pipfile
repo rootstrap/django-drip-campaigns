@@ -55,10 +55,12 @@ types-six = "1.16.16"
 pytest = "==7.1.1"
 pytest-sugar = "==0.9.4"
 pytest-django = "==4.5.2"
+pytest-celery = "==0.0.0"
 
 [packages]
 Django = "==3.2.14"
 apscheduler = "==3.7.0"
+celery = "==5.0.0"
 
 [requires]
 python_version = "3.8"
