@@ -8,8 +8,9 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import URLPattern, path
 
+from drip.campaigns.admin import CampaignAdmin
 from drip.drips import configured_message_classes, message_class_for
-from drip.models import Drip, QuerySetRule, SentDrip
+from drip.models import Campaign, Drip, QuerySetRule, SentDrip
 from drip.utils import get_simple_fields, get_user_model
 
 User = get_user_model()
@@ -165,3 +166,6 @@ class SentDripAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SentDrip, SentDripAdmin)
+
+
+admin.site.register(Campaign, CampaignAdmin)

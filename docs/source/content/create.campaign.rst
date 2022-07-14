@@ -3,7 +3,7 @@
 :orphan:
 
 Create Campaign
-===========
+===============
 
 The Campaign creation page looks like this:
 

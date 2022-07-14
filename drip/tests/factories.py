@@ -1,8 +1,7 @@
 from factory import Faker, SubFactory
 from factory.django import DjangoModelFactory
 
-from campaigns.models import Campaign
-from drip.models import Drip
+from drip.models import Campaign, Drip
 
 
 class CampaignFactory(DjangoModelFactory):

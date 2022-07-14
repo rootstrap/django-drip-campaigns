@@ -1,4 +1,5 @@
-from typing import List, Type
+from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, List, Type
 
 import six
 from django.contrib.auth.models import User
@@ -196,6 +197,23 @@ def get_user_model() -> Type[User]:
     except ImportError:
         pass
     return User
+
+
+def get_conditional_now() -> Callable:
+    # handle now import for appropiate django version
+    try:
+        from django.utils.timezone import now as conditional_now
+    except ImportError:
+        conditional_now = datetime.now
+    return conditional_now
+
+
+def build_now_from_timedelta(now_shift_kwargs: Dict[str, Any]) -> datetime:
+    """
+    Build "now" from shift timedelta.
+    """
+    conditional_now = get_conditional_now()
+    return conditional_now() + timedelta(**now_shift_kwargs)
 
 
 class DripScheduleSettingsError(Exception):
