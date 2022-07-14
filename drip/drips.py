@@ -19,14 +19,11 @@ from typing_extensions import TypeAlias
 
 from drip.exceptions import MessageClassNotFound
 from drip.models import Drip, SentDrip
-from drip.utils import get_user_model
+from drip.utils import build_now_from_timedelta, get_conditional_now, get_user_model
 
 User = get_user_model()
 
-try:
-    from django.utils.timezone import now as conditional_now
-except ImportError:
-    conditional_now = datetime.now
+conditional_now = get_conditional_now()
 
 
 DEFAULT_DRIP_MESSAGE_CLASS = "drip.drips.DripMessage"
@@ -235,7 +232,7 @@ class DripBase(object):
         This allows us to override what we consider "now", making it easy
         to build timelines of who gets what when.
         """
-        return conditional_now() + self.timedelta(**self.now_shift_kwargs)
+        return build_now_from_timedelta(self.now_shift_kwargs)
 
     def timedelta(self, *args, **kwargs) -> timedelta:
         """

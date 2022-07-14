@@ -20,7 +20,7 @@ This project is a fork of the one written by [Zapier](https://zapier.com/z/qO/).
 pip install django-drip-campaigns
 ```
 
-2. Add `'drip'` and `'campaigns'` to your `INSTALLED_APPS` list on your settings.
+2. Add `'drip'` to your `INSTALLED_APPS` list on your settings.
 
 ```python
 INSTALLED_APPS = [
@@ -33,13 +33,12 @@ INSTALLED_APPS = [
     # ...
 
     'drip',
-    'campaigns',
 ]
 ```
 
 3. (Optional) Set `DRIP_FROM_EMAIL = '<your_app_from_email>'` in your settings, where `<your_app_from_email>` is the email account that is going to be shown in the sent emails. Otherwise `EMAIL_HOST_USER` value will be used.
 
-4. Finally, run `python manage.py migrate drip` and `python manage.py migrate campaigns` to set up the necessary database tables.
+4. Finally, run `python manage.py migrate drip` to set up the necessary database tables.
 
 ## Usage
 

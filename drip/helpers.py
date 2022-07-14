@@ -2,12 +2,6 @@ import datetime
 import re
 from typing import Dict, Match, Union
 
-STRFDATETIME = re.compile("([dgGhHis])")
-
-
-def STRFDATETIME_REPL(x) -> str:
-    return "%({group})s".format(group=x.group())
-
 
 def process_regex(matches: Match[str]) -> Dict[str, Union[str, int]]:
     matches_dict = matches.groupdict(0)
