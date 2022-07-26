@@ -68,3 +68,12 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 DRIP_CLASS_NAME = "drip.Drip"
+
+# Default SCHEDULER to CELERY for testing purposes
+DRIP_SCHEDULE_SETTINGS = {
+    "DRIP_SCHEDULE": True,
+    "DRIP_SCHEDULE_DAY_OF_WEEK": "*",
+    "DRIP_SCHEDULE_HOUR": 12,
+    "DRIP_SCHEDULE_MINUTE": 00,
+    "SCHEDULER": "CELERY",
+}

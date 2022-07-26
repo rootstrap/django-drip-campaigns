@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import timedelta
+from typing import Any, Dict, Optional
 from unittest.mock import patch
 
 import pytest
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
+from django.core.management import call_command
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import resolve, reverse
@@ -14,6 +15,7 @@ from credits.models import Profile
 from drip.admin import DripAdmin
 from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes
 from drip.models import Drip, QuerySetRule, SentDrip
+from drip.scheduler.cron_scheduler import cron_send_drips
 from drip.utils import get_user_model, unicode
 
 pytestmark = pytest.mark.django_db
@@ -30,53 +32,72 @@ User = get_user_model()
 DEFAULT_MESSAGE_CLASSES_LENGTH = len(configured_message_classes().items())
 
 
-class TestCaseDrips:
-    start: datetime
-    num_string: List[str]
+class SetupDataDripMixin:
+    NUM_STRING = [
+        "first",
+        "second",
+        "third",
+        "fourth",
+        "fifth",
+        "sixth",
+        "seventh",
+        "eighth",
+        "ninth",
+        "tenth",
+    ]
 
-    @classmethod
-    def setup_class(cls):
+    def build_user_data(self):
         """
         Creates 20 users, half of which buy 25 credits a day,
         and the other half that does none.
         """
-
-        cls.start = timezone.now() - timedelta(hours=2)
-        cls.num_string = [
-            "first",
-            "second",
-            "third",
-            "fourth",
-            "fifth",
-            "sixth",
-            "seventh",
-            "eighth",
-            "ninth",
-            "tenth",
-        ]
-
-    def setup_method(self, test_method):
-        for i, name in enumerate(self.num_string):
+        start = timezone.now() - timedelta(hours=2)
+        for i, name in enumerate(self.NUM_STRING):
             user = User.objects.create(
                 username="{name}_25_credits_a_day".format(name=name),
                 email="{name}@test.com".format(name=name),
             )
             User.objects.filter(id=user.id).update(
-                date_joined=self.start - timedelta(days=i),
+                date_joined=start - timedelta(days=i),
             )
 
             profile = Profile.objects.get(user=user)
             profile.credits = i * 25
             profile.save()
 
-        for i, name in enumerate(self.num_string):
+        for i, name in enumerate(self.NUM_STRING):
             user = User.objects.create(
                 username="{name}_no_credits".format(name=name),
                 email="{name}@test.com".format(name=name),
             )
             User.objects.filter(id=user.id).update(
-                date_joined=self.start - timedelta(days=i),
+                date_joined=start - timedelta(days=i),
             )
+
+    def build_joined_date_drip(self, shift_one=7, shift_two=8):
+        model_drip = Drip.objects.create(
+            name="A Custom Week Ago",
+            subject_template="HELLO {{ user.username }}",
+            body_html_template="KETTEHS ROCK!",
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name="date_joined",
+            lookup_type="lt",
+            field_value="now-{shift_one} days".format(shift_one=shift_one),
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name="date_joined",
+            lookup_type="gte",
+            field_value="now-{shift_two} days".format(shift_two=shift_two),
+        )
+        return model_drip
+
+
+class TestCaseDrips(SetupDataDripMixin):
+    def setup_method(self, test_method):
+        self.build_user_data()
 
     def test_users_exists(self):
         assert 20 == User.objects.all().count()
@@ -123,26 +144,6 @@ class TestCaseDrips:
     def test_backwards_drip_class(self):
         for drip in Drip.objects.all():
             assert issubclass(drip.drip.__class__, DripBase)
-
-    def build_joined_date_drip(self, shift_one=7, shift_two=8):
-        model_drip = Drip.objects.create(
-            name="A Custom Week Ago",
-            subject_template="HELLO {{ user.username }}",
-            body_html_template="KETTEHS ROCK!",
-        )
-        QuerySetRule.objects.create(
-            drip=model_drip,
-            field_name="date_joined",
-            lookup_type="lt",
-            field_value="now-{shift_one} days".format(shift_one=shift_one),
-        )
-        QuerySetRule.objects.create(
-            drip=model_drip,
-            field_name="date_joined",
-            lookup_type="gte",
-            field_value="now-{shift_two} days".format(shift_two=shift_two),
-        )
-        return model_drip
 
     def test_custom_drip(self):
         """
@@ -562,3 +563,66 @@ class UrlsTestCase(TestCase):
             test_url_pattern.pattern._route  # type: ignore
             == "<int:drip_id>/timeline/<int:into_past>/<int:into_future>/<uuid:user_id>/"
         )
+
+
+@pytest.fixture(scope="session")
+def celery_includes():
+    return [
+        "drip.tasks",
+    ]
+
+
+class TestScheduler:
+    def test_celery_beat_schedule(self, celery_app, celery_worker):
+        task_name = "drip.tasks.call_send_drips_celery_command()"
+        assert task_name in celery_app.conf.beat_schedule
+
+    def test_cron_jobs_schedule(self):
+        # CELERY default config
+        cron_scheduler = cron_send_drips()
+        assert cron_scheduler is None
+
+        # CRON config
+        setattr(
+            settings,
+            "DRIP_SCHEDULE_SETTINGS",
+            {
+                "DRIP_SCHEDULE": True,
+                "DRIP_SCHEDULE_DAY_OF_WEEK": "*",
+                "DRIP_SCHEDULE_HOUR": 12,
+                "DRIP_SCHEDULE_MINUTE": 00,
+                "SCHEDULER": "CRON",
+            },
+        )
+        cron_scheduler = cron_send_drips()
+        assert cron_scheduler
+        jobs = cron_scheduler.get_jobs()
+        expected_job_name = "cron_send_drips.<locals>.call_send_drips_command"
+        assert expected_job_name in [job.name for job in jobs]
+
+
+class TestSendDripsCommand(SetupDataDripMixin):
+    @pytest.mark.parametrize(
+        "build_users, model_drip_enabled, sent_drip_count, drip_count_queryset",
+        (
+            (True, True, 2, 2),  # Sucess case, the command send drips to users.
+            (False, True, 0, 0),  # No users at all, enabled drip.
+            (True, False, 0, 2),  # Disabled drip, the command will not get this drip
+            (False, False, 0, 0),  # No users at all, disabled drip.
+        ),
+    )
+    def test_send_drips_command(
+        self, build_users: bool, model_drip_enabled: bool, sent_drip_count: int, drip_count_queryset: int
+    ):
+        if build_users:
+            self.build_user_data()
+        model_drip = self.build_joined_date_drip()
+        model_drip.enabled = model_drip_enabled
+        model_drip.save()
+
+        call_command("send_drips")
+
+        assert sent_drip_count == SentDrip.objects.count()
+        model_drip.refresh_from_db()
+        drip = model_drip.drip
+        assert drip_count_queryset == drip.get_queryset().count()

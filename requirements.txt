@@ -79,3 +79,5 @@ pytest==7.1.1
 pytest-sugar==0.9.4
 pytest-django==4.5.2
 factory-boy==3.2.1
+celery==5.0.0
+pytest-celery==0.0.0

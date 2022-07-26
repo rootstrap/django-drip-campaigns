@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
+from drip.scheduler.constants import VALID_SCHEDULERS, get_drip_scheduler_settings
 from drip.types import FieldType
 
 basestring = (str, bytes)
@@ -213,3 +214,13 @@ def build_now_from_timedelta(now_shift_kwargs: Dict[str, Any]) -> datetime:
     """
     conditional_now = get_conditional_now()
     return conditional_now() + timedelta(**now_shift_kwargs)
+
+
+class DripScheduleSettingsError(Exception):
+    pass
+
+
+def validate_schedules():
+    _, _, _, _, SCHEDULER = get_drip_scheduler_settings()
+    if SCHEDULER not in VALID_SCHEDULERS:
+        raise DripScheduleSettingsError(f"{SCHEDULER} is not a valid SCHEDULER configuration")
