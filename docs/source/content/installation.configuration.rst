@@ -19,7 +19,6 @@ Installation and configuration
         'django.contrib.admin',
         # ...
         'drip',
-        'campaigns',
     ]
 
 
