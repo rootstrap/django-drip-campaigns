@@ -137,7 +137,7 @@ Some tips:
 Celery integration
 ------------------
 
-IMPORTANT: We use Celery 5.0.x that supports Django 1.11 LTS or newer versions.
+IMPORTANT: We use Celery 5.2.2 that supports Django 1.11 LTS or newer versions.
 
 If you need to use celery it can be configured in the same way you just need to add the following key ``SCHEDULER`` setted as ``"CELERY"``:
 
