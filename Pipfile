@@ -60,7 +60,7 @@ pytest-celery = "==0.0.0"
 [packages]
 Django = "==3.2.14"
 apscheduler = "==3.7.0"
-celery = "==5.0.0"
+celery = "==5.2.2"
 
 [requires]
 python_version = "3.8"
