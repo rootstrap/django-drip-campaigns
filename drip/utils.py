@@ -64,7 +64,7 @@ def get_full_field(parent_field: str, field_name: str) -> str:
 
 
 def get_rel_model(field: FieldType, RelatedObject: RelatedObject) -> Type[models.Model]:
-    if isinstance(field, RelatedObject):  # type: ignore
+    if not is_valid_instance(field):  # type: ignore
         RelModel = field.model
         # field_names.extend(get_fields(RelModel, full_field, True))
     else:
@@ -178,10 +178,6 @@ def give_model_field(full_field: str, Model: Type[models.Model]) -> tuple:
 def get_simple_fields(Model: Type[models.Model], **kwargs) -> List:
     ret_list: List = []
     for f in get_fields(Model, **kwargs):
-        if "__" in f[0]:
-            # Add __user__ to the fields in related models
-            parts = f[0].split("__")
-            f[0] = parts[0] + "__user__" + parts[1]
         if f[0] not in [x[0] for x in ret_list]:
             # Add field if not already in list
             ret_list.append([f[0], f[3].__name__])

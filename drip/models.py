@@ -132,14 +132,14 @@ LOOKUP_TYPES = (
     ("contains", "contains"),
     ("icontains", "contains (case insensitive)"),
     ("regex", "regex"),
-    ("iregex", "contains (case insensitive)"),
+    ("iregex", "regex (case insensitive)"),
     ("gt", "greater than"),
     ("gte", "greater than or equal to"),
     ("lt", "less than"),
     ("lte", "less than or equal to"),
     ("startswith", "starts with"),
-    ("endswith", "starts with"),
-    ("istartswith", "ends with (case insensitive)"),
+    ("endswith", "ends with"),
+    ("istartswith", "starts with (case insensitive)"),
     ("iendswith", "ends with (case insensitive)"),
 )
 
