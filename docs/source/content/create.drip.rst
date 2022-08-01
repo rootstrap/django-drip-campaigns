@@ -16,11 +16,20 @@ On the other hand, when you click in the ``FIELD NAME OF USER`` input, you will 
 
 Here you can relate the Drip to the corresponding ``Campaign``. Grouping several drips under a campaign.
 
+Lookup fields
+-------------
+The fields you can make a query are User model fields and fields of models related to the user model. 
+For example, Groups model has 3 fields: `id`, `name`, and `id`. It will show you 4 items, these fields plus the groups relationship itself. 
+Another nice example is the SentDrip model, it has 8 fields but the drip field is also a relationship, so it will allow you to filter also over these fields in Drip model. This will allow you to filter Users that match a specific drip name sent to that user, using `sent_drips__drip__name` field.
+This will extend to any fields you have in your project related to User model.
+
 .. image:: ../../images/users_lookup_fields.png
   :width: 600
   :alt: User fields
 
-In the previous image, for example, `last_login` is the field in the User model, and `groups__user__id` is the user id from the Groups model that is related to it. So you can enter the name of the field or select it from the list that you see when you click on the input.  
+In the previous image, for example, `last_login` is the field in the User model, and `sent_drips__subject` is the subject of the SentDrips model that is related to it. 
+So you can enter the name of the field or select it from the list that you see when you click on the input.
+
 After the selection of the field name, you have to choose the type of lookup that you want to do over the field. The possibilities are `exactly`, `exactly (case insensitive)`, `contains`, `contains (case insensitive)`, `greater than`, `greater than or equal to`, `less than`, etc. This lookup type will be done over the user field and the `FIELD VALUE` that you enter.  
 The `FIELD VALUE` input can be a string, a number, or a regular expression. The correctness of the queryset rule will depend on the type of the user field, the lookup type, and the field value.
 
