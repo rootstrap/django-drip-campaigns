@@ -9,3 +9,6 @@ class Campaign(models.Model):
         if self.delete_drips:
             self.drip_set.all().delete()
         super().delete(using, keep_parents)
+
+    def __str__(self) -> str:
+        return self.name
