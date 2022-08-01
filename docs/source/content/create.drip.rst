@@ -18,7 +18,7 @@ Here you can relate the Drip to the corresponding ``Campaign``. Grouping several
 
 Lookup fields
 -------------
-The fields you can make a query are User model fields and fields of models related to the user model. 
+You can make queries using the User's model fields and the fields of the models related to the user.
 For example, Groups model has 3 fields: `id`, `name`, and `id`. It will show you 4 items, these fields plus the groups relationship itself. 
 Another nice example is the SentDrip model, it has 8 fields but the drip field is also a relationship, so it will allow you to filter also over these fields in Drip model. This will allow you to filter Users that match a specific drip name sent to that user, using `sent_drips__drip__name` field.
 This will extend to any fields you have in your project related to User model.
