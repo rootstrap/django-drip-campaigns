@@ -357,6 +357,21 @@ class DripBase(object):
 
         return count
 
+    
+
+    def exclude_unsubcribed_users(self) -> None:
+        """If DRIP_UNSUBSCRIBE_USERS is set to True, get a list of unsubscribed users ids to Drip model."""
+        unsubscribed_ids: Union[QuerySet, List] = []
+        unsubscribe_users = getattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            True,
+        )
+        if unsubscribe_users:
+            # Unsubscribed users on Drip
+            unsubscribed_ids = self.drip_model.unsubscribed_users.all().values_list("id", flat=True)
+        self._queryset = self.get_queryset().exclude(id__in=unsubscribed_ids)
+
     def exclude_sent_drips_users(self) -> None:
         """If configured in can_resend_drip changes queryset excluding Users ids who have a SentDrip already."""
         if not self.drip_model.can_resend_drip:
@@ -369,10 +384,12 @@ class DripBase(object):
             self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
     def prune(self) -> None:
-        """If configured in can_resend_drip do an exclude for all Users who have a SentDrip already"""
+        """Do an exclude for all Users who have a SentDrip already and if configured the unsubscribed users."""
         self.get_queryset()
         # sent drips exclude
         self.exclude_sent_drips_users()
+        # unsubscribed users exclude
+        self.exclude_unsubcribed_users()
 
     def get_count_from_queryset(self, message_class) -> int:
         """
