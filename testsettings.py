@@ -18,6 +18,7 @@ INSTALLED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "django.contrib.messages",
+    "django.contrib.sites",
     "drip",
     # testing only
     "credits",
@@ -79,3 +80,5 @@ DRIP_SCHEDULE_SETTINGS = {
 }
 
 DRIP_UNSUBSCRIBE_USERS = True
+
+SITE_ID = 1

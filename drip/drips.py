@@ -19,7 +19,8 @@ from typing_extensions import TypeAlias
 
 from drip.exceptions import MessageClassNotFound
 from drip.models import Drip, SentDrip
-from drip.utils import build_now_from_timedelta, get_conditional_now, get_user_model
+from drip.tokens import EmailToken
+from drip.utils import build_now_from_timedelta, get_conditional_now, get_user_model, validate_path_existence
 
 User = get_user_model()
 
@@ -127,8 +128,24 @@ class DripMessage(object):
     @property
     def context(self) -> Context:
         if not self._context:
-            self._context = Context({"user": self.user})
+            context_dict = self.build_context()
+            self._context = Context(context_dict)
         return self._context
+
+    def build_context(self) -> Dict[str, Any]:
+        """
+        Build context drip dictionary allowing you easy extension.
+        Also it is used to manage unsubscribe links configurations.
+        """
+        context = {"user": self.user}
+        unsubscribe_users = getattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+        if unsubscribe_users:
+            context["unsubscribe_link"] = self._get_unsubscribe_link()
+        return context
 
     @property
     def subject(self) -> SafeString:
@@ -186,6 +203,17 @@ class DripMessage(object):
             if len(self.plain) != len(self.body):
                 self._message.attach_alternative(self.body, "text/html")
         return self._message
+
+    def _get_unsubscribe_link(self) -> Optional[str]:
+        """
+        Generate url for drip and user data and validates existence of this url in project.
+        Checking if it was configured by the user.
+        """
+        email_token = EmailToken(self.user)
+        drip_uidb64, uidb64, token = email_token.get_uidb64_token(self.drip_base.drip_model.pk)
+        url_args = {"drip_uidb64": drip_uidb64, "uidb64": uidb64, "token": token}
+        unsubscribe_link = validate_path_existence("unsubscribe_drip", url_args)
+        return unsubscribe_link
 
 
 class DripBase(object):
@@ -365,7 +393,7 @@ class DripBase(object):
         unsubscribe_users = getattr(
             settings,
             "DRIP_UNSUBSCRIBE_USERS",
-            True,
+            False,
         )
         if unsubscribe_users:
             # Unsubscribed users on Drip

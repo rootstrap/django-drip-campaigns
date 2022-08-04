@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 
 import six
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.fields.related import ForeignObjectRel as RelatedObject
+from django.urls import NoReverseMatch, reverse
 
 from drip.scheduler.constants import VALID_SCHEDULERS, get_drip_scheduler_settings
 from drip.types import FieldType
@@ -220,3 +221,15 @@ def validate_schedules():
     _, _, _, _, SCHEDULER = get_drip_scheduler_settings()
     if SCHEDULER not in VALID_SCHEDULERS:
         raise DripScheduleSettingsError(f"{SCHEDULER} is not a valid SCHEDULER configuration")
+
+
+def validate_path_existence(path: str, url_args: Dict[str, Any]) -> Optional[str]:
+    """
+    Validate path existence in Django project. And returns it
+    """
+    unsubscribe_link = None
+    try:
+        unsubscribe_link = reverse(path, kwargs=url_args)
+    except NoReverseMatch:
+        return unsubscribe_link
+    return unsubscribe_link
