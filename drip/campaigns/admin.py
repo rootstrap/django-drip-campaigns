@@ -44,7 +44,6 @@ class CampaignAdmin(admin.ModelAdmin):
         for drip in campaign.drip_set.all():
             seen_users: Set[int] = set()
             for shifted_drip in drip.drip.walk(into_past=int(into_past), into_future=int(into_future) + 1):
-                print()
                 shifted_drip.prune()
                 shifted_data = {
                     "drip_model": drip,
