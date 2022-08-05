@@ -46,11 +46,9 @@ class CustomTokenGenerator(PasswordResetTokenGenerator):
 
         # Check that the timestamp/uid has not been tampered with
         if not constant_time_compare(self._make_token_with_timestamp(user, ts), token):
-            # RemovedInDjango40Warning: when the deprecation ends, replace
-            # with:
-            #   return False
+            # Ignore line because Mypy doesn't recognice the argument legacy
             if not constant_time_compare(
-                self._make_token_with_timestamp(user, ts, legacy=True),
+                self._make_token_with_timestamp(user, ts, legacy=True),  # type: ignore
                 token,
             ):
                 return False

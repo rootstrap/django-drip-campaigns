@@ -385,8 +385,6 @@ class DripBase(object):
 
         return count
 
-    
-
     def exclude_unsubcribed_users(self) -> None:
         """If DRIP_UNSUBSCRIBE_USERS is set to True, get a list of unsubscribed users ids to Drip model."""
         unsubscribed_ids: Union[QuerySet, List] = []
