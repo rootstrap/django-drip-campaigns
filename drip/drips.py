@@ -357,15 +357,22 @@ class DripBase(object):
 
         return count
 
+    def exclude_sent_drips_users(self) -> None:
+        """If configured in can_resend_drip changes queryset excluding Users ids who have a SentDrip already."""
+        if not self.drip_model.can_resend_drip:
+            target_user_ids = self.get_queryset().values_list("id", flat=True)
+            exclude_user_ids = SentDrip.objects.filter(
+                date__lt=conditional_now(),
+                drip=self.drip_model,
+                user__id__in=target_user_ids,
+            ).values_list("user_id", flat=True)
+            self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
+
     def prune(self) -> None:
-        """Do an exclude for all Users who have a SentDrip already."""
-        target_user_ids = self.get_queryset().values_list("id", flat=True)
-        exclude_user_ids = SentDrip.objects.filter(
-            date__lt=conditional_now(),
-            drip=self.drip_model,
-            user__id__in=target_user_ids,
-        ).values_list("user_id", flat=True)
-        self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
+        """If configured in can_resend_drip do an exclude for all Users who have a SentDrip already"""
+        self.get_queryset()
+        # sent drips exclude
+        self.exclude_sent_drips_users()
 
     def get_count_from_queryset(self, message_class) -> int:
         """

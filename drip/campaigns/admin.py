@@ -44,6 +44,7 @@ class CampaignAdmin(admin.ModelAdmin):
         for drip in campaign.drip_set.all():
             seen_users: Set[int] = set()
             for shifted_drip in drip.drip.walk(into_past=int(into_past), into_future=int(into_future) + 1):
+                print()
                 shifted_drip.prune()
                 shifted_data = {
                     "drip_model": drip,
@@ -52,9 +53,10 @@ class CampaignAdmin(admin.ModelAdmin):
                         id__in=seen_users,
                     ),
                 }
-                seen_users.update(shifted_drip.get_queryset().values_list("id", flat=True))
+                if not drip.can_resend_drip:
+                    seen_users.update(shifted_drip.get_queryset().values_list("id", flat=True))
                 shift_days = shifted_drip.now_shift_kwargs.get("days")
-                if shift_days:
+                if shift_days is not None:
                     new_shifted_drips[shift_days]["drips"].append(shifted_data)  # type: ignore
                     new_shifted_drips[shift_days]["now"] = shifted_drip.now()
 

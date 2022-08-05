@@ -66,7 +66,8 @@ class DripAdmin(admin.ModelAdmin):
                     ),
                 },
             )
-            seen_users.update(shifted_drip.get_queryset().values_list("id", flat=True))
+            if not drip.can_resend_drip:
+                seen_users.update(shifted_drip.get_queryset().values_list("id", flat=True))
 
         return render(request, "drip/timeline.html", locals())
 
