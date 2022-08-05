@@ -32,6 +32,10 @@ class AbstractDrip(models.Model):
         help_text="A unique name for this drip.",
     )
     enabled = models.BooleanField(default=False)
+    can_resend_drip = models.BooleanField(
+        default=False,
+        help_text="This will allow you to resend emails to users with the same Drip when query matches the user again.",
+    )
 
     from_email = models.EmailField(null=True, blank=True, help_text="Set a custom from email.")
     from_email_name = models.CharField(
