@@ -145,11 +145,21 @@ class TestCaseDrips(SetupDataDripMixin):
         for drip in Drip.objects.all():
             assert issubclass(drip.drip.__class__, DripBase)
 
-    def test_custom_drip(self):
+    @pytest.mark.parametrize(
+        "can_resend_drip, expected_pruned_count",
+        (
+            (False, 0),  # No resend, default configuration
+            (True, 2),  # Enable resend drip.
+        ),
+    )
+    def test_custom_drip(self, can_resend_drip: bool, expected_pruned_count: int):
         """
-        Test a simple
+        Test a simple drip with resend disabled and enabled
         """
         model_drip = self.build_joined_date_drip()
+        model_drip.can_resend_drip = can_resend_drip
+        model_drip.save()
+
         drip = model_drip.drip
 
         # ensure we are starting from a blank slate
@@ -174,7 +184,7 @@ class TestCaseDrips(SetupDataDripMixin):
         # 2 people meet the criteria
         assert 2 == drip.get_queryset().count()
         drip.prune()
-        assert 0 == drip.get_queryset().count()  # everyone is pruned
+        assert expected_pruned_count == drip.get_queryset().count()  # Check who many users are pruned
 
     def test_custom_short_term_drip(self):
         model_drip = self.build_joined_date_drip(shift_one=3, shift_two=4)
