@@ -102,7 +102,7 @@ class EmailToken:
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
-        if user is None or not custom_token_generator.check_token(user, token):
+        if not custom_token_generator.check_token(user, token):
             return None
         return user
 
