@@ -227,9 +227,8 @@ def validate_path_existence(path: str, url_args: Dict[str, Any]) -> Optional[str
     """
     Validate path existence in Django project. And returns it
     """
-    unsubscribe_link = None
     try:
         unsubscribe_link = reverse(path, kwargs=url_args)
     except NoReverseMatch:
-        return unsubscribe_link
+        return None
     return unsubscribe_link
