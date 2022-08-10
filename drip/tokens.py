@@ -6,7 +6,7 @@ from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import base36_to_int, urlsafe_base64_decode, urlsafe_base64_encode
 
-from drip.models import Drip
+from drip.models import Campaign, Drip
 from drip.utils import get_user_model
 
 User = get_user_model()
@@ -82,12 +82,12 @@ class EmailToken:
         # Mypy is not getting the result of force_bytes as bytes
         return urlsafe_base64_encode(force_bytes(data_id))  # type: ignore
 
-    def get_uidb64_token(self, drip_id: int) -> Tuple[str, str, str]:
+    def get_uidb64_token(self, object_id: int) -> Tuple[str, str, str]:
         """
-        Returns drip and user uidb64 and token for the user, for building url
+        Returns drip/campaign and user uidb64 and token for the user, for building url
         """
         uidb64 = self._get_uidb64(self.user.pk)
-        drip_uidb64 = self._get_uidb64(drip_id)
+        drip_uidb64 = self._get_uidb64(object_id)
         token = self._get_token()
         return drip_uidb64, uidb64, token
 
@@ -117,3 +117,15 @@ class EmailToken:
         except (TypeError, ValueError, OverflowError, Drip.DoesNotExist):
             drip = None
         return drip
+
+    @classmethod
+    def validate_campaign_uidb64(cls, campaign_uidb64: str) -> Optional[Campaign]:
+        """
+        Validates campaign uidb64 and returns the Campaign object for this string
+        """
+        try:
+            campaign_uid = force_str(urlsafe_base64_decode(campaign_uidb64))
+            campaign = Campaign.objects.get(pk=campaign_uid)
+        except (TypeError, ValueError, OverflowError, Campaign.DoesNotExist):
+            campaign = None
+        return campaign

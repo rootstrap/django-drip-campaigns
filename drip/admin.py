@@ -43,9 +43,15 @@ class DripForm(forms.ModelForm):
         if unsubscribe_users:
             basic_help_text = self.fields["body_html_template"].help_text
             unsubscribe_help_text = """
+            <br/><br/>
+            <b>UNSUBSCRIBE USERS:</b>
             <br/>
-            If you wish to give the user an unsubscribe link to this Drip, please include
-            <b>'http://yourdomain.com{{unsubscribe_link}}'</b> wherever you want in the email.
+            <b>Drip:</b> If you wish to give the user an unsubscribe link to this Drip, please include
+            <b>'http://yourdomain.com{{unsubscribe_link_drip}}'</b> wherever you want in the email.
+            <br/>
+            <b>Campaign:</b> If you wish to give the user an unsubscribe link to a Campaign
+            (if only will work if you have a campaign related to this Drip), please include
+            <b>'http://yourdomain.com{{unsubscribe_link_campaign}}'</b> wherever you want in the email.
             <br/>
             Replace the HTTP protocol and yourdomain.com with the appropriate ones.
             """
