@@ -60,6 +60,11 @@ class AbstractDrip(models.Model):
         on_delete=models.SET_DEFAULT,
         help_text="If set, this is the campaign to which this Drip belongs to.",
     )
+    unsubscribed_users = models.ManyToManyField(
+        getattr(settings, "AUTH_USER_MODEL", "auth.User"),
+        through="UserUnsubscribeDrip",
+        related_name="drips_unsubscribed",
+    )
 
     class Meta:
         abstract = True
@@ -341,3 +346,17 @@ class TestUserUUIDModel(models.Model):
     """
 
     id = models.UUIDField(primary_key=True)
+
+
+class UserUnsubscribeDrip(models.Model):
+    drip = models.ForeignKey(
+        Drip,
+        related_name="user_unsubscribe_drips",
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        getattr(settings, "AUTH_USER_MODEL", "auth.User"),
+        related_name="user_unsubscribe_drips",
+        on_delete=models.CASCADE,
+    )
+    created_date = models.DateTimeField(auto_now_add=True)

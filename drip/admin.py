@@ -2,6 +2,7 @@ import json
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpRequest, HttpResponse
@@ -28,6 +29,27 @@ class DripForm(forms.ModelForm):
     class Meta:
         model = Drip
         exclude: List[str] = []
+
+    def __init__(self, *args, **kwargs):
+        """
+        Overriding init form to change help text in body_html_template field according to DRIP_UNSUBSCRIBE_USERS
+        """
+        super(DripForm, self).__init__(*args, **kwargs)
+        unsubscribe_users = getattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+        if unsubscribe_users:
+            basic_help_text = self.fields["body_html_template"].help_text
+            unsubscribe_help_text = """
+            <br/>
+            If you wish to give the user an unsubscribe link to this Drip, please include
+            <b>'http://yourdomain.com{{unsubscribe_link}}'</b> wherever you want in the email.
+            <br/>
+            Replace the HTTP protocol and yourdomain.com with the appropriate ones.
+            """
+            self.fields["body_html_template"].help_text = f"{basic_help_text}{unsubscribe_help_text}"
 
 
 class DripAdmin(admin.ModelAdmin):
