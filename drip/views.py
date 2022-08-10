@@ -49,7 +49,7 @@ class UnsubscribeCampaignView(TemplateView):
     invalid_template_name = "unsubscribe_campaign_invalid.html"
     success_template_name = "unsubscribe_campaign_success.html"
 
-    def _set_user_and_campaign(self, **kwargs):
+    def _set_user_and_campaign(self, **kwargs: Any):
         campaign_uidb64 = kwargs.get("campaign_uidb64", "")
         uidb64 = kwargs.get("uidb64", "")
         token = kwargs.get("token", "")
@@ -57,7 +57,7 @@ class UnsubscribeCampaignView(TemplateView):
         self.campaign = EmailToken.validate_campaign_uidb64(campaign_uidb64)
         self.post_sucess = False
 
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, *args: Any, **kwargs: Any):
         self._set_user_and_campaign(**kwargs)
         return super().dispatch(*args, **kwargs)
 
@@ -75,7 +75,7 @@ class UnsubscribeCampaignView(TemplateView):
             template_names = [self.success_template_name]
         return template_names
 
-    def post(self, request, *args, **kwargs):
+    def post(self, *args: Any, **kwargs: Any):
         context = self.get_context_data(**kwargs)
         if self.user and self.campaign:
             self.campaign.unsubscribed_users.add(self.user.pk)
