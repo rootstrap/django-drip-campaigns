@@ -50,7 +50,7 @@ class DripForm(forms.ModelForm):
             <b>'http://yourdomain.com{{unsubscribe_link_drip}}'</b> wherever you want in the email.
             <br/>
             <b>Campaign:</b> If you wish to give the user an unsubscribe link to a Campaign
-            (if only will work if you have a campaign related to this Drip), please include
+            (it will only work if you have a campaign related to this Drip), please include
             <b>'http://yourdomain.com{{unsubscribe_link_campaign}}'</b> wherever you want in the email.
             <br/>
             Replace the HTTP protocol and yourdomain.com with the appropriate ones.
