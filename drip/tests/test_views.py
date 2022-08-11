@@ -1,10 +1,10 @@
 import pytest
 from django.test import Client
 
-from drip.models import Campaign, Drip
+from drip.models import Campaign, Drip, UserUnsubscribe
 from drip.tokens import EmailToken
 from drip.utils import get_user_model, validate_path_existence
-from drip.views import UnsubscribeCampaignView, UnsubscribeDripView
+from drip.views import UnsubscribeCampaignView, UnsubscribeDripView, UnsubscribeView
 
 pytestmark = pytest.mark.django_db
 
@@ -20,6 +20,13 @@ INVALID_VALUES = (
     ("", "invalid", "invalid", True, False),  # Invalid uidb64 and token
     ("invalid", "", "invalid", False, False),  # Invalid drip_uidb64/campaign_uidb64 and token
     ("invalid", "invalid", "invalid", False, False),  # All invalid
+)
+
+INVALID_PARAMS_GENERAL = "extra_uidb64, extra_token, exists_user"
+INVALID_VALUES_GENERAL = (
+    ("invalid", "", False),  # Invalid uidb64
+    ("", "invalid", False),  # Invalid token
+    ("invalid", "invalid", False),  # All invalid
 )
 
 
@@ -44,6 +51,9 @@ class BaseTestCaseViews:
         self.context_keys_campaign = {
             "user",
             "campaign",
+        }
+        self.context_keys_general = {
+            "user",
         }
 
 
@@ -265,3 +275,95 @@ class TestCaseUnsubscribeCampaignView(BaseTestCaseViews):
         # It DOES NOT creates the unsubscribed users model
         campaign.refresh_from_db()
         assert self.user not in campaign.unsubscribed_users.all()
+
+
+class TestCaseUnsubscribeView(BaseTestCaseViews):
+    def test_get_unsubscribe_general_success(self):
+        email_token = EmailToken(self.user)
+        uidb64, token = email_token.get_uidb64_token_user_only()
+        url_args = {"uidb64": uidb64, "token": token}
+        unsubscribe_link = validate_path_existence("unsubscribe_app", url_args)
+        assert unsubscribe_link
+        response = self.client.get(unsubscribe_link)
+
+        assert response.template_name == [UnsubscribeView.template_name]  # type: ignore
+        assert response.status_code == 200
+        context_data = response.context_data  # type: ignore
+        assert self.context_keys_general.issubset(context_data)
+        assert context_data.get("user", None) == self.user
+
+    @pytest.mark.parametrize(
+        INVALID_PARAMS_GENERAL,
+        INVALID_VALUES_GENERAL,
+    )
+    def test_get_unsubscribe_general_invalid(
+        self,
+        extra_uidb64: str,
+        extra_token: str,
+        exists_user: bool,
+    ):
+        email_token = EmailToken(self.user)
+        uidb64, token = email_token.get_uidb64_token_user_only()
+        url_args = {
+            "uidb64": f"{uidb64}{extra_uidb64}",
+            "token": f"{token}{extra_token}",
+        }
+        unsubscribe_link = validate_path_existence("unsubscribe_app", url_args)
+        assert unsubscribe_link
+        response = self.client.get(unsubscribe_link)
+
+        assert response.template_name == [UnsubscribeView.invalid_template_name]  # type: ignore
+        assert response.status_code == 200
+        context_data = response.context_data  # type: ignore
+        assert self.context_keys_general.issubset(context_data)
+        user_context = context_data.get("user", None)
+        expected_user = self.user if exists_user else None
+        assert user_context == expected_user
+
+    def test_post_unsubscribe_general_success(self):
+        email_token = EmailToken(self.user)
+        uidb64, token = email_token.get_uidb64_token_user_only()
+        url_args = {"uidb64": uidb64, "token": token}
+        unsubscribe_link = validate_path_existence("unsubscribe_app", url_args)
+        assert unsubscribe_link
+        response = self.client.post(unsubscribe_link)
+
+        assert response.template_name == [UnsubscribeView.success_template_name]  # type: ignore
+        assert response.status_code == 200
+        context_data = response.context_data  # type: ignore
+        assert self.context_keys_general.issubset(context_data)
+        assert context_data.get("user", None) == self.user
+
+        # It creates the unsubscribed users model
+        assert self.user.pk in UserUnsubscribe.objects.all().values_list("user", flat=True)
+
+    @pytest.mark.parametrize(
+        INVALID_PARAMS_GENERAL,
+        INVALID_VALUES_GENERAL,
+    )
+    def test_post_unsubscribe_drip_invalid(
+        self,
+        extra_uidb64: str,
+        extra_token: str,
+        exists_user: bool,
+    ):
+        email_token = EmailToken(self.user)
+        uidb64, token = email_token.get_uidb64_token_user_only()
+        url_args = {
+            "uidb64": f"{uidb64}{extra_uidb64}",
+            "token": f"{token}{extra_token}",
+        }
+        unsubscribe_link = validate_path_existence("unsubscribe_app", url_args)
+        assert unsubscribe_link
+        response = self.client.get(unsubscribe_link)
+
+        assert response.template_name == [UnsubscribeView.invalid_template_name]  # type: ignore
+        assert response.status_code == 200
+        context_data = response.context_data  # type: ignore
+        assert self.context_keys_general.issubset(context_data)
+        user_context = context_data.get("user", None)
+        expected_user = self.user if exists_user else None
+        assert user_context == expected_user
+
+        # It DOES NOT creates the unsubscribed users model
+        assert self.user.pk not in UserUnsubscribe.objects.all().values_list("user", flat=True)
