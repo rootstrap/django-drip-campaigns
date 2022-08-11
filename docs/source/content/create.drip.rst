@@ -20,8 +20,8 @@ Resend drip field
 -----------------
 
 The default behaviour of Drip library is that an email could only be sended to one user every time.
-Now with the field ``Can resend drip`` you could be able to send the same drip email to one user multiple times. Every time the user matches the conditions, it will be sended.
-If the field is setted to True, the ``SentDrip`` model will not be used to exclude users from queryset. This field could be functional, if you mix it up with some datetime conditions when building your drip. 
+Now with the field ``Can resend drip`` you could be able to send the same drip email to one user multiple times. Every time the user matches the conditions, it will receive the email.
+If the field is set to True, the ``SentDrip`` model will not be used to exclude users from queryset. This field could be functional, if you mix it up with some datetime conditions when building your drip. 
 
 Lookup fields
 -------------
