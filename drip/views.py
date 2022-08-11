@@ -30,12 +30,11 @@ class UnsubscribeDripView(TemplateView):
         return context_data
 
     def get_template_names(self) -> List[str]:
-        template_names = super().get_template_names()
         if not (self.user and self.drip):
-            template_names = [self.invalid_template_name]
+            return [self.invalid_template_name]
         if self.user and self.drip and self.post_sucess:
-            template_names = [self.success_template_name]
-        return template_names
+            return [self.success_template_name]
+        return super().get_template_names()
 
     def post(self, *args: Any, **kwargs: Any):
         context = self.get_context_data(**kwargs)
@@ -69,12 +68,11 @@ class UnsubscribeCampaignView(TemplateView):
         return context_data
 
     def get_template_names(self) -> List[str]:
-        template_names = super().get_template_names()
         if not (self.user and self.campaign):
-            template_names = [self.invalid_template_name]
+            return [self.invalid_template_name]
         if self.user and self.campaign and self.post_sucess:
-            template_names = [self.success_template_name]
-        return template_names
+            return [self.success_template_name]
+        return super().get_template_names()
 
     def post(self, *args: Any, **kwargs: Any):
         context = self.get_context_data(**kwargs)
@@ -105,12 +103,11 @@ class UnsubscribeView(TemplateView):
         return context_data
 
     def get_template_names(self) -> List[str]:
-        template_names = super().get_template_names()
         if not self.user:
-            template_names = [self.invalid_template_name]
+            return [self.invalid_template_name]
         if self.user and self.post_sucess:
-            template_names = [self.success_template_name]
-        return template_names
+            return [self.success_template_name]
+        return super().get_template_names()
 
     def post(self, *args: Any, **kwargs: Any):
         context = self.get_context_data(**kwargs)
