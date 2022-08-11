@@ -158,3 +158,80 @@ In order to make this happen, the project's ``celery.py`` setup shall invoke the
 `autodiscoverttasks <https://docs.celeryproject.org/en/latest/reference/celery.html#celery.Celery.autodiscover_tasks>`_
 function. This task is scheduled with a simple
 `Celery beat configuration <https://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html#entries>`_.
+
+
+Unsubscribe users from emails
+-----------------------------
+
+If you need to unsubscribe users from the emails please add the following key ``DRIP_UNSUBSCRIBE_USERS``set as ``True`` in the settings file.
+
+We support unsubscribing from ``Drip``, ``Campaign``, and also all emails (all emails sent by this library).
+
+To see more details about changes in Drip create, :ref:`click here <create-drip>`.
+
+Another config is needed here, please add drip urls:
+
+
+.. code-block:: python
+
+    urlpatterns = [
+        ...,
+        path('drip_unsubscribe/', include('drip.urls'))
+    ]
+
+This configuration will enable 3 views (one for every type of unsubscription) with some dump HTML.
+
+
+.. code-block:: python
+
+    class UnsubscribeDripView(TemplateView):
+        template_name = "unsubscribe_drip.html"
+        invalid_template_name = "unsubscribe_drip_invalid.html"
+        success_template_name = "unsubscribe_drip_success.html"
+        ...
+    
+    class UnsubscribeCampaignView(TemplateView):
+        template_name = "unsubscribe_campaign.html"
+        invalid_template_name = "unsubscribe_campaign_invalid.html"
+        success_template_name = "unsubscribe_campaign_success.html"
+        ...
+    
+    class UnsubscribeView(TemplateView):
+        template_name = "unsubscribe_general.html"
+        invalid_template_name = "unsubscribe_general_invalid.html"
+        success_template_name = "unsubscribe_general_success.html"
+        ...
+
+
+These dump views will be useful for development, if you wish to customize the HTML, please follow this example:
+
+
+.. code-block:: python
+
+    from drip.views import UnsubscribeView
+
+    class CustomUnsubscribeView(UnsubscribeView):
+        template_name = "custom_template.html"
+        invalid_template_name = "invalid_custom_template.html"
+        success_template_name = "sucess_custom_template.html"
+
+
+And then instead of adding the drip urls add the views you customize as the following:
+
+
+.. code-block:: python
+
+    from django.urls import re_path
+
+    urlpatterns = [
+        ...,
+        re_path(
+            r"^app/(?P<uidb64>\w+)/(?P<token>[\w-]+)/$",
+            CustomUnsubscribeView.as_view(),
+            name="unsubscribe_app",
+        ),
+    ]
+
+
+Take a look in ``drip.urls`` file to understand how urls are build for all 3 views.
+IMPORTANT: Please keep the views ``name`` with the same values.
