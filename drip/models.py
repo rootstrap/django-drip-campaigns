@@ -32,6 +32,10 @@ class AbstractDrip(models.Model):
         help_text="A unique name for this drip.",
     )
     enabled = models.BooleanField(default=False)
+    can_resend_drip = models.BooleanField(
+        default=False,
+        help_text="This will allow you to resend emails to users with the same Drip when query matches the user again.",
+    )
 
     from_email = models.EmailField(null=True, blank=True, help_text="Set a custom from email.")
     from_email_name = models.CharField(
@@ -55,6 +59,11 @@ class AbstractDrip(models.Model):
         default=None,
         on_delete=models.SET_DEFAULT,
         help_text="If set, this is the campaign to which this Drip belongs to.",
+    )
+    unsubscribed_users = models.ManyToManyField(
+        getattr(settings, "AUTH_USER_MODEL", "auth.User"),
+        through="UserUnsubscribeDrip",
+        related_name="drips_unsubscribed",
     )
 
     class Meta:
@@ -337,3 +346,26 @@ class TestUserUUIDModel(models.Model):
     """
 
     id = models.UUIDField(primary_key=True)
+
+
+class UserUnsubscribeDrip(models.Model):
+    drip = models.ForeignKey(
+        Drip,
+        related_name="user_unsubscribe_drips",
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        getattr(settings, "AUTH_USER_MODEL", "auth.User"),
+        related_name="user_unsubscribe_drips",
+        on_delete=models.CASCADE,
+    )
+    created_date = models.DateTimeField(auto_now_add=True)
+
+
+class UserUnsubscribe(models.Model):
+    user = models.ForeignKey(
+        getattr(settings, "AUTH_USER_MODEL", "auth.User"),
+        related_name="user_unsubscribes",
+        on_delete=models.CASCADE,
+    )
+    created_date = models.DateTimeField(auto_now_add=True)

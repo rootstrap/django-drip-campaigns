@@ -12,9 +12,9 @@ from django.urls import resolve, reverse
 from django.utils import timezone
 
 from credits.models import Profile
-from drip.admin import DripAdmin
-from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes
-from drip.models import Drip, QuerySetRule, SentDrip
+from drip.admin import DripAdmin, DripForm
+from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes, message_class_for
+from drip.models import Campaign, Drip, QuerySetRule, SentDrip, UserUnsubscribe
 from drip.scheduler.cron_scheduler import cron_send_drips
 from drip.utils import get_user_model, unicode
 
@@ -74,11 +74,15 @@ class SetupDataDripMixin:
                 date_joined=start - timedelta(days=i),
             )
 
-    def build_joined_date_drip(self, shift_one=7, shift_two=8):
+    def build_joined_date_drip(self, shift_one: int = 7, shift_two: int = 8, build_campaign: bool = False):
+        campaign = None
+        if build_campaign:
+            campaign = Campaign.objects.create(name="Custom campaign")
         model_drip = Drip.objects.create(
             name="A Custom Week Ago",
             subject_template="HELLO {{ user.username }}",
             body_html_template="KETTEHS ROCK!",
+            campaign=campaign,
         )
         QuerySetRule.objects.create(
             drip=model_drip,
@@ -145,11 +149,21 @@ class TestCaseDrips(SetupDataDripMixin):
         for drip in Drip.objects.all():
             assert issubclass(drip.drip.__class__, DripBase)
 
-    def test_custom_drip(self):
+    @pytest.mark.parametrize(
+        "can_resend_drip, expected_pruned_count",
+        (
+            (False, 0),  # No resend, default configuration
+            (True, 2),  # Enable resend drip.
+        ),
+    )
+    def test_custom_drip(self, can_resend_drip: bool, expected_pruned_count: int):
         """
-        Test a simple
+        Test a simple drip with resend disabled and enabled
         """
         model_drip = self.build_joined_date_drip()
+        model_drip.can_resend_drip = can_resend_drip
+        model_drip.save()
+
         drip = model_drip.drip
 
         # ensure we are starting from a blank slate
@@ -174,7 +188,107 @@ class TestCaseDrips(SetupDataDripMixin):
         # 2 people meet the criteria
         assert 2 == drip.get_queryset().count()
         drip.prune()
-        assert 0 == drip.get_queryset().count()  # everyone is pruned
+        assert expected_pruned_count == drip.get_queryset().count()  # Check who many users are pruned
+
+    def test_custom_drip_exclude_unsubscribed(self):
+        """
+        Test a simple drip with resend disabled and enabled (Drip)
+        """
+        model_drip = self.build_joined_date_drip()
+        drip = model_drip.drip
+
+        # Disable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+
+        # create unsubscribed user model
+        some_user = drip.get_queryset().first()
+        model_drip.unsubscribed_users.add(some_user.pk)
+
+        # User in queryset. It is not excluded even if the user is unsubscribed
+        drip.prune()
+        assert some_user in drip.get_queryset()
+
+        # Enable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            True,
+        )
+
+        # User not in queryset. It is excluded.
+        drip.prune()
+        assert some_user not in drip.get_queryset()
+
+    def test_custom_drip_exclude_unsubscribed_campaign(self):
+        """
+        Test a simple drip with resend disabled and enabled (Campaign)
+        """
+        model_drip = self.build_joined_date_drip(build_campaign=True)
+        drip = model_drip.drip
+        campaign = model_drip.campaign
+
+        # Disable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+
+        # create unsubscribed user model
+        some_user = drip.get_queryset().first()
+        campaign.unsubscribed_users.add(some_user.pk)
+
+        # User in queryset. It is not excluded even if the user is unsubscribed
+        drip.prune()
+        assert some_user in drip.get_queryset()
+
+        # Enable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            True,
+        )
+
+        # User not in queryset. It is excluded.
+        drip.prune()
+        assert some_user not in drip.get_queryset()
+
+    def test_custom_drip_exclude_unsubscribed_app(self):
+        """
+        Test a simple drip with resend disabled and enabled (General)
+        """
+        model_drip = self.build_joined_date_drip()
+        drip = model_drip.drip
+
+        # Disable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+
+        # create unsubscribed user model
+        some_user = drip.get_queryset().first()
+        UserUnsubscribe.objects.create(user=some_user)
+
+        # User in queryset. It is not excluded even if the user is unsubscribed
+        drip.prune()
+        assert some_user in drip.get_queryset()
+
+        # Enable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            True,
+        )
+
+        # User not in queryset. It is excluded.
+        drip.prune()
+        assert some_user not in drip.get_queryset()
 
     def test_custom_short_term_drip(self):
         model_drip = self.build_joined_date_drip(shift_one=3, shift_two=4)
@@ -522,6 +636,41 @@ class TestCaseDrips(SetupDataDripMixin):
         if custom_class:
             assert message_classes["custom"] == custom_class
 
+    @pytest.mark.parametrize(
+        "drip_unsubscribe_users, expected_context_keys",
+        (
+            (
+                True,
+                {
+                    "user",
+                    "unsubscribe_link_drip",
+                    "unsubscribe_link_campaign",
+                },
+            ),  # Unsubscribe users is enabled, it should have user and unsubscribe link config key (drip and campaign)
+            (
+                False,
+                {
+                    "user",
+                },
+            ),  # Unsubscribe users is disabled, it should have user key only
+        ),
+    )
+    def test_drip_message_build_context(self, drip_unsubscribe_users: bool, expected_context_keys: set):
+        # DRIP_UNSUBSCRIBE_USERS config
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            drip_unsubscribe_users,
+        )
+        model_drip = self.build_joined_date_drip()
+        drip = model_drip.drip
+        user = User.objects.first()
+        drip_message = message_class_for(  # type: ignore
+            model_drip.message_class,
+        )(drip, user)
+        context = drip_message.build_context()
+        assert expected_context_keys.issubset(context)
+
 
 class UrlsTestCase(TestCase):
     def test_drip_timeline_url(self):
@@ -626,3 +775,24 @@ class TestSendDripsCommand(SetupDataDripMixin):
         model_drip.refresh_from_db()
         drip = model_drip.drip
         assert drip_count_queryset == drip.get_queryset().count()
+
+
+class TestFormAdminDrip:
+    @pytest.mark.parametrize(
+        "drip_unsubscribe_users, has_changed_help_text",
+        (
+            (True, True),  # Unsubscribe users is enabled, it should change the help text in form
+            (False, False),  # Unsubscribe users is disabled, it should NOT change the help text in form
+        ),
+    )
+    def test_form_body_html_template(self, drip_unsubscribe_users: bool, has_changed_help_text: bool):
+        # DRIP_UNSUBSCRIBE_USERS config
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            drip_unsubscribe_users,
+        )
+        form = DripForm()
+        default_help_text = Drip._meta.get_field("body_html_template").help_text
+        form_help_text = form.fields["body_html_template"].help_text
+        assert not (form_help_text == default_help_text) == has_changed_help_text
