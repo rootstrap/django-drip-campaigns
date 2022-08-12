@@ -14,7 +14,7 @@ from django.utils import timezone
 from credits.models import Profile
 from drip.admin import DripAdmin, DripForm
 from drip.drips import DEFAULT_DRIP_MESSAGE_CLASS, DripBase, configured_message_classes, message_class_for
-from drip.models import Campaign, Drip, QuerySetRule, SentDrip
+from drip.models import Campaign, Drip, QuerySetRule, SentDrip, UserUnsubscribe
 from drip.scheduler.cron_scheduler import cron_send_drips
 from drip.utils import get_user_model, unicode
 
@@ -241,6 +241,39 @@ class TestCaseDrips(SetupDataDripMixin):
         # create unsubscribed user model
         some_user = drip.get_queryset().first()
         campaign.unsubscribed_users.add(some_user.pk)
+
+        # User in queryset. It is not excluded even if the user is unsubscribed
+        drip.prune()
+        assert some_user in drip.get_queryset()
+
+        # Enable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            True,
+        )
+
+        # User not in queryset. It is excluded.
+        drip.prune()
+        assert some_user not in drip.get_queryset()
+
+    def test_custom_drip_exclude_unsubscribed_app(self):
+        """
+        Test a simple drip with resend disabled and enabled (General)
+        """
+        model_drip = self.build_joined_date_drip()
+        drip = model_drip.drip
+
+        # Disable unsubscribe users
+        setattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+
+        # create unsubscribed user model
+        some_user = drip.get_queryset().first()
+        UserUnsubscribe.objects.create(user=some_user)
 
         # User in queryset. It is not excluded even if the user is unsubscribed
         drip.prune()

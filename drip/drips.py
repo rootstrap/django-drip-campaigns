@@ -18,7 +18,7 @@ from django.utils.safestring import SafeString
 from typing_extensions import TypeAlias
 
 from drip.exceptions import MessageClassNotFound
-from drip.models import Drip, SentDrip
+from drip.models import Drip, SentDrip, UserUnsubscribe
 from drip.tokens import EmailToken
 from drip.utils import build_now_from_timedelta, get_conditional_now, get_user_model, validate_path_existence
 
@@ -146,6 +146,7 @@ class DripMessage(object):
         if unsubscribe_users:
             context["unsubscribe_link_drip"] = self._get_unsubscribe_link_drip()
             context["unsubscribe_link_campaign"] = self._get_unsubscribe_link_campaign()
+            context["unsubscribe_link"] = self._get_unsubscribe_link()
         return context
 
     @property
@@ -207,7 +208,7 @@ class DripMessage(object):
 
     def _get_unsubscribe_link_drip(self) -> Optional[str]:
         """
-        Generate url for drip and user data and validates existence of this url in project.
+        Generate url for Unsubscribe Drip with drip and user data and validates existence of this url in project.
         Checking if it was configured by the user.
         """
         email_token = EmailToken(self.user)
@@ -218,7 +219,7 @@ class DripMessage(object):
 
     def _get_unsubscribe_link_campaign(self) -> Optional[str]:
         """
-        Generate url for campaign and user data and validates existence of this url in project.
+        Generate url for Unsubcribe Campaign with campaign and user data and validates existence of this url in project.
         Checking if it was configured by the user.
         """
         if not self.drip_base.drip_model.campaign:
@@ -227,6 +228,17 @@ class DripMessage(object):
         campaign_uidb64, uidb64, token = email_token.get_uidb64_token(self.drip_base.drip_model.campaign.pk)
         url_args = {"campaign_uidb64": campaign_uidb64, "uidb64": uidb64, "token": token}
         unsubscribe_link = validate_path_existence("unsubscribe_campaign", url_args)
+        return unsubscribe_link
+
+    def _get_unsubscribe_link(self) -> Optional[str]:
+        """
+        Generate url for Unsubcribe to app with user data and validates existence of this url in project.
+        Checking if it was configured by the user.
+        """
+        email_token = EmailToken(self.user)
+        uidb64, token = email_token.get_uidb64_token_user_only()
+        url_args = {"uidb64": uidb64, "token": token}
+        unsubscribe_link = validate_path_existence("unsubscribe_app", url_args)
         return unsubscribe_link
 
 
@@ -385,6 +397,14 @@ class DripBase(object):
             ).distinct()
         return self._queryset
 
+    def get_drip_unsubscribe_users_config(self) -> bool:
+        drip_unsubscribe_users_config = getattr(
+            settings,
+            "DRIP_UNSUBSCRIBE_USERS",
+            False,
+        )
+        return drip_unsubscribe_users_config
+
     def run(self) -> Optional[int]:
         """Get the queryset, prune sent people, and send it.
 
@@ -402,11 +422,7 @@ class DripBase(object):
     def exclude_unsubcribed_users_drip(self) -> None:
         """If DRIP_UNSUBSCRIBE_USERS is set to True, get a list of unsubscribed users ids to Drip model."""
         unsubscribed_ids: Union[QuerySet, List] = []
-        unsubscribe_users = getattr(
-            settings,
-            "DRIP_UNSUBSCRIBE_USERS",
-            False,
-        )
+        unsubscribe_users = self.get_drip_unsubscribe_users_config()
         if unsubscribe_users:
             # Unsubscribed users on Drip
             unsubscribed_ids = self.drip_model.unsubscribed_users.all().values_list("id", flat=True)
@@ -415,15 +431,20 @@ class DripBase(object):
     def exclude_unsubcribed_users_campaign(self) -> None:
         """If DRIP_UNSUBSCRIBE_USERS is set to True, get a list of unsubscribed users ids to Campaign model."""
         unsubscribed_ids: Union[QuerySet, List] = []
-        unsubscribe_users = getattr(
-            settings,
-            "DRIP_UNSUBSCRIBE_USERS",
-            False,
-        )
+        unsubscribe_users = self.get_drip_unsubscribe_users_config()
         campaign = self.drip_model.campaign
         if unsubscribe_users and campaign:
-            # Unsubscribed users on Drip
+            # Unsubscribed users on Campaign
             unsubscribed_ids = campaign.unsubscribed_users.all().values_list("id", flat=True)
+        self._queryset = self.get_queryset().exclude(id__in=unsubscribed_ids)
+
+    def exclude_unsubcribed_users_general(self) -> None:
+        """If DRIP_UNSUBSCRIBE_USERS is set to True, get a list of unsubscribed users ids to app (all emails)."""
+        unsubscribed_ids: Union[QuerySet, List] = []
+        unsubscribe_users = self.get_drip_unsubscribe_users_config()
+        if unsubscribe_users:
+            # Unsubscribed users on Drip
+            unsubscribed_ids = UserUnsubscribe.objects.all().values_list("user__id", flat=True)
         self._queryset = self.get_queryset().exclude(id__in=unsubscribed_ids)
 
     def exclude_sent_drips_users(self) -> None:
@@ -446,6 +467,8 @@ class DripBase(object):
         self.exclude_unsubcribed_users_drip()
         # unsubscribed users exclude from Campaign
         self.exclude_unsubcribed_users_campaign()
+        # unsubscribed users exclude from all emails
+        self.exclude_unsubcribed_users_general()
 
     def get_count_from_queryset(self, message_class) -> int:
         """

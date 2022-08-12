@@ -86,10 +86,17 @@ class EmailToken:
         """
         Returns drip/campaign and user uidb64 and token for the user, for building url
         """
-        uidb64 = self._get_uidb64(self.user.pk)
         drip_uidb64 = self._get_uidb64(object_id)
-        token = self._get_token()
+        uidb64, token = self.get_uidb64_token_user_only()
         return drip_uidb64, uidb64, token
+
+    def get_uidb64_token_user_only(self) -> Tuple[str, str]:
+        """
+        Returns user uidb64 and token for the user, for building url
+        """
+        uidb64 = self._get_uidb64(self.user.pk)
+        token = self._get_token()
+        return uidb64, token
 
     @classmethod
     def validate_user_uidb64_token(cls, uidb64: str, token: str) -> Optional[AbstractBaseUser]:

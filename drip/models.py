@@ -360,3 +360,12 @@ class UserUnsubscribeDrip(models.Model):
         on_delete=models.CASCADE,
     )
     created_date = models.DateTimeField(auto_now_add=True)
+
+
+class UserUnsubscribe(models.Model):
+    user = models.ForeignKey(
+        getattr(settings, "AUTH_USER_MODEL", "auth.User"),
+        related_name="user_unsubscribes",
+        on_delete=models.CASCADE,
+    )
+    created_date = models.DateTimeField(auto_now_add=True)

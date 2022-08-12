@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import re_path
 
-from drip.views import UnsubscribeCampaignView, UnsubscribeDripView
+from drip.views import UnsubscribeCampaignView, UnsubscribeDripView, UnsubscribeView
 
 urlpatterns = []
 
@@ -16,5 +16,10 @@ if getattr(settings, "DRIP_UNSUBSCRIBE_USERS", False):
             r"^campaign/(?P<campaign_uidb64>\w+)/(?P<uidb64>\w+)/(?P<token>[\w-]+)/$",
             UnsubscribeCampaignView.as_view(),
             name="unsubscribe_campaign",
+        ),
+        re_path(
+            r"^app/(?P<uidb64>\w+)/(?P<token>[\w-]+)/$",
+            UnsubscribeView.as_view(),
+            name="unsubscribe_app",
         ),
     ]
