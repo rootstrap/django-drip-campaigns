@@ -58,7 +58,7 @@ pytest-django = "==4.5.2"
 pytest-celery = "==0.0.0"
 
 [packages]
-Django = "==3.2.15"
+Django = "==3.2.17"
 apscheduler = "==3.7.0"
 celery = "==5.2.2"
 
