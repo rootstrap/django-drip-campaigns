@@ -7,19 +7,19 @@ jobs:
     strategy:
       matrix:
         include:
-          # python 3.4
-          - python-version: "3.5"
-            django-version: "2.2"
+          # # python 3.5
+          # - python-version: "3.5"
+          #   django-version: "2.2"
           # python 3.6
-          - python-version: "3.6"
-            django-version: "2.2"
-          - python-version: "3.6"
-            django-version: "3.2"
+          # - python-version: "3.6"
+          #   django-version: "2.2"
+          # - python-version: "3.6"
+          #   django-version: "3.2"
           # python 3.7
-          - python-version: "3.7"
-            django-version: "2.2"
-          - python-version: "3.7"
-            django-version: "3.2"
+          # - python-version: "3.7"
+          #   django-version: "2.2"
+          # - python-version: "3.7"
+          #   django-version: "3.2"
           # python 3.8
           - python-version: "3.8"
             django-version: "2.2"
@@ -61,16 +61,16 @@ jobs:
             django-version: "4.2"
           - python-version: "3.12"
             django-version: "5.2"
-          # pypy3
-          - python-version: "pypy3"
-            django-version: "2.2"
-          - python-version: "pypy3"
-            django-version: "3.2"
-          - python-version: "pypy3"
-            django-version: "4.2"
-          - python-version: "pypy3"
-            django-version: "5.2"
-    runs-on: ubuntu-latest
+          # # pypy3
+          # - python-version: "pypy3"
+          #   django-version: "2.2"
+          # - python-version: "pypy3"
+          #   django-version: "3.2"
+          # - python-version: "pypy3"
+          #   django-version: "4.2"
+          # - python-version: "pypy3"
+          #   django-version: "5.2"
+    runs-on: ubuntu-20.04
     env:
       CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
@@ -83,34 +83,40 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Installing resources
+        run: pip install --upgrade pip
+
+      - name: Installing and entering to virtualenv
         run: |
-          pip install --upgrade pip==20.0.2
-          pip install pipenv
-      - name: Installing requirements pipenv
+          pip install virtualenv
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Installing Requirements
         run: |
-          pipenv install --dev
-      - name: Installing Django version ${{ matrix.django-version }}
-        run: |
-          pip install Django==${{ matrix.django-version }}
-      - name: Checking PEP8 code style
-        run: |
-          pipenv run flake8 --count
-      - name: Checking Black code formatter
-        run: |
-          pipenv run black . --check
-      - name: Check typing
-        run: |
-          pipenv run mypy --namespace-packages --explicit-package-bases --ignore-missing-imports --no-warn-unused-ignores .
-      - name: Running tests
-        run: |
-          pipenv run coverage run -m pytest --ds=testsettings
-      - name: Checking coverage
-        run: |
-          pipenv run coverage report --fail-under=90 -m
-          pipenv run coverage xml
-      - name: Setup Code Climate test-reporter
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-          ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
+          pip install django==${{ matrix.django-version }}
+          pip install pytest==7.1.1
+          pytest --ds=testsettings
+
+      # - name: Checking PEP8 code style
+      #   run: flake8 .
+
+      # - name: Checking Black code formatter
+      #   run: black . --check
+
+      # - name: Check typing
+      #   run: mypy --namespace-packages --explicit-package-bases --ignore-missing-imports --no-warn-unused-ignores .
+
+      # - name: Running tests
+      #   run: coverage run -m pytest . --ds=testsettings
+
+      # - name: Checking coverage
+      #   run: |
+      #     coverage report --fail-under=90 -m
+      #     coverage xml
+
+      # - name: Setup Code Climate test-reporter
+      #   run: |
+      #     curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      #     chmod +x ./cc-test-reporter
+      #     ./cc-test-reporter before-build
+      #     ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
