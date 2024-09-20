@@ -56,6 +56,51 @@ People _love_ thorough bug reports. I'm not even kidding.
   - ### How is this different from what you are currently doing?
   - ### Possible implementation
 
+## How to develop locally and run the tests
+
+We recommend you to use:
+
+- [pyenv](https://github.com/pyenv/pyenv): To easily install and manage different versions of Python.
+- [pipenv](https://pipenv.pypa.io/en/latest/): To create and manage Python virtual environments.
+
+The Python version we recommend to develop with: The latest (currently 3.12) but avoiding (if possible) to use elements
+that are exclusively from that version and don't work in previous versions. This is because we want to be compatible
+with older versions of Python.
+
+### Python versions we are currently testing (Sept, 2024)
+
+- 3.8.19
+- 3.9.19
+- 3.10.14
+- 3.11.9
+- 3.12.4
+
+### Step by step to run the tests
+
+1. Install with pyenv the different versions of Python, so you can use the latest to develop, and the other ones to
+   run the tests and check that the compatibility with older versions continues.
+   - `pyenv install <python version>`
+   - Run this for each version.
+2. Go to the project folder in the terminal.
+3. Set the versions of python to be locally available in the folder:
+   - `pyenv local 3.8.19 3.9.19 3.10.14 3.11.9 3.12.4`
+   - This will create a gitignored file called `.python-version` listing these versions.
+4. Create the virtual environment using the latest version:
+   - `pipenv install --python 3.12.4`
+   - This will create and install in it the base and dev requirements. You can check this on the Pipfile.
+5. Enter the virtual environment:
+   - `pipenv shell`
+6. Run the tests:
+   - `pytest .`
+   - They should pass without errors.
+7. Now run the tox command that will run the tests using different versions of python:
+   - `tox`
+   - This will run the tests with different Python versions using the `tox.ini` file.
+   - It will install the base requirements from the `install_requires` list in the `setup.py` file, and the dev requirements
+     from the `test-requirements.txt` file that has the list of the needed dev libraries.
+   - You will see the tests execution for each version of Python.
+   - You can run `tox -v` to see more details.
+
 ## Use a Consistent Coding Style
 
 I'm again borrowing these from [Rootstrap Tech Guides](https://github.com/rootstrap/tech-guides/tree/master/python)

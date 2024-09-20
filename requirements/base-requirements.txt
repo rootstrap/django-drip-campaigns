@@ -1,0 +1,4 @@
+django==4.2.16
+apscheduler==3.10.4
+celery==5.4.0
+typing-extensions==4.12.2

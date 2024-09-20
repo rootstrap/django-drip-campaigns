@@ -79,3 +79,6 @@ DRIP_SCHEDULE_SETTINGS = {
 }
 
 DRIP_UNSUBSCRIBE_USERS = True
+
+# To remove a warning in the tests (RemovedInDjango50Warning)
+USE_TZ = False

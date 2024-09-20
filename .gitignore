@@ -1,22 +1,103 @@
-*.pyc
-MANIFEST
-
-dist/
-build/
-docs/_build/
-*.egg-info/
-.idea/
-
-sqlite.db
-settings.py
-
-env*
-
-__pycache__
-
-*DS_Store
-
-.vscode
-
 #pyenv
 .python-version
+
+.tox/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtualenv
+# If you use a virtualenv, it's better to ignore its directory.
+venv/
+ENV/
+env/
+.venv/
+.pyenv/
+
+# tox
+.tox/
+.cache/
+.coverage
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest cache
+.pytest_cache/
+
+# Django specific
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# Ignore migrations files (optional, you might want to track migrations in OSS)
+# **/migrations/
+
+# Ignore Django secret key file (if it exists)
+.env
+.env.*
+
+# celery beat schedule file
+celerybeat-schedule
+
+# macOS
+.DS_Store
+
+# System files
+Thumbs.db
+desktop.ini
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Documentation artifacts
+docs/_build/
+
+# SQLite
+sqlite.db
