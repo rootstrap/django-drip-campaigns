@@ -2,6 +2,9 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/5240f5a755d873846f8f/test_coverage)](https://codeclimate.com/repos/5f0c9d52db4bad011400189e/test_coverage)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![Python Versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue)
+![Django Versions](https://img.shields.io/badge/django-4.2%20|%205-green)
+
 # Django Drip Campaigns
 
 ![Build Status](https://github.com/rootstrap/django-drip-campaigns/actions/workflows/drip-django.yaml/badge.svg?branch=master)
@@ -48,7 +51,8 @@ If you haven't, create a superuser with the [Django createsuperuser command](htt
 - Create a new drip.
 - Select and delete drips.
 
-Now you can also manage campaigns, select ``Campaigns`` to manage them. You will be able to:
+Now you can also manage campaigns, select `Campaigns` to manage them. You will be able to:
+
 - View created campaigns.
 - Create a new campaign.
 - Select and delete campaign.
@@ -71,7 +75,7 @@ In the Django admin, after select `Drips`, you can click on `ADD DRIP +` button 
 
 ![Add Drip](https://raw.githubusercontent.com/rootstrap/django-drip-campaigns/master/docs/images/add_drip_page.png)
 
-Here you can relate the Drip to the corresponding ``Campaign``. Grouping several drips under a campaign.
+Here you can relate the Drip to the corresponding `Campaign`. Grouping several drips under a campaign.
 
 On the `FIELD NAME OF USER` input, when you click on it, you will be able to view:
 
@@ -182,11 +186,12 @@ Some tips:
 - If you want to run the command every day in the week, hour, or minute, just set the corresponding parameter to `'*'`.
 - If you want to run the command more than a day in the week, just set the `DRIP_SCHEDULE_DAY_OF_WEEK` to more than one value. For example, if you set that to `'mon-fri'` the command will be executed from Monday to Friday.
 
-
 ### Celery integration
+
 IMPORTANT: We use Celery 5.2.2 that supports Django 1.11 LTS or newer versions.
 
 If you need to use celery it can be configured in the same way you just need to add the following key `SCHEDULER` setted as `"CELERY"`:
+
 ```python
 DRIP_SCHEDULE_SETTINGS = {
    'DRIP_SCHEDULE': True,
@@ -196,6 +201,7 @@ DRIP_SCHEDULE_SETTINGS = {
    'SCHEDULER': "CELERY",
 }
 ```
+
 The default value of this key is `"CRON"`, if you enable `DRIP_SCHEDULE` it will work with a Cron by default.
 
 In order to make this happen, the project's `celery.py` setup shall invoke the
