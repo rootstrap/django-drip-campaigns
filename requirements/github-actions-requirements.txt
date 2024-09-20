@@ -1,0 +1,11 @@
+# All the libraries except django. Needed by github actions
+apscheduler==3.10.4
+celery==5.4.0
+typing-extensions==4.12.2
+pytest==8.3.3
+pytest-sugar==1.0.0
+pytest-django==4.9.0
+pytest-celery==0.0.0
+faker==29.0.0
+factory-boy==3.3.1
+coverage==7.6.1
