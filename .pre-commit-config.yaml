@@ -23,6 +23,7 @@ repos:
     hooks:
       - id: mypy
         args: ["--config-file=setup.cfg"]
+        additional_dependencies: [django-stubs, six]
 
   - repo: https://github.com/psf/black
     rev: 24.8.0

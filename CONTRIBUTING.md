@@ -100,6 +100,30 @@ with older versions of Python.
      from the `test-requirements.txt` file that has the list of the needed dev libraries.
    - You will see the tests execution for each version of Python.
    - You can run `tox -v` to see more details.
+8. Run `pre-commit install` so pre-commit is configured. This will make that some dev tools are run when making a git commit. The tools are
+   explained in the next section.
+
+### Use of Dev tools
+
+If you want to develop in Django Drip, you will need to use these dev tools:
+
+- isort: to automatically sort imports in Python files, ensuring a consistent and organized format. Before the commit, run `isort .`, this will sort the imports.
+- black: to automatically format Python code by enforcing a consistent style, improving readability while adhering to PEP 8 guidelines. Before the commit, run `black .`. This will format the files.
+- flake8: to enforce coding style guidelines and check for code quality issues in Python, including PEP 8 compliance, syntax errors, and potential bugs. Before the commit, run `flake8 .`. This will show errors if any of the used guidelines are not being met.
+- mypy: used for static type checking in Python, ensuring that variables, functions, and return types match the expected types specified in type hints. Before commit, run `mypy .`. This will show errors if there is any typing error.
+
+All these tools are configured in the setup.cfg file, except black, that can't use that file and uses pyproject.toml.
+It's important to make sure these four tools are executed successfuly before making any git commit. If any of them
+shows any errors, you need to fix all of them before making the commit.
+
+### Test Coverage
+
+If you add new code, make sure you create tests for it and make sure you don't decrease the percentage of test coverage.
+
+1. You can run: `coverage run -m pytest .`
+2. Now run: `coverage report -m`
+
+This way you will see a complete report of the tests. The percentage coverage should be equal or greater to the current one: 94%.
 
 ## Use a Consistent Coding Style
 
