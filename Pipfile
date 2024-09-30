@@ -12,6 +12,8 @@ typing-extensions = "==4.12.2"
 [dev-packages]
 black = "==24.8.0"
 coverage = "==7.6.1"
+django-coverage-plugin = "==3.1.0"
+django-stubs = "==5.1.0"
 factory-boy = "==3.3.1"
 faker = "==29.0.0"
 flake8 = "==7.1.1"
@@ -22,7 +24,6 @@ pytest-celery = "==0.0.0"
 pytest-django = "==4.9.0"
 pytest-sugar = "==1.0.0"
 tox = "==4.20.0"
-django-stubs = "==5.1.0"
 types-six = "==1.16.21.20240513"
 
 [requires]
