@@ -1,11 +1,11 @@
 from typing import Optional, Tuple
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import base36_to_int, urlsafe_base64_decode, urlsafe_base64_encode
-from django.conf import settings
 
 from drip.models import Campaign, Drip
 from drip.utils import get_user_model
