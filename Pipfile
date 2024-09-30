@@ -25,6 +25,7 @@ pytest-django = "==4.9.0"
 pytest-sugar = "==1.0.0"
 tox = "==4.20.0"
 types-six = "==1.16.21.20240513"
+pre-commit = "==3.8.0"
 
 [requires]
 python_full_version = "3.12.4"
