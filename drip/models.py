@@ -60,7 +60,7 @@ class AbstractDrip(models.Model):
         on_delete=models.SET_DEFAULT,
         help_text="If set, this is the campaign to which this Drip belongs to.",
     )
-    unsubscribed_users = models.ManyToManyField(
+    unsubscribed_users = models.ManyToManyField(  # type: ignore
         getattr(settings, "AUTH_USER_MODEL", "auth.User"),
         through="UserUnsubscribeDrip",
         related_name="drips_unsubscribed",

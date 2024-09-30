@@ -5,7 +5,7 @@ from django.db import models
 class Campaign(models.Model):
     name = models.CharField(max_length=256)
     delete_drips = models.BooleanField(default=True)
-    unsubscribed_users = models.ManyToManyField(
+    unsubscribed_users = models.ManyToManyField(  # type: ignore
         getattr(settings, "AUTH_USER_MODEL", "auth.User"),
         through="UserUnsubscribeCampaign",
         related_name="campaign_unsubscribed_users",
