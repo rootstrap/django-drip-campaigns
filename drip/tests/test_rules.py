@@ -28,7 +28,7 @@ class TestCaseRules:
         field_types = {
             "AutoField": self.faker.pyint(min_value=1),
             "CharField": self.faker.word(),
-            "DateTimeField": f"now-{self.faker.pyint(min_value= 1, max_value=60)} days",
+            "DateTimeField": f"now-{self.faker.pyint(min_value=1, max_value=60)} days",
             "BooleanField": self.faker.pybool(),
             "EmailField": self.faker.email(),
             "TextField": self.faker.word(),

@@ -1,5 +1,6 @@
 """Defines the types to be used within
 the type annotations all along the system"""
+
 from datetime import timedelta
 from typing import TypeVar, Union
 

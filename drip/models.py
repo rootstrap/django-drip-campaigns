@@ -253,7 +253,7 @@ class AbstractQuerySetRule(models.Model):
 
     def set_f_expressions(self, field_value: str) -> FExpressionOrStr:
         """
-        If field_value starts with the substring 'F\_', returns an instance
+        If field_value starts with the substring 'F_', returns an instance
         of models.F within the field_value expression, otherwise returns
         field_value unchanged.
         """  # noqa: W605
@@ -302,9 +302,9 @@ class AbstractQuerySetRule(models.Model):
 
         field_value: FieldValue = self.set_time_deltas_and_dates(now, self.field_value)
 
-        field_value = self.set_f_expressions(field_value) if type(field_value) == str else field_value
+        field_value = self.set_f_expressions(field_value) if isinstance(field_value, str) else field_value
 
-        field_value = self.set_booleans(field_value) if type(field_value) == str else field_value
+        field_value = self.set_booleans(field_value) if isinstance(field_value, str) else field_value
 
         kwargs = {field_name: field_value}
 
