@@ -1,11 +1,11 @@
 from typing import Optional, Tuple
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import base36_to_int, urlsafe_base64_decode, urlsafe_base64_encode
-from django.conf import settings
 
 from drip.models import Campaign, Drip
 from drip.utils import get_user_model
@@ -46,7 +46,10 @@ class CustomTokenGenerator(PasswordResetTokenGenerator):
             return False
 
         # Check that the timestamp/uid has not been tampered with
-        if not constant_time_compare(self._make_token_with_timestamp(user, ts, settings.SECRET_KEY), token):
+        if not constant_time_compare(
+            self._make_token_with_timestamp(user, ts, settings.SECRET_KEY),  # type: ignore
+            token,
+        ):
             # Ignore line because Mypy doesn't recognice the argument legacy
             if not constant_time_compare(
                 self._make_token_with_timestamp(user, ts, settings.SECRET_KEY),  # type: ignore
@@ -74,14 +77,14 @@ class EmailToken:
         """
         Generate token using custom token generator class for user
         """
-        return custom_token_generator.make_token(self.user)
+        return custom_token_generator.make_token(self.user)  # type: ignore
 
     def _get_uidb64(self, data_id: int) -> str:
         """
         Generate uidb64 string for ids with url encode
         """
         # Mypy is not getting the result of force_bytes as bytes
-        return urlsafe_base64_encode(force_bytes(data_id))  # type: ignore
+        return urlsafe_base64_encode(force_bytes(data_id))
 
     def get_uidb64_token(self, object_id: int) -> Tuple[str, str, str]:
         """

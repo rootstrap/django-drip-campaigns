@@ -1,24 +1,32 @@
 [[source]]
+name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pypi"
 
 [packages]
-django = "==4.2.16"
 apscheduler = "==3.10.4"
 celery = "==5.4.0"
+django = "==4.2.16"
 typing-extensions = "==4.12.2"
 
 [dev-packages]
-pytest = "==8.3.3"
-pytest-sugar = "==1.0.0"
-pytest-django = "==4.9.0"
-pytest-celery = "==0.0.0"
-faker = "==29.0.0"
-factory-boy = "==3.3.1"
-tox = "==4.20.0"
+black = "==24.8.0"
 coverage = "==7.6.1"
+django-coverage-plugin = "==3.1.0"
+django-stubs = "==5.1.0"
+factory-boy = "==3.3.1"
+faker = "==29.0.0"
+flake8 = "==7.1.1"
+isort = "==5.13.2"
+mypy = "==1.11.2"
+pytest = "==8.3.3"
+pytest-celery = "==0.0.0"
+pytest-django = "==4.9.0"
+pytest-sugar = "==1.0.0"
+tox = "==4.20.0"
+types-six = "==1.16.21.20240513"
+pre-commit = "==3.8.0"
 
 [requires]
-python_version = "3.12"
 python_full_version = "3.12.4"
+python_version = "3.12"

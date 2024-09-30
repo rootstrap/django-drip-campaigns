@@ -65,12 +65,12 @@ def get_full_field(parent_field: str, field_name: str) -> str:
 
 
 def get_rel_model(field: FieldType, RelatedObject: RelatedObject) -> Type[models.Model]:
-    if not is_valid_instance(field):  # type: ignore
+    if not is_valid_instance(field):
         RelModel = field.model
         # field_names.extend(get_fields(RelModel, full_field, True))
     else:
         RelModel = field.related_model  # type: ignore
-    return RelModel  # type: ignore
+    return RelModel
 
 
 def is_valid_instance(field: FieldType) -> bool:
@@ -133,7 +133,7 @@ def get_fields(
     # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
     if isinstance(Model, six.string_types):
         app_label, model_name = Model.split(".")
-        Model = models.get_model(app_label, model_name)  # type: ignore
+        Model = models.get_model(app_label, model_name)
 
     fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()  # type: ignore
     model_stack.append(Model)
@@ -171,7 +171,7 @@ def give_model_field(full_field: str, Model: Type[models.Model]) -> tuple:
             return full_key, name, _Model, _ModelField
     message_exception = "Field key `{field}` not found on `{model}`.".format(
         field=full_field,
-        model=Model.__name__,  # type: ignore
+        model=Model.__name__,
     )
     raise Exception(message_exception)
 

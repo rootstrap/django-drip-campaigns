@@ -151,7 +151,7 @@ class DripAdmin(admin.ModelAdmin):
         return super(DripAdmin, self).add_view(
             request,
             form_url=form_url,
-            extra_context=self.build_extra_context(extra_context),  # type: ignore
+            extra_context=self.build_extra_context(extra_context),
         )
 
     def change_view(self, request: HttpRequest, object_id: str, form_url="", extra_context: Any = None) -> HttpResponse:
