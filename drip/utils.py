@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional, Type
 
@@ -13,6 +14,70 @@ from drip.types import FieldType
 
 basestring = (str, bytes)
 unicode = str
+
+
+def html_to_plain_text(html: str) -> Optional[str]:
+    """Convert HTML to readable plain text.
+
+    Unlike Django's ``strip_tags``, this function:
+
+    * Preserves link URLs by converting ``<a href="url">text</a>`` to
+      ``text (url)``, so recipients can still reach the linked resource.
+    * Converts block-level elements (``<br>``, ``<p>``, ``<div>``,
+      ``<tr>``, ``<li>``) to newlines for readable formatting.
+    * Collapses runs of whitespace and trims leading/trailing blanks.
+
+    :param html: HTML string to convert
+    :type html: str
+    :return: Plain-text representation of the HTML
+    :rtype: Optional[str]
+    """
+    if not html:
+        return html
+
+    text = html
+
+    # Convert <br> variants to newlines
+    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
+
+    # Convert block-level closing tags to newlines
+    text = re.sub(
+        r"</(?:p|div|tr|li|h[1-6])>", "\n", text, flags=re.IGNORECASE,
+    )
+
+    # Inline link URLs: <a href="url">text</a> -> text (url)
+    def _replace_link(match):
+        url = match.group(1)
+        link_text = match.group(2)
+        if link_text.strip() != url.strip():
+            return "{text} ({url})".format(text=link_text, url=url)
+        return url
+
+    text = re.sub(
+        r'<a\s[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+        _replace_link,
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    # Strip remaining HTML tags
+    text = re.sub(r"<[^>]+>", "", text)
+
+    # Decode common HTML entities
+    text = text.replace("&amp;", "&")
+    text = text.replace("&lt;", "<")
+    text = text.replace("&gt;", ">")
+    text = text.replace("&quot;", '"')
+    text = text.replace("&#39;", "'")
+    text = text.replace("&nbsp;", " ")
+
+    # Collapse multiple blank lines into at most two newlines
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    # Collapse horizontal whitespace (but not newlines)
+    text = re.sub(r"[^\S\n]+", " ", text)
+
+    return text.strip()
 
 
 def check_redundant(model_stack: List[Type[models.Model]], stack_limit: int) -> bool:

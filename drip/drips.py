@@ -13,14 +13,20 @@ from django.db.models import Q
 from django.db.models.manager import BaseManager
 from django.db.models.query import QuerySet
 from django.template import Context, Template
-from django.utils.html import strip_tags
+
 from django.utils.safestring import SafeString
 from typing_extensions import TypeAlias
 
 from drip.exceptions import MessageClassNotFound
 from drip.models import Drip, SentDrip, UserUnsubscribe
 from drip.tokens import EmailToken
-from drip.utils import build_now_from_timedelta, get_conditional_now, get_user_model, validate_path_existence
+from drip.utils import (
+    build_now_from_timedelta,
+    get_conditional_now,
+    get_user_model,
+    html_to_plain_text,
+    validate_path_existence,
+)
 
 User = get_user_model()
 
@@ -176,7 +182,7 @@ class DripMessage(object):
     @property
     def plain(self) -> str:
         if not self._plain:
-            self._plain = strip_tags(self.body)
+            self._plain = html_to_plain_text(self.body)
         return self._plain
 
     def get_from_(self) -> str:
