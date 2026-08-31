@@ -1,5 +1,3 @@
-import pytest
-
 from drip.utils import html_to_plain_text
 
 

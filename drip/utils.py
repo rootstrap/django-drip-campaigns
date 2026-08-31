@@ -16,7 +16,7 @@ basestring = (str, bytes)
 unicode = str
 
 
-def html_to_plain_text(html: str) -> Optional[str]:
+def html_to_plain_text(html: Optional[str]) -> Optional[str]:
     """Convert HTML to readable plain text.
 
     Unlike Django's ``strip_tags``, this function:
@@ -28,7 +28,7 @@ def html_to_plain_text(html: str) -> Optional[str]:
     * Collapses runs of whitespace and trims leading/trailing blanks.
 
     :param html: HTML string to convert
-    :type html: str
+    :type html: Optional[str]
     :return: Plain-text representation of the HTML
     :rtype: Optional[str]
     """

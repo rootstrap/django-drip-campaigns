@@ -182,7 +182,7 @@ class DripMessage(object):
     @property
     def plain(self) -> str:
         if not self._plain:
-            self._plain = html_to_plain_text(self.body)
+            self._plain = html_to_plain_text(self.body) or ""
         return self._plain
 
     def get_from_(self) -> str:
